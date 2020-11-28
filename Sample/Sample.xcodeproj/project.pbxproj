@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E308A92F257281870059EF00 /* StoreFlowable.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E308A92E257281870059EF00 /* StoreFlowable.framework */; };
+		E308A930257281870059EF00 /* StoreFlowable.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E308A92E257281870059EF00 /* StoreFlowable.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E35C34FF2572808500B085ED /* SampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E35C34FE2572808500B085ED /* SampleApp.swift */; };
 		E35C35012572808500B085ED /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E35C35002572808500B085ED /* ContentView.swift */; };
 		E35C35032572808500B085ED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E35C35022572808500B085ED /* Assets.xcassets */; };
@@ -32,7 +34,22 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		E308A931257281870059EF00 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E308A930257281870059EF00 /* StoreFlowable.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		E308A92E257281870059EF00 /* StoreFlowable.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = StoreFlowable.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E35C34FB2572808500B085ED /* Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E35C34FE2572808500B085ED /* SampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleApp.swift; sourceTree = "<group>"; };
 		E35C35002572808500B085ED /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -52,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E308A92F257281870059EF00 /* StoreFlowable.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,6 +90,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E308A92D257281870059EF00 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E308A92E257281870059EF00 /* StoreFlowable.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		E35C34F22572808500B085ED = {
 			isa = PBXGroup;
 			children = (
@@ -79,6 +105,7 @@
 				E35C350F2572808500B085ED /* SampleTests */,
 				E35C351A2572808500B085ED /* SampleUITests */,
 				E35C34FC2572808500B085ED /* Products */,
+				E308A92D257281870059EF00 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -140,6 +167,7 @@
 				E35C34F72572808500B085ED /* Sources */,
 				E35C34F82572808500B085ED /* Frameworks */,
 				E35C34F92572808500B085ED /* Resources */,
+				E308A931257281870059EF00 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -417,8 +445,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_ASSET_PATHS = "\"Sample/Preview Content\"";
+				DEVELOPMENT_TEAM = 3WUM9V6RP7;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Sample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -428,6 +458,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kazakago.Sample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "match Development *";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -438,8 +469,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_ASSET_PATHS = "\"Sample/Preview Content\"";
+				DEVELOPMENT_TEAM = 3WUM9V6RP7;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Sample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -449,6 +482,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kazakago.Sample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "match AdHoc *";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
