@@ -20,4 +20,12 @@ public enum StateContent<T> {
         }
     }
 
+    static func wrap(rawContent: T?) -> StateContent<T> {
+        if let rawContent = rawContent {
+            return .exist(rawContent: rawContent)
+        } else {
+            return .notExist
+        }
+    }
+
 }

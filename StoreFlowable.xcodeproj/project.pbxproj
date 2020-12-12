@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -23,6 +23,27 @@
 /* Begin PBXBuildFile section */
 		E308A93525728CC90059EF00 /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = E308A93425728CC90059EF00 /* State.swift */; };
 		E308A93B25728EA30059EF00 /* StateContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E308A93A25728EA30059EF00 /* StateContent.swift */; };
+		E336D3C025823290001E8E6D /* StoreFlowableResponder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3BF25823290001E8E6D /* StoreFlowableResponder.swift */; };
+		E336D3CA25832922001E8E6D /* StoreFlowableImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3C925832922001E8E6D /* StoreFlowableImpl.swift */; };
+		E336D3D825832AA3001E8E6D /* AnyStoreFlowableResponder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3D725832AA3001E8E6D /* AnyStoreFlowableResponder.swift */; };
+		E336D3DE2583BA0F001E8E6D /* StoreFlowableExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3DD2583BA0F001E8E6D /* StoreFlowableExtension.swift */; };
+		E336D3E82583CC3E001E8E6D /* CombineAsync in Frameworks */ = {isa = PBXBuildFile; productRef = E3D61B5C257D1D16005FC400 /* CombineAsync */; };
+		E336D3EE2583D3EC001E8E6D /* AnyStoreFlowable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3ED2583D3EC001E8E6D /* AnyStoreFlowable.swift */; };
+		E375344F257336AD0048EB33 /* FlowAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E375344E257336AD0048EB33 /* FlowAccessor.swift */; };
+		E375345D257337C80048EB33 /* DataState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E375345C257337C80048EB33 /* DataState.swift */; };
+		E3753463257338430048EB33 /* DataStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3753462257338430048EB33 /* DataStateManager.swift */; };
+		E37534692573389D0048EB33 /* OriginDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E37534682573389D0048EB33 /* OriginDataManager.swift */; };
+		E375346F257338FC0048EB33 /* CacheDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E375346E257338FC0048EB33 /* CacheDataManager.swift */; };
+		E3753475257339730048EB33 /* AsDataType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3753474257339730048EB33 /* AsDataType.swift */; };
+		E375347B257339A10048EB33 /* FlowableDataStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E375347A257339A10048EB33 /* FlowableDataStateManager.swift */; };
+		E3753486257340CE0048EB33 /* DataSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3753485257340CE0048EB33 /* DataSelector.swift */; };
+		E375348C257344CC0048EB33 /* AnyDataStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E375348B257344CC0048EB33 /* AnyDataStateManager.swift */; };
+		E375349A257349200048EB33 /* AnyOriginDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3753499257349200048EB33 /* AnyOriginDataManager.swift */; };
+		E37534A025734A3F0048EB33 /* AnyCacheDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E375349F25734A3F0048EB33 /* AnyCacheDataManager.swift */; };
+		E3D61B63257DBD97005FC400 /* StoreFlowable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D61B62257DBD97005FC400 /* StoreFlowable.swift */; };
+		E3D61B73257E2FA8005FC400 /* DataStateMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D61B72257E2FA8005FC400 /* DataStateMapper.swift */; };
+		E3D61B7D257E335D005FC400 /* AsyncExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D61B7C257E335D005FC400 /* AsyncExtension.swift */; };
+		E3D61B83257E3C58005FC400 /* NoSuchElementError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D61B82257E3C58005FC400 /* NoSuchElementError.swift */; };
 		OBJ_30 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
 		OBJ_41 /* StoreFlowableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* StoreFlowableTests.swift */; };
 		OBJ_42 /* XCTestManifests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* XCTestManifests.swift */; };
@@ -49,12 +70,32 @@
 /* Begin PBXFileReference section */
 		E308A93425728CC90059EF00 /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
 		E308A93A25728EA30059EF00 /* StateContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateContent.swift; sourceTree = "<group>"; };
+		E336D3BF25823290001E8E6D /* StoreFlowableResponder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowableResponder.swift; sourceTree = "<group>"; };
+		E336D3C925832922001E8E6D /* StoreFlowableImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowableImpl.swift; sourceTree = "<group>"; };
+		E336D3D725832AA3001E8E6D /* AnyStoreFlowableResponder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyStoreFlowableResponder.swift; sourceTree = "<group>"; };
+		E336D3DD2583BA0F001E8E6D /* StoreFlowableExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowableExtension.swift; sourceTree = "<group>"; };
+		E336D3ED2583D3EC001E8E6D /* AnyStoreFlowable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyStoreFlowable.swift; sourceTree = "<group>"; };
+		E375344E257336AD0048EB33 /* FlowAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowAccessor.swift; sourceTree = "<group>"; };
+		E375345C257337C80048EB33 /* DataState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataState.swift; sourceTree = "<group>"; };
+		E3753462257338430048EB33 /* DataStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStateManager.swift; sourceTree = "<group>"; };
+		E37534682573389D0048EB33 /* OriginDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OriginDataManager.swift; sourceTree = "<group>"; };
+		E375346E257338FC0048EB33 /* CacheDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheDataManager.swift; sourceTree = "<group>"; };
+		E3753474257339730048EB33 /* AsDataType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsDataType.swift; sourceTree = "<group>"; };
+		E375347A257339A10048EB33 /* FlowableDataStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowableDataStateManager.swift; sourceTree = "<group>"; };
+		E3753485257340CE0048EB33 /* DataSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSelector.swift; sourceTree = "<group>"; };
+		E375348B257344CC0048EB33 /* AnyDataStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyDataStateManager.swift; sourceTree = "<group>"; };
+		E3753499257349200048EB33 /* AnyOriginDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyOriginDataManager.swift; sourceTree = "<group>"; };
+		E375349F25734A3F0048EB33 /* AnyCacheDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCacheDataManager.swift; sourceTree = "<group>"; };
+		E3D61B62257DBD97005FC400 /* StoreFlowable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowable.swift; sourceTree = "<group>"; };
+		E3D61B72257E2FA8005FC400 /* DataStateMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStateMapper.swift; sourceTree = "<group>"; };
+		E3D61B7C257E335D005FC400 /* AsyncExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncExtension.swift; sourceTree = "<group>"; };
+		E3D61B82257E3C58005FC400 /* NoSuchElementError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoSuchElementError.swift; sourceTree = "<group>"; };
 		OBJ_12 /* StoreFlowableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowableTests.swift; sourceTree = "<group>"; };
 		OBJ_13 /* XCTestManifests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestManifests.swift; sourceTree = "<group>"; };
 		OBJ_17 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		OBJ_6 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
-		"StoreFlowable::StoreFlowable::Product" /* StoreFlowable.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = StoreFlowable.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		"StoreFlowable::StoreFlowableTests::Product" /* StoreFlowableTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = StoreFlowableTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		"StoreFlowable::StoreFlowable::Product" /* StoreFlowable.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = StoreFlowable.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		"StoreFlowable::StoreFlowableTests::Product" /* StoreFlowableTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = StoreFlowableTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +103,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
+				E336D3E82583CC3E001E8E6D /* CombineAsync in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -76,6 +118,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E375348025733F9B0048EB33 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				E308A93425728CC90059EF00 /* State.swift */,
+				E308A93A25728EA30059EF00 /* StateContent.swift */,
+				E3D61B82257E3C58005FC400 /* NoSuchElementError.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
 		OBJ_10 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
@@ -103,7 +155,7 @@
 			name = Products;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -112,7 +164,6 @@
 				OBJ_14 /* Products */,
 				OBJ_17 /* README.md */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_7 /* Sources */ = {
@@ -126,8 +177,26 @@
 		OBJ_8 /* StoreFlowable */ = {
 			isa = PBXGroup;
 			children = (
-				E308A93425728CC90059EF00 /* State.swift */,
-				E308A93A25728EA30059EF00 /* StateContent.swift */,
+				E375348025733F9B0048EB33 /* Core */,
+				E3753474257339730048EB33 /* AsDataType.swift */,
+				E375346E257338FC0048EB33 /* CacheDataManager.swift */,
+				E375349F25734A3F0048EB33 /* AnyCacheDataManager.swift */,
+				E3753485257340CE0048EB33 /* DataSelector.swift */,
+				E375345C257337C80048EB33 /* DataState.swift */,
+				E3753462257338430048EB33 /* DataStateManager.swift */,
+				E375348B257344CC0048EB33 /* AnyDataStateManager.swift */,
+				E3D61B72257E2FA8005FC400 /* DataStateMapper.swift */,
+				E375347A257339A10048EB33 /* FlowableDataStateManager.swift */,
+				E375344E257336AD0048EB33 /* FlowAccessor.swift */,
+				E37534682573389D0048EB33 /* OriginDataManager.swift */,
+				E3753499257349200048EB33 /* AnyOriginDataManager.swift */,
+				E3D61B62257DBD97005FC400 /* StoreFlowable.swift */,
+				E336D3ED2583D3EC001E8E6D /* AnyStoreFlowable.swift */,
+				E336D3C925832922001E8E6D /* StoreFlowableImpl.swift */,
+				E336D3DD2583BA0F001E8E6D /* StoreFlowableExtension.swift */,
+				E336D3BF25823290001E8E6D /* StoreFlowableResponder.swift */,
+				E336D3D725832AA3001E8E6D /* AnyStoreFlowableResponder.swift */,
+				E3D61B7C257E335D005FC400 /* AsyncExtension.swift */,
 			);
 			name = StoreFlowable;
 			path = Sources/StoreFlowable;
@@ -148,6 +217,9 @@
 			dependencies = (
 			);
 			name = StoreFlowable;
+			packageProductDependencies = (
+				E3D61B5C257D1D16005FC400 /* CombineAsync */,
+			);
 			productName = StoreFlowable;
 			productReference = "StoreFlowable::StoreFlowable::Product" /* StoreFlowable.framework */;
 			productType = "com.apple.product-type.framework";
@@ -199,7 +271,10 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
+			packageReferences = (
+				E3D61B5B257D1D16005FC400 /* XCRemoteSwiftPackageReference "CombineAsync" */,
+			);
 			productRefGroup = OBJ_14 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -217,8 +292,28 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
+				E336D3D825832AA3001E8E6D /* AnyStoreFlowableResponder.swift in Sources */,
+				E3D61B73257E2FA8005FC400 /* DataStateMapper.swift in Sources */,
+				E336D3CA25832922001E8E6D /* StoreFlowableImpl.swift in Sources */,
 				E308A93B25728EA30059EF00 /* StateContent.swift in Sources */,
+				E375346F257338FC0048EB33 /* CacheDataManager.swift in Sources */,
+				E3753463257338430048EB33 /* DataStateManager.swift in Sources */,
+				E3753475257339730048EB33 /* AsDataType.swift in Sources */,
+				E3753486257340CE0048EB33 /* DataSelector.swift in Sources */,
+				E336D3EE2583D3EC001E8E6D /* AnyStoreFlowable.swift in Sources */,
+				E3D61B7D257E335D005FC400 /* AsyncExtension.swift in Sources */,
+				E3D61B63257DBD97005FC400 /* StoreFlowable.swift in Sources */,
+				E375345D257337C80048EB33 /* DataState.swift in Sources */,
+				E37534A025734A3F0048EB33 /* AnyCacheDataManager.swift in Sources */,
+				E375347B257339A10048EB33 /* FlowableDataStateManager.swift in Sources */,
+				E375348C257344CC0048EB33 /* AnyDataStateManager.swift in Sources */,
+				E336D3C025823290001E8E6D /* StoreFlowableResponder.swift in Sources */,
+				E375344F257336AD0048EB33 /* FlowAccessor.swift in Sources */,
+				E336D3DE2583BA0F001E8E6D /* StoreFlowableExtension.swift in Sources */,
 				E308A93525728CC90059EF00 /* State.swift in Sources */,
+				E375349A257349200048EB33 /* AnyOriginDataManager.swift in Sources */,
+				E37534692573389D0048EB33 /* OriginDataManager.swift in Sources */,
+				E3D61B83257E3C58005FC400 /* NoSuchElementError.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -265,9 +360,10 @@
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = StoreFlowable.xcodeproj/StoreFlowable_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(TOOLCHAIN_DIR)/usr/lib/swift/macosx",
+				);
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
@@ -278,8 +374,6 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
 				TARGET_NAME = StoreFlowable;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
 			name = Debug;
 		};
@@ -293,9 +387,10 @@
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = StoreFlowable.xcodeproj/StoreFlowable_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(TOOLCHAIN_DIR)/usr/lib/swift/macosx",
+				);
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
@@ -306,8 +401,6 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
 				TARGET_NAME = StoreFlowable;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
 			name = Release;
 		};
@@ -344,15 +437,18 @@
 					"SWIFT_PACKAGE=1",
 					"DEBUG=1",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_SWIFT_FLAGS = "$(inherited) -DXcode";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator appletvos appletvsimulator watchos watchsimulator";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) SWIFT_PACKAGE DEBUG";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TVOS_DEPLOYMENT_TARGET = 13.0;
 				USE_HEADERMAP = NO;
+				WATCHOS_DEPLOYMENT_TARGET = 6.0;
 			};
 			name = Debug;
 		};
@@ -379,17 +475,17 @@
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = StoreFlowable.xcodeproj/StoreFlowableTests_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
 				TARGET_NAME = StoreFlowableTests;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
 			name = Debug;
 		};
@@ -404,17 +500,17 @@
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = StoreFlowable.xcodeproj/StoreFlowableTests_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
 				TARGET_NAME = StoreFlowableTests;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
 			name = Release;
 		};
@@ -431,14 +527,18 @@
 					"$(inherited)",
 					"SWIFT_PACKAGE=1",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_SWIFT_FLAGS = "$(inherited) -DXcode";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator appletvos appletvsimulator watchos watchsimulator";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) SWIFT_PACKAGE";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				TVOS_DEPLOYMENT_TARGET = 13.0;
 				USE_HEADERMAP = NO;
+				WATCHOS_DEPLOYMENT_TARGET = 6.0;
 			};
 			name = Release;
 		};
@@ -491,6 +591,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E3D61B5B257D1D16005FC400 /* XCRemoteSwiftPackageReference "CombineAsync" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rizumita/CombineAsync";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.5;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E3D61B5C257D1D16005FC400 /* CombineAsync */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E3D61B5B257D1D16005FC400 /* XCRemoteSwiftPackageReference "CombineAsync" */;
+			productName = CombineAsync;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = OBJ_1 /* Project object */;
 }
