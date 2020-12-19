@@ -15,13 +15,11 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
     typealias DATA = DATA
 
     private let storeFlowableResponder: AnyStoreFlowableResponder<KEY, DATA>
+    private var dataSelector: DataSelector<KEY, DATA>
 
     init(storeFlowableResponder: AnyStoreFlowableResponder<KEY, DATA>) {
         self.storeFlowableResponder = storeFlowableResponder
-    }
-
-    private var dataSelector: DataSelector<KEY, DATA> {
-        DataSelector(
+        dataSelector = DataSelector(
             key: storeFlowableResponder.key,
             dataStateManager: AnyDataStateManager(storeFlowableResponder.flowableDataStateManager),
             cacheDataManager: AnyCacheDataManager(storeFlowableResponder),
@@ -56,7 +54,7 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
     }
 
     func get(type: AsDataType = .mix) -> AnyPublisher<DATA, Error> {
-        async {
+        async { yield in
             switch type {
             case .mix:
                 try await(dataSelector.doStateAction(forceRefresh: false, clearCache: true, fetchAtError: false, fetchAsync: false))
@@ -67,7 +65,7 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
                 break
             }
         }
-        .flatMap { _ in
+        .flatMap {
             storeFlowableResponder.flowableDataStateManager.getFlow(key: storeFlowableResponder.key)
         }
         .flatMap { dataState in

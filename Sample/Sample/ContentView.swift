@@ -6,11 +6,34 @@
 //
 
 import SwiftUI
+import Combine
+import StoreFlowable
+
+var subscribe: AnyCancellable?
+var request: AnyCancellable?
 
 struct ContentView: View {
+
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+        VStack {
+            Text("Hello, world!")
+            Button("subscribe") {
+                let flowable: AnyStoreFlowable<String, GithubMeta> = GithubMetaResponder(key: "").createStoreFlowable()
+                subscribe?.cancel()
+                subscribe = flowable.asFlow().sink { error in
+                    print(error)
+                } receiveValue: { value in
+                    print(value)
+                }
+            }
+            Button("request") {
+                let flowable: AnyStoreFlowable<String, GithubMeta> = GithubMetaResponder(key: "").createStoreFlowable()
+                request?.cancel()
+                request = flowable.request().sink { _ in
+                } receiveValue: { _ in
+                }
+            }
+        }
     }
 }
 

@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-protocol StoreFlowableResponder: CacheDataManager, OriginDataManager {
+public protocol StoreFlowableResponder: CacheDataManager, OriginDataManager {
 
     associatedtype KEY: Hashable
     associatedtype DATA

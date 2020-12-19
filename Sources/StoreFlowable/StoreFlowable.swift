@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-protocol StoreFlowable {
+public protocol StoreFlowable {
 
     associatedtype KEY: Hashable
     associatedtype DATA

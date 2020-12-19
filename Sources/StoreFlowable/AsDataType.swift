@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum AsDataType {
+public enum AsDataType {
     case mix
     case fromOrigin
     case fromCache

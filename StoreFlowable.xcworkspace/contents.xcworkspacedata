@@ -2,9 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:Sample/Sample.xcodeproj">
+      location = "group:StoreFlowable.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:StoreFlowable.xcodeproj">
+      location = "group:Sample/Sample.xcodeproj">
    </FileRef>
 </Workspace>

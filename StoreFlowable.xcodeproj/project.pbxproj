@@ -29,6 +29,7 @@
 		E336D3DE2583BA0F001E8E6D /* StoreFlowableExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3DD2583BA0F001E8E6D /* StoreFlowableExtension.swift */; };
 		E336D3E82583CC3E001E8E6D /* CombineAsync in Frameworks */ = {isa = PBXBuildFile; productRef = E3D61B5C257D1D16005FC400 /* CombineAsync */; };
 		E336D3EE2583D3EC001E8E6D /* AnyStoreFlowable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3ED2583D3EC001E8E6D /* AnyStoreFlowable.swift */; };
+		E35BEAF5258DB49700D946FF /* PublisherExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E35BEAF4258DB49700D946FF /* PublisherExtension.swift */; };
 		E375344F257336AD0048EB33 /* FlowAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E375344E257336AD0048EB33 /* FlowAccessor.swift */; };
 		E375345D257337C80048EB33 /* DataState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E375345C257337C80048EB33 /* DataState.swift */; };
 		E3753463257338430048EB33 /* DataStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3753462257338430048EB33 /* DataStateManager.swift */; };
@@ -42,7 +43,6 @@
 		E37534A025734A3F0048EB33 /* AnyCacheDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E375349F25734A3F0048EB33 /* AnyCacheDataManager.swift */; };
 		E3D61B63257DBD97005FC400 /* StoreFlowable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D61B62257DBD97005FC400 /* StoreFlowable.swift */; };
 		E3D61B73257E2FA8005FC400 /* DataStateMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D61B72257E2FA8005FC400 /* DataStateMapper.swift */; };
-		E3D61B7D257E335D005FC400 /* AsyncExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D61B7C257E335D005FC400 /* AsyncExtension.swift */; };
 		E3D61B83257E3C58005FC400 /* NoSuchElementError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D61B82257E3C58005FC400 /* NoSuchElementError.swift */; };
 		OBJ_30 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
 		OBJ_41 /* StoreFlowableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* StoreFlowableTests.swift */; };
@@ -75,6 +75,7 @@
 		E336D3D725832AA3001E8E6D /* AnyStoreFlowableResponder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyStoreFlowableResponder.swift; sourceTree = "<group>"; };
 		E336D3DD2583BA0F001E8E6D /* StoreFlowableExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowableExtension.swift; sourceTree = "<group>"; };
 		E336D3ED2583D3EC001E8E6D /* AnyStoreFlowable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyStoreFlowable.swift; sourceTree = "<group>"; };
+		E35BEAF4258DB49700D946FF /* PublisherExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublisherExtension.swift; sourceTree = "<group>"; };
 		E375344E257336AD0048EB33 /* FlowAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowAccessor.swift; sourceTree = "<group>"; };
 		E375345C257337C80048EB33 /* DataState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataState.swift; sourceTree = "<group>"; };
 		E3753462257338430048EB33 /* DataStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStateManager.swift; sourceTree = "<group>"; };
@@ -88,7 +89,6 @@
 		E375349F25734A3F0048EB33 /* AnyCacheDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCacheDataManager.swift; sourceTree = "<group>"; };
 		E3D61B62257DBD97005FC400 /* StoreFlowable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowable.swift; sourceTree = "<group>"; };
 		E3D61B72257E2FA8005FC400 /* DataStateMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStateMapper.swift; sourceTree = "<group>"; };
-		E3D61B7C257E335D005FC400 /* AsyncExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncExtension.swift; sourceTree = "<group>"; };
 		E3D61B82257E3C58005FC400 /* NoSuchElementError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoSuchElementError.swift; sourceTree = "<group>"; };
 		OBJ_12 /* StoreFlowableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowableTests.swift; sourceTree = "<group>"; };
 		OBJ_13 /* XCTestManifests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestManifests.swift; sourceTree = "<group>"; };
@@ -196,7 +196,7 @@
 				E336D3DD2583BA0F001E8E6D /* StoreFlowableExtension.swift */,
 				E336D3BF25823290001E8E6D /* StoreFlowableResponder.swift */,
 				E336D3D725832AA3001E8E6D /* AnyStoreFlowableResponder.swift */,
-				E3D61B7C257E335D005FC400 /* AsyncExtension.swift */,
+				E35BEAF4258DB49700D946FF /* PublisherExtension.swift */,
 			);
 			name = StoreFlowable;
 			path = Sources/StoreFlowable;
@@ -292,6 +292,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
+				E35BEAF5258DB49700D946FF /* PublisherExtension.swift in Sources */,
 				E336D3D825832AA3001E8E6D /* AnyStoreFlowableResponder.swift in Sources */,
 				E3D61B73257E2FA8005FC400 /* DataStateMapper.swift in Sources */,
 				E336D3CA25832922001E8E6D /* StoreFlowableImpl.swift in Sources */,
@@ -301,7 +302,6 @@
 				E3753475257339730048EB33 /* AsDataType.swift in Sources */,
 				E3753486257340CE0048EB33 /* DataSelector.swift in Sources */,
 				E336D3EE2583D3EC001E8E6D /* AnyStoreFlowable.swift in Sources */,
-				E3D61B7D257E335D005FC400 /* AsyncExtension.swift in Sources */,
 				E3D61B63257DBD97005FC400 /* StoreFlowable.swift in Sources */,
 				E375345D257337C80048EB33 /* DataState.swift in Sources */,
 				E37534A025734A3F0048EB33 /* AnyCacheDataManager.swift in Sources */,

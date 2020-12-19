@@ -27,5 +27,4 @@ public enum StateContent<T> {
             return .notExist
         }
     }
-
 }

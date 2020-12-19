@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-protocol CacheDataManager {
+public protocol CacheDataManager {
 
     associatedtype DATA
 

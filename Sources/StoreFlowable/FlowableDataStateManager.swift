@@ -14,6 +14,9 @@ open class FlowableDataStateManager<KEY: Hashable>: FlowAccessor, DataStateManag
 
     private var dataState: [KEY: CurrentValueSubject<DataState, Error>] = [:]
 
+    public init() {
+    }
+
     func getFlow(key: KEY) -> AnyPublisher<DataState, Error> {
         dataState.getOrCreate(key).eraseToAnyPublisher()
     }

@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-protocol OriginDataManager {
+public protocol OriginDataManager {
 
     associatedtype DATA
 

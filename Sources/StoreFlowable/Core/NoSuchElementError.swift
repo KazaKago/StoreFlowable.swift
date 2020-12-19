@@ -7,5 +7,5 @@
 
 import Foundation
 
-class NoSuchElementError : Error {
+public class NoSuchElementError : Error {
 }

@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import CombineAsync
 
-class DataSelector<KEY, DATA> {
+struct DataSelector<KEY, DATA> {
 
     private let key: KEY
     private let dataStateManager: AnyDataStateManager<KEY>
@@ -26,65 +26,65 @@ class DataSelector<KEY, DATA> {
     }
 
     func load() -> AnyPublisher<DATA?, Error> {
-        async {
-            try await(self.cacheDataManager.loadData())
+        async { yield in
+            yield(try await(cacheDataManager.loadData()))
         }.eraseToAnyPublisher()
     }
 
     func update(newData: DATA?) -> AnyPublisher<Void, Error> {
-        async {
-            try await(self.cacheDataManager.saveData(data: newData))
-            self.dataStateManager.saveState(key: self.key, state: .fixed())
+        async { yield in
+            try await(cacheDataManager.saveData(data: newData))
+            dataStateManager.saveState(key: key, state: .fixed())
         }.eraseToAnyPublisher()
     }
 
     func doStateAction(forceRefresh: Bool, clearCache: Bool, fetchAtError: Bool, fetchAsync: Bool) -> AnyPublisher<Void, Error> {
-        async {
-            switch self.dataStateManager.loadState(key: self.key) {
+        async { yield in
+            switch dataStateManager.loadState(key: key) {
             case .fixed(_):
-                try await(self.doDataAction(forceRefresh: forceRefresh, clearCache: clearCache, fetchAsync: fetchAsync))
+                try await(doDataAction(forceRefresh: forceRefresh, clearCache: clearCache, fetchAsync: fetchAsync))
             case .loading:
                 // do nothing.
                 break
             case .error(_):
                 if fetchAtError {
-                    try await(self.prepareFetch(clearCache: clearCache, fetchAsync: fetchAsync))
+                    try await(prepareFetch(clearCache: clearCache, fetchAsync: fetchAsync))
                 }
             }
         }.eraseToAnyPublisher()
     }
 
     private func doDataAction(forceRefresh: Bool, clearCache: Bool, fetchAsync: Bool) -> AnyPublisher<Void, Error> {
-        async {
-            let data = try await(self.cacheDataManager.loadData())
+        async { yield in
+            let data = try await(cacheDataManager.loadData())
             if (data == nil || forceRefresh || (try! await(self.needRefresh(data!)))) {
-                try await(self.prepareFetch(clearCache: clearCache, fetchAsync: fetchAsync))
+                try await(prepareFetch(clearCache: clearCache, fetchAsync: fetchAsync))
             }
         }.eraseToAnyPublisher()
     }
 
     private func prepareFetch(clearCache: Bool, fetchAsync: Bool) -> AnyPublisher<Void, Error> {
-        async {
+        async { yield in
             if clearCache {
-                try await(self.cacheDataManager.saveData(data: nil))
+                try await(cacheDataManager.saveData(data: nil))
             }
-            self.dataStateManager.saveState(key: self.key, state: .loading)
+            dataStateManager.saveState(key: key, state: .loading)
             if fetchAsync {
-                _ = self.fetchNewData().sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+                _ = fetchNewData().sink(receiveCompletion: { _ in }, receiveValue: { _ in })
             } else {
-                try await(self.fetchNewData())
+                try await(fetchNewData())
             }
         }.eraseToAnyPublisher()
     }
 
     private func fetchNewData() -> AnyPublisher<Void, Error> {
-        async {
+        async { yield in
             do {
-                let fetchedData = try await(self.originDataManager.fetchOrigin())
-                try await(self.cacheDataManager.saveData(data: fetchedData))
-                self.dataStateManager.saveState(key: self.key, state: .fixed())
+                let fetchedData = try await(originDataManager.fetchOrigin())
+                try await(cacheDataManager.saveData(data: fetchedData))
+                dataStateManager.saveState(key: key, state: .fixed())
             } catch {
-                self.dataStateManager.saveState(key: self.key, state: .error(error: error))
+                dataStateManager.saveState(key: key, state: .error(error: error))
             }
         }.eraseToAnyPublisher()
     }

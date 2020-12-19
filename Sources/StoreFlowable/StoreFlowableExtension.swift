@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension StoreFlowableResponder {
+public extension StoreFlowableResponder {
     func createStoreFlowable() -> AnyStoreFlowable<KEY, DATA> {
         AnyStoreFlowable(StoreFlowableImpl(storeFlowableResponder: AnyStoreFlowableResponder(self)))
     }

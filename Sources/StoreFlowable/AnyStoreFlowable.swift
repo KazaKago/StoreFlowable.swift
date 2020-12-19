@@ -8,10 +8,10 @@
 import Foundation
 import Combine
 
-struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
+public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
 
-    typealias KEY = KEY
-    typealias DATA = DATA
+    public typealias KEY = KEY
+    public typealias DATA = DATA
 
     private let _asFlow: () -> AnyPublisher<State<DATA>, Error>
     private let _asFlowWithForceRefresh: (_ forceRefresh: Bool) -> AnyPublisher<State<DATA>, Error>
@@ -45,31 +45,31 @@ struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
         }
     }
 
-    func asFlow() -> AnyPublisher<State<DATA>, Error> {
+    public func asFlow() -> AnyPublisher<State<DATA>, Error> {
         _asFlow()
     }
 
-    func asFlow(forceRefresh: Bool) -> AnyPublisher<State<DATA>, Error> {
+    public func asFlow(forceRefresh: Bool) -> AnyPublisher<State<DATA>, Error> {
         _asFlowWithForceRefresh(forceRefresh)
     }
 
-    func get() -> AnyPublisher<DATA, Error> {
+    public func get() -> AnyPublisher<DATA, Error> {
         _get()
     }
 
-    func get(type: AsDataType) -> AnyPublisher<DATA, Error> {
+    public func get(type: AsDataType) -> AnyPublisher<DATA, Error> {
         _getWithType(type)
     }
 
-    func validate() -> AnyPublisher<Void, Error> {
+    public func validate() -> AnyPublisher<Void, Error> {
         _validate()
     }
 
-    func request() -> AnyPublisher<Void, Error> {
+    public func request() -> AnyPublisher<Void, Error> {
         _request()
     }
 
-    func update(newData: DATA?) -> AnyPublisher<Void, Error> {
+    public func update(newData: DATA?) -> AnyPublisher<Void, Error> {
         _update(newData)
     }
 }
