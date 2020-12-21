@@ -28,11 +28,11 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
         )
     }
 
-    func asFlow() -> AnyPublisher<State<DATA>, Error> {
+    func asFlow() -> AnyPublisher<State<DATA>, Never> {
         asFlow(forceRefresh: false)
     }
 
-    func asFlow(forceRefresh: Bool) -> AnyPublisher<State<DATA>, Error> {
+    func asFlow(forceRefresh: Bool) -> AnyPublisher<State<DATA>, Never> {
         dataSelector.doStateAction(forceRefresh: forceRefresh, clearCache: true, fetchAtError: false, fetchAsync: true)
             .flatMap { _ in
                 storeFlowableResponder.flowableDataStateManager.getFlow(key: storeFlowableResponder.key)
@@ -53,7 +53,7 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
         get(type: .mix)
     }
 
-    func get(type: AsDataType = .mix) -> AnyPublisher<DATA, Error> {
+    func get(type: AsDataType) -> AnyPublisher<DATA, Error> {
         async { yield in
             switch type {
             case .mix:
@@ -85,11 +85,11 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
                 case .loading:
                     // do nothing.
                     break
-                case .error(let error):
+                case .error(let rawError):
                     if let data = data {
                         yield(data)
                     } else {
-                        throw error
+                        throw rawError
                     }
                 }
             }
@@ -98,15 +98,15 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
         .eraseToAnyPublisher()
     }
 
-    func validate() -> AnyPublisher<Void, Error> {
+    func validate() -> AnyPublisher<Void, Never> {
         dataSelector.doStateAction(forceRefresh: false, clearCache: true, fetchAtError: false, fetchAsync: false)
     }
 
-    func request() -> AnyPublisher<Void, Error> {
+    func request() -> AnyPublisher<Void, Never> {
         dataSelector.doStateAction(forceRefresh: true, clearCache: false, fetchAtError: true, fetchAsync: false)
     }
 
-    func update(newData: DATA?) -> AnyPublisher<Void, Error> {
+    func update(newData: DATA?) -> AnyPublisher<Void, Never> {
         dataSelector.update(newData: newData)
     }
 }

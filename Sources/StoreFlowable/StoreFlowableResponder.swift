@@ -17,11 +17,11 @@ public protocol StoreFlowableResponder: CacheDataManager, OriginDataManager {
 
     var flowableDataStateManager: FlowableDataStateManager<KEY> { get }
 
-    func loadData() -> AnyPublisher<DATA?, Error>
+    func loadData() -> AnyPublisher<DATA?, Never>
 
-    func saveData(data: DATA?) -> AnyPublisher<Void, Error>
+    func saveData(data: DATA?) -> AnyPublisher<Void, Never>
 
     func fetchOrigin() -> AnyPublisher<DATA, Error>
 
-    func needRefresh(data: DATA) -> AnyPublisher<Bool, Error>
+    func needRefresh(data: DATA) -> AnyPublisher<Bool, Never>
 }

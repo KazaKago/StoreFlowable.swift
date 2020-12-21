@@ -15,9 +15,9 @@ struct DataSelector<KEY, DATA> {
     private let dataStateManager: AnyDataStateManager<KEY>
     private let cacheDataManager: AnyCacheDataManager<DATA>
     private let originDataManager: AnyOriginDataManager<DATA>
-    private let needRefresh: (_ data: DATA) -> AnyPublisher<Bool, Error>
+    private let needRefresh: (_ data: DATA) -> AnyPublisher<Bool, Never>
 
-    init(key: KEY, dataStateManager: AnyDataStateManager<KEY>, cacheDataManager: AnyCacheDataManager<DATA>, originDataManager: AnyOriginDataManager<DATA>, needRefresh: @escaping (DATA) -> AnyPublisher<Bool, Error>) {
+    init(key: KEY, dataStateManager: AnyDataStateManager<KEY>, cacheDataManager: AnyCacheDataManager<DATA>, originDataManager: AnyOriginDataManager<DATA>, needRefresh: @escaping (DATA) -> AnyPublisher<Bool, Never>) {
         self.key = key
         self.dataStateManager = dataStateManager
         self.cacheDataManager = cacheDataManager
@@ -25,20 +25,24 @@ struct DataSelector<KEY, DATA> {
         self.needRefresh = needRefresh
     }
 
-    func load() -> AnyPublisher<DATA?, Error> {
+    func load() -> AnyPublisher<DATA?, Never> {
         async { yield in
             yield(try await(cacheDataManager.loadData()))
-        }.eraseToAnyPublisher()
+        }
+        .replaceError(with: nil)
+        .eraseToAnyPublisher()
     }
 
-    func update(newData: DATA?) -> AnyPublisher<Void, Error> {
+    func update(newData: DATA?) -> AnyPublisher<Void, Never> {
         async { yield in
             try await(cacheDataManager.saveData(data: newData))
             dataStateManager.saveState(key: key, state: .fixed())
-        }.eraseToAnyPublisher()
+        }
+        .replaceError(with: ())
+        .eraseToAnyPublisher()
     }
 
-    func doStateAction(forceRefresh: Bool, clearCache: Bool, fetchAtError: Bool, fetchAsync: Bool) -> AnyPublisher<Void, Error> {
+    func doStateAction(forceRefresh: Bool, clearCache: Bool, fetchAtError: Bool, fetchAsync: Bool) -> AnyPublisher<Void, Never> {
         async { yield in
             switch dataStateManager.loadState(key: key) {
             case .fixed(_):
@@ -51,19 +55,23 @@ struct DataSelector<KEY, DATA> {
                     try await(prepareFetch(clearCache: clearCache, fetchAsync: fetchAsync))
                 }
             }
-        }.eraseToAnyPublisher()
+        }
+        .replaceError(with: ())
+        .eraseToAnyPublisher()
     }
 
-    private func doDataAction(forceRefresh: Bool, clearCache: Bool, fetchAsync: Bool) -> AnyPublisher<Void, Error> {
+    private func doDataAction(forceRefresh: Bool, clearCache: Bool, fetchAsync: Bool) -> AnyPublisher<Void, Never> {
         async { yield in
             let data = try await(cacheDataManager.loadData())
             if (data == nil || forceRefresh || (try! await(self.needRefresh(data!)))) {
                 try await(prepareFetch(clearCache: clearCache, fetchAsync: fetchAsync))
             }
-        }.eraseToAnyPublisher()
+        }
+        .replaceError(with: ())
+        .eraseToAnyPublisher()
     }
 
-    private func prepareFetch(clearCache: Bool, fetchAsync: Bool) -> AnyPublisher<Void, Error> {
+    private func prepareFetch(clearCache: Bool, fetchAsync: Bool) -> AnyPublisher<Void, Never> {
         async { yield in
             if clearCache {
                 try await(cacheDataManager.saveData(data: nil))
@@ -74,18 +82,22 @@ struct DataSelector<KEY, DATA> {
             } else {
                 try await(fetchNewData())
             }
-        }.eraseToAnyPublisher()
+        }
+        .replaceError(with: ())
+        .eraseToAnyPublisher()
     }
 
-    private func fetchNewData() -> AnyPublisher<Void, Error> {
+    private func fetchNewData() -> AnyPublisher<Void, Never> {
         async { yield in
             do {
                 let fetchedData = try await(originDataManager.fetchOrigin())
                 try await(cacheDataManager.saveData(data: fetchedData))
                 dataStateManager.saveState(key: key, state: .fixed())
             } catch {
-                dataStateManager.saveState(key: key, state: .error(error: error))
+                dataStateManager.saveState(key: key, state: .error(rawError: error))
             }
-        }.eraseToAnyPublisher()
+        }
+        .replaceError(with: ())
+        .eraseToAnyPublisher()
     }
 }

@@ -10,5 +10,5 @@ import Foundation
 public enum DataState {
     case fixed(isReachLast: Bool = false)
     case loading
-    case error(error: Error)
+    case error(rawError: Error)
 }

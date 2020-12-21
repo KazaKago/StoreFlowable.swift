@@ -10,7 +10,7 @@ import Foundation
 public enum State<T> {
     case fixed(stateContent: StateContent<T>)
     case loading(stateContent: StateContent<T>)
-    case error(stateContent: StateContent<T>, error: Error)
+    case error(stateContent: StateContent<T>, rawError: Error)
 
     public var stateContent: StateContent<T> {
         switch self {
@@ -19,14 +19,14 @@ public enum State<T> {
         }
     }
 
-    public func doAction<V>(onFixed: () -> V, onLoading: () -> V, onError: (_ error: Error) -> V) -> V {
+    public func doAction<V>(onFixed: () -> V, onLoading: () -> V, onError: (_ rawError: Error) -> V) -> V {
         switch self {
         case .fixed(_):
             return onFixed()
         case .loading(_):
             return onLoading()
-        case .error(_, let error):
-            return onError(error)
+        case .error(_, let rawError):
+            return onError(rawError)
         }
     }
 }

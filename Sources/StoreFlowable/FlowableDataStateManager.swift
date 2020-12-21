@@ -12,12 +12,12 @@ open class FlowableDataStateManager<KEY: Hashable>: FlowAccessor, DataStateManag
 
     typealias KEY = KEY
 
-    private var dataState: [KEY: CurrentValueSubject<DataState, Error>] = [:]
+    private var dataState: [KEY: CurrentValueSubject<DataState, Never>] = [:]
 
     public init() {
     }
 
-    func getFlow(key: KEY) -> AnyPublisher<DataState, Error> {
+    func getFlow(key: KEY) -> AnyPublisher<DataState, Never> {
         dataState.getOrCreate(key).eraseToAnyPublisher()
     }
 
@@ -34,10 +34,10 @@ open class FlowableDataStateManager<KEY: Hashable>: FlowAccessor, DataStateManag
     }
 }
 
-private extension Dictionary where Key: Hashable, Value == CurrentValueSubject<DataState, Error> {
-    mutating func getOrCreate(_ key: Key) -> CurrentValueSubject<DataState, Error> {
+private extension Dictionary where Key: Hashable, Value == CurrentValueSubject<DataState, Never> {
+    mutating func getOrCreate(_ key: Key) -> CurrentValueSubject<DataState, Never> {
         getOrPut(key) {
-            CurrentValueSubject<DataState, Error>(DataState.fixed())
+            CurrentValueSubject<DataState, Never>(DataState.fixed())
         }
     }
 }

@@ -13,13 +13,13 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
     public typealias KEY = KEY
     public typealias DATA = DATA
 
-    private let _asFlow: () -> AnyPublisher<State<DATA>, Error>
-    private let _asFlowWithForceRefresh: (_ forceRefresh: Bool) -> AnyPublisher<State<DATA>, Error>
+    private let _asFlow: () -> AnyPublisher<State<DATA>, Never>
+    private let _asFlowWithForceRefresh: (_ forceRefresh: Bool) -> AnyPublisher<State<DATA>, Never>
     private let _get: () -> AnyPublisher<DATA, Error>
     private let _getWithType: (_ type: AsDataType) -> AnyPublisher<DATA, Error>
-    private let _validate: () -> AnyPublisher<Void, Error>
-    private let _request: () -> AnyPublisher<Void, Error>
-    private let _update: (_ newData: DATA?) -> AnyPublisher<Void, Error>
+    private let _validate: () -> AnyPublisher<Void, Never>
+    private let _request: () -> AnyPublisher<Void, Never>
+    private let _update: (_ newData: DATA?) -> AnyPublisher<Void, Never>
 
     init<INNER: StoreFlowable>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
         _asFlow = {
@@ -45,11 +45,11 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
         }
     }
 
-    public func asFlow() -> AnyPublisher<State<DATA>, Error> {
+    public func asFlow() -> AnyPublisher<State<DATA>, Never> {
         _asFlow()
     }
 
-    public func asFlow(forceRefresh: Bool) -> AnyPublisher<State<DATA>, Error> {
+    public func asFlow(forceRefresh: Bool) -> AnyPublisher<State<DATA>, Never> {
         _asFlowWithForceRefresh(forceRefresh)
     }
 
@@ -61,15 +61,15 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
         _getWithType(type)
     }
 
-    public func validate() -> AnyPublisher<Void, Error> {
+    public func validate() -> AnyPublisher<Void, Never> {
         _validate()
     }
 
-    public func request() -> AnyPublisher<Void, Error> {
+    public func request() -> AnyPublisher<Void, Never> {
         _request()
     }
 
-    public func update(newData: DATA?) -> AnyPublisher<Void, Error> {
+    public func update(newData: DATA?) -> AnyPublisher<Void, Never> {
         _update(newData)
     }
 }

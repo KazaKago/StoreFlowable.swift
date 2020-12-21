@@ -15,10 +15,10 @@ struct AnyStoreFlowableResponder<KEY: Hashable, DATA>: StoreFlowableResponder {
 
     private let _key: KEY
     private let _flowableDataStateManager: FlowableDataStateManager<KEY>
-    private let _loadData: () -> AnyPublisher<DATA?, Error>
-    private let _saveData: (_ data: DATA?) -> AnyPublisher<Void, Error>
-    private let _needRefresh: (_ data: DATA) -> AnyPublisher<Bool, Error>
+    private let _loadData: () -> AnyPublisher<DATA?, Never>
+    private let _saveData: (_ data: DATA?) -> AnyPublisher<Void, Never>
     private let _fetchOrigin: () -> AnyPublisher<DATA, Error>
+    private let _needRefresh: (_ data: DATA) -> AnyPublisher<Bool, Never>
 
     init<INNER: StoreFlowableResponder>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
         _key = inner.key
@@ -29,11 +29,11 @@ struct AnyStoreFlowableResponder<KEY: Hashable, DATA>: StoreFlowableResponder {
         _saveData = { data in
             inner.saveData(data: data)
         }
-        _needRefresh = { data in
-            inner.needRefresh(data: data)
-        }
         _fetchOrigin = {
             inner.fetchOrigin()
+        }
+        _needRefresh = { data in
+            inner.needRefresh(data: data)
         }
     }
 
@@ -45,19 +45,19 @@ struct AnyStoreFlowableResponder<KEY: Hashable, DATA>: StoreFlowableResponder {
         _flowableDataStateManager
     }
 
-    func loadData() -> AnyPublisher<DATA?, Error> {
+    func loadData() -> AnyPublisher<DATA?, Never> {
         _loadData()
     }
 
-    func saveData(data: DATA?) -> AnyPublisher<Void, Error> {
+    func saveData(data: DATA?) -> AnyPublisher<Void, Never> {
         _saveData(data)
-    }
-
-    func needRefresh(data: DATA) -> AnyPublisher<Bool, Error> {
-        _needRefresh(data)
     }
 
     func fetchOrigin() -> AnyPublisher<DATA, Error> {
         _fetchOrigin()
+    }
+
+    func needRefresh(data: DATA) -> AnyPublisher<Bool, Never> {
+        _needRefresh(data)
     }
 }

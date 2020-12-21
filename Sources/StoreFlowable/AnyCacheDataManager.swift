@@ -12,8 +12,8 @@ struct AnyCacheDataManager<DATA>: CacheDataManager {
 
     typealias DATA = DATA
 
-    private let _loadData: () -> AnyPublisher<DATA?, Error>
-    private let _saveData: (_ data: DATA?) -> AnyPublisher<Void, Error>
+    private let _loadData: () -> AnyPublisher<DATA?, Never>
+    private let _saveData: (_ data: DATA?) -> AnyPublisher<Void, Never>
 
     init<INNER: CacheDataManager>(_ inner: INNER) where INNER.DATA == DATA {
         _loadData = {
@@ -24,11 +24,11 @@ struct AnyCacheDataManager<DATA>: CacheDataManager {
         }
     }
 
-    func loadData() -> AnyPublisher<DATA?, Error> {
+    func loadData() -> AnyPublisher<DATA?, Never> {
         _loadData()
     }
 
-    func saveData(data: DATA?) -> AnyPublisher<Void, Error> {
+    func saveData(data: DATA?) -> AnyPublisher<Void, Never> {
         _saveData(data)
     }
 }

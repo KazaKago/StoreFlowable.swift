@@ -10,22 +10,22 @@ import Combine
 import StoreFlowable
 
 struct GithubMetaResponder : StoreFlowableResponder {
-    typealias KEY = String
+    typealias KEY = UnitHash
     typealias DATA = GithubMeta
 
     private let githubApi = GithubApi()
 
-    var key: String
+    var key: UnitHash = UnitHash()
 
-    let flowableDataStateManager: FlowableDataStateManager<String> = GithubMetaStateManager.sharedInstance
+    let flowableDataStateManager: FlowableDataStateManager<UnitHash> = GithubMetaStateManager.sharedInstance
 
-    func loadData() -> AnyPublisher<GithubMeta?, Error> {
+    func loadData() -> AnyPublisher<GithubMeta?, Never> {
         Future { promise in
             promise(.success(GithubInMemoryCache.metaCache))
         }.eraseToAnyPublisher()
     }
 
-    func saveData(data: GithubMeta?) -> AnyPublisher<Void, Error> {
+    func saveData(data: GithubMeta?) -> AnyPublisher<Void, Never> {
         Future { promise in
             GithubInMemoryCache.metaCache = data
             GithubInMemoryCache.metaCacheCreatedAt = Date()
@@ -37,9 +37,9 @@ struct GithubMetaResponder : StoreFlowableResponder {
         githubApi.getMeta()
     }
 
-    func needRefresh(data: GithubMeta) -> AnyPublisher<Bool, Error> {
+    func needRefresh(data: GithubMeta) -> AnyPublisher<Bool, Never> {
         Future { promise in
-            promise(.success(true))
+            promise(.success(false))
         }.eraseToAnyPublisher()
     }
 }

@@ -14,8 +14,8 @@ extension DataState {
             return .fixed(stateContent: stateContent)
         case .loading:
             return .loading(stateContent: stateContent)
-        case .error(let error):
-            return .error(stateContent: stateContent, error: error)
+        case .error(let rawError):
+            return .error(stateContent: stateContent, rawError: rawError)
         }
     }
 }

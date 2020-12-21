@@ -12,5 +12,5 @@ protocol FlowAccessor {
 
     associatedtype KEY
 
-    func getFlow(key: KEY) -> AnyPublisher<DataState, Error>
+    func getFlow(key: KEY) -> AnyPublisher<DataState, Never>
 }

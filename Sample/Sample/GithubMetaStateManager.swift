@@ -8,6 +8,6 @@
 import Foundation
 import StoreFlowable
 
-class GithubMetaStateManager: FlowableDataStateManager<String> {
+class GithubMetaStateManager: FlowableDataStateManager<UnitHash> {
     static let sharedInstance = GithubMetaStateManager()
 }
