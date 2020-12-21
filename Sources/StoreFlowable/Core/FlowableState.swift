@@ -1,5 +1,5 @@
 //
-//  State.swift
+//  FlowableState.swift
 //  StoreFlowable
 //
 //  Created by Kensuke Tamura on 2020/11/28.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum State<T> {
+public enum FlowableState<T> {
     case fixed(stateContent: StateContent<T>)
     case loading(stateContent: StateContent<T>)
     case error(stateContent: StateContent<T>, rawError: Error)

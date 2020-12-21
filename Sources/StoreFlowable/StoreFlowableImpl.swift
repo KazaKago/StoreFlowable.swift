@@ -28,11 +28,11 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
         )
     }
 
-    func asFlow() -> AnyPublisher<State<DATA>, Never> {
+    func asFlow() -> AnyPublisher<FlowableState<DATA>, Never> {
         asFlow(forceRefresh: false)
     }
 
-    func asFlow(forceRefresh: Bool) -> AnyPublisher<State<DATA>, Never> {
+    func asFlow(forceRefresh: Bool) -> AnyPublisher<FlowableState<DATA>, Never> {
         dataSelector.doStateAction(forceRefresh: forceRefresh, clearCache: true, fetchAtError: false, fetchAsync: true)
             .flatMap { _ in
                 storeFlowableResponder.flowableDataStateManager.getFlow(key: storeFlowableResponder.key)

@@ -13,9 +13,9 @@ public protocol StoreFlowable {
     associatedtype KEY: Hashable
     associatedtype DATA
 
-    func asFlow() -> AnyPublisher<State<DATA>, Never>
+    func asFlow() -> AnyPublisher<FlowableState<DATA>, Never>
 
-    func asFlow(forceRefresh: Bool) -> AnyPublisher<State<DATA>, Never>
+    func asFlow(forceRefresh: Bool) -> AnyPublisher<FlowableState<DATA>, Never>
 
     func get() -> AnyPublisher<DATA, Error>
 

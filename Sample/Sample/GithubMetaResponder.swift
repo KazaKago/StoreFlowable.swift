@@ -39,7 +39,7 @@ struct GithubMetaResponder : StoreFlowableResponder {
 
     func needRefresh(data: GithubMeta) -> AnyPublisher<Bool, Never> {
         Future { promise in
-            promise(.success(false))
+            promise(.success(true))
         }.eraseToAnyPublisher()
     }
 }

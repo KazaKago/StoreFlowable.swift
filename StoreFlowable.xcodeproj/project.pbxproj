@@ -21,7 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		E308A93525728CC90059EF00 /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = E308A93425728CC90059EF00 /* State.swift */; };
+		E308A93525728CC90059EF00 /* FlowableState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E308A93425728CC90059EF00 /* FlowableState.swift */; };
 		E308A93B25728EA30059EF00 /* StateContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E308A93A25728EA30059EF00 /* StateContent.swift */; };
 		E336D3C025823290001E8E6D /* StoreFlowableResponder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3BF25823290001E8E6D /* StoreFlowableResponder.swift */; };
 		E336D3CA25832922001E8E6D /* StoreFlowableImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3C925832922001E8E6D /* StoreFlowableImpl.swift */; };
@@ -68,7 +68,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		E308A93425728CC90059EF00 /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
+		E308A93425728CC90059EF00 /* FlowableState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowableState.swift; sourceTree = "<group>"; };
 		E308A93A25728EA30059EF00 /* StateContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateContent.swift; sourceTree = "<group>"; };
 		E336D3BF25823290001E8E6D /* StoreFlowableResponder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowableResponder.swift; sourceTree = "<group>"; };
 		E336D3C925832922001E8E6D /* StoreFlowableImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowableImpl.swift; sourceTree = "<group>"; };
@@ -121,7 +121,7 @@
 		E375348025733F9B0048EB33 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				E308A93425728CC90059EF00 /* State.swift */,
+				E308A93425728CC90059EF00 /* FlowableState.swift */,
 				E308A93A25728EA30059EF00 /* StateContent.swift */,
 				E3D61B82257E3C58005FC400 /* NoSuchElementError.swift */,
 			);
@@ -310,7 +310,7 @@
 				E375344F257336AD0048EB33 /* FlowAccessor.swift in Sources */,
 				E336D3DE2583BA0F001E8E6D /* StoreFlowableExtension.swift in Sources */,
 				E3F556CE2590499A0087FC85 /* UnitHash.swift in Sources */,
-				E308A93525728CC90059EF00 /* State.swift in Sources */,
+				E308A93525728CC90059EF00 /* FlowableState.swift in Sources */,
 				E375349A257349200048EB33 /* AnyOriginDataManager.swift in Sources */,
 				E37534692573389D0048EB33 /* OriginDataManager.swift in Sources */,
 				E3D61B83257E3C58005FC400 /* NoSuchElementError.swift in Sources */,
