@@ -26,7 +26,23 @@ struct ContentView: View {
                         print(error)
                     },
                     receiveValue: { value in
-                        print(value.sshKeyFingerprints)
+                        print(value)
+                    }
+                )
+            }
+            Button("getOrNil") {
+                let flowable: AnyStoreFlowable<UnitHash, GithubMeta> = GithubMetaResponder().createStoreFlowable()
+                get?.cancel()
+                get = flowable.getOrNil().sink(
+                    receiveCompletion: { error in
+                        print(error)
+                    },
+                    receiveValue: { value in
+                        if let value = value {
+                            print(value)
+                        } else {
+                            print("nil")
+                        }
                     }
                 )
             }
