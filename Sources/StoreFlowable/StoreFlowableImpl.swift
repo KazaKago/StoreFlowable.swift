@@ -77,8 +77,8 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
             async { yield in
                 switch dataState {
                 case .fixed:
-                    if let data = data {
-                        yield(data)
+                    if (data != nil && !(try! await(storeFlowableResponder.needRefresh(data: data!)))) {
+                        yield(data!)
                     } else {
                         throw NoSuchElementError()
                     }
@@ -86,8 +86,8 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
                     // do nothing.
                     break
                 case .error(let rawError):
-                    if let data = data {
-                        yield(data)
+                    if (data != nil && !(try! await(storeFlowableResponder.needRefresh(data: data!)))) {
+                        yield(data!)
                     } else {
                         throw rawError
                     }

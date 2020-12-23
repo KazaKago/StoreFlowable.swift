@@ -7,14 +7,26 @@
 
 import Foundation
 import Combine
+import Alamofire
 
 struct GithubApi {
+
     func getMeta() -> AnyPublisher<GithubMeta, Error> {
-        Future { promise in
-            let stub = GithubMeta(verifiablePasswordAuthentication: true, sshKeyFingerprints: SshKeyFingerprints(sha256Rsa: "sha256Rsa", sha256Dsa: "sha256Dsa"))
-            promise(.success(stub))
+        return Future { promise in
+            AF.request("https://api.github.com/meta")
+                .response { response in
+                    switch response.result {
+                    case .success(let element): do {
+                        let decodedResponse = try JSONDecoder().decode(GithubMeta.self, from: element!)
+                        promise(.success(decodedResponse))
+                    } catch {
+                        promise(.failure(error))
+                    }
+                    case .failure(let error):
+                        promise(.failure(error))
+                    }
+                }
         }
-        .delay(for: .seconds(3), scheduler: RunLoop.main, options: .none)
         .eraseToAnyPublisher()
     }
 }
