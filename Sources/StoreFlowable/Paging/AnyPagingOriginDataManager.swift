@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-struct PagingAnyOriginDataManager<DATA>: PagingOriginDataManager {
+struct AnyPagingOriginDataManager<DATA>: PagingOriginDataManager {
 
     typealias DATA = DATA
 

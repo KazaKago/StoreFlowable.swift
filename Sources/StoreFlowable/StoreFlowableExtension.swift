@@ -10,7 +10,7 @@ import Combine
 
 public extension StoreFlowableResponder {
 
-    func createStoreFlowable() -> AnyStoreFlowable<KEY, DATA> {
+    func create() -> AnyStoreFlowable<KEY, DATA> {
         AnyStoreFlowable(StoreFlowableImpl(storeFlowableResponder: AnyStoreFlowableResponder(self)))
     }
 }

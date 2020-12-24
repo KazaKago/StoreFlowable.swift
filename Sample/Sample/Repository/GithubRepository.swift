@@ -12,12 +12,12 @@ import StoreFlowable
 struct GithubRepository {
 
     func followMeta() -> AnyPublisher<FlowableState<GithubMeta>, Never> {
-        let githubMetaFlowable = GithubMetaResponder().createStoreFlowable()
+        let githubMetaFlowable = GithubMetaResponder().create()
         return githubMetaFlowable.asFlow()
     }
 
     func requestMeta() -> AnyPublisher<Void, Never> {
-        let githubMetaFlowable = GithubMetaResponder().createStoreFlowable()
+        let githubMetaFlowable = GithubMetaResponder().create()
         return githubMetaFlowable.request()
     }
 }

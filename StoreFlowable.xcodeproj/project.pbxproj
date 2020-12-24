@@ -44,6 +44,13 @@
 		E3C052FE2593348100DB555B /* AnyPagingCacheDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C052FD2593348100DB555B /* AnyPagingCacheDataManager.swift */; };
 		E3C053042593352800DB555B /* PagingOriginDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C053032593352800DB555B /* PagingOriginDataManager.swift */; };
 		E3C0530A259335A600DB555B /* AnyPagingOriginDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C05309259335A600DB555B /* AnyPagingOriginDataManager.swift */; };
+		E3D22F6625938F7A00CF4E36 /* PagingStoreFlowable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D22F6525938F7A00CF4E36 /* PagingStoreFlowable.swift */; };
+		E3D22F6C25939C1500CF4E36 /* AnyPagingStoreFlowable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D22F6B25939C1500CF4E36 /* AnyPagingStoreFlowable.swift */; };
+		E3D22F7225939CD300CF4E36 /* PagingStoreFlowableExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D22F7125939CD300CF4E36 /* PagingStoreFlowableExtension.swift */; };
+		E3D22F7825939D0C00CF4E36 /* PagingStoreFlowableResponder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D22F7725939D0C00CF4E36 /* PagingStoreFlowableResponder.swift */; };
+		E3D22F7E25939DDB00CF4E36 /* AnyPagingStoreFlowableResponder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D22F7D25939DDB00CF4E36 /* AnyPagingStoreFlowableResponder.swift */; };
+		E3D22F8425939EA000CF4E36 /* PagingDataSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D22F8325939EA000CF4E36 /* PagingDataSelector.swift */; };
+		E3D22F8A2594413900CF4E36 /* PagingStoreFlowableImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D22F892594413900CF4E36 /* PagingStoreFlowableImpl.swift */; };
 		E3D61B63257DBD97005FC400 /* StoreFlowable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D61B62257DBD97005FC400 /* StoreFlowable.swift */; };
 		E3D61B73257E2FA8005FC400 /* DataStateMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D61B72257E2FA8005FC400 /* DataStateMapper.swift */; };
 		E3D61B83257E3C58005FC400 /* NoSuchElementError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D61B82257E3C58005FC400 /* NoSuchElementError.swift */; };
@@ -94,6 +101,13 @@
 		E3C052FD2593348100DB555B /* AnyPagingCacheDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyPagingCacheDataManager.swift; sourceTree = "<group>"; };
 		E3C053032593352800DB555B /* PagingOriginDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingOriginDataManager.swift; sourceTree = "<group>"; };
 		E3C05309259335A600DB555B /* AnyPagingOriginDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyPagingOriginDataManager.swift; sourceTree = "<group>"; };
+		E3D22F6525938F7A00CF4E36 /* PagingStoreFlowable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingStoreFlowable.swift; sourceTree = "<group>"; };
+		E3D22F6B25939C1500CF4E36 /* AnyPagingStoreFlowable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyPagingStoreFlowable.swift; sourceTree = "<group>"; };
+		E3D22F7125939CD300CF4E36 /* PagingStoreFlowableExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingStoreFlowableExtension.swift; sourceTree = "<group>"; };
+		E3D22F7725939D0C00CF4E36 /* PagingStoreFlowableResponder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingStoreFlowableResponder.swift; sourceTree = "<group>"; };
+		E3D22F7D25939DDB00CF4E36 /* AnyPagingStoreFlowableResponder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyPagingStoreFlowableResponder.swift; sourceTree = "<group>"; };
+		E3D22F8325939EA000CF4E36 /* PagingDataSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingDataSelector.swift; sourceTree = "<group>"; };
+		E3D22F892594413900CF4E36 /* PagingStoreFlowableImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingStoreFlowableImpl.swift; sourceTree = "<group>"; };
 		E3D61B62257DBD97005FC400 /* StoreFlowable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowable.swift; sourceTree = "<group>"; };
 		E3D61B72257E2FA8005FC400 /* DataStateMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStateMapper.swift; sourceTree = "<group>"; };
 		E3D61B82257E3C58005FC400 /* NoSuchElementError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoSuchElementError.swift; sourceTree = "<group>"; };
@@ -141,8 +155,15 @@
 			children = (
 				E3C052F32593343100DB555B /* PagingCacheDataManager.swift */,
 				E3C052FD2593348100DB555B /* AnyPagingCacheDataManager.swift */,
+				E3D22F8325939EA000CF4E36 /* PagingDataSelector.swift */,
 				E3C053032593352800DB555B /* PagingOriginDataManager.swift */,
 				E3C05309259335A600DB555B /* AnyPagingOriginDataManager.swift */,
+				E3D22F6525938F7A00CF4E36 /* PagingStoreFlowable.swift */,
+				E3D22F6B25939C1500CF4E36 /* AnyPagingStoreFlowable.swift */,
+				E3D22F892594413900CF4E36 /* PagingStoreFlowableImpl.swift */,
+				E3D22F7125939CD300CF4E36 /* PagingStoreFlowableExtension.swift */,
+				E3D22F7725939D0C00CF4E36 /* PagingStoreFlowableResponder.swift */,
+				E3D22F7D25939DDB00CF4E36 /* AnyPagingStoreFlowableResponder.swift */,
 			);
 			path = Paging;
 			sourceTree = "<group>";
@@ -196,8 +217,8 @@
 		OBJ_8 /* StoreFlowable */ = {
 			isa = PBXGroup;
 			children = (
-				E3C052F22593322800DB555B /* Paging */,
 				E375348025733F9B0048EB33 /* Core */,
+				E3C052F22593322800DB555B /* Paging */,
 				E3F556CD2590499A0087FC85 /* UnitHash.swift */,
 				E3753474257339730048EB33 /* AsDataType.swift */,
 				E375346E257338FC0048EB33 /* CacheDataManager.swift */,
@@ -316,20 +337,25 @@
 				E3C052FE2593348100DB555B /* AnyPagingCacheDataManager.swift in Sources */,
 				E3D61B73257E2FA8005FC400 /* DataStateMapper.swift in Sources */,
 				E336D3CA25832922001E8E6D /* StoreFlowableImpl.swift in Sources */,
+				E3D22F8425939EA000CF4E36 /* PagingDataSelector.swift in Sources */,
 				E3C0530A259335A600DB555B /* AnyPagingOriginDataManager.swift in Sources */,
 				E3C052F42593343100DB555B /* PagingCacheDataManager.swift in Sources */,
 				E308A93B25728EA30059EF00 /* StateContent.swift in Sources */,
 				E375346F257338FC0048EB33 /* CacheDataManager.swift in Sources */,
 				E3753463257338430048EB33 /* DataStateManager.swift in Sources */,
 				E3753475257339730048EB33 /* AsDataType.swift in Sources */,
+				E3D22F8A2594413900CF4E36 /* PagingStoreFlowableImpl.swift in Sources */,
 				E3753486257340CE0048EB33 /* DataSelector.swift in Sources */,
 				E336D3EE2583D3EC001E8E6D /* AnyStoreFlowable.swift in Sources */,
 				E3D61B63257DBD97005FC400 /* StoreFlowable.swift in Sources */,
 				E375345D257337C80048EB33 /* DataState.swift in Sources */,
+				E3D22F6C25939C1500CF4E36 /* AnyPagingStoreFlowable.swift in Sources */,
 				E37534A025734A3F0048EB33 /* AnyCacheDataManager.swift in Sources */,
+				E3D22F7825939D0C00CF4E36 /* PagingStoreFlowableResponder.swift in Sources */,
 				E375347B257339A10048EB33 /* FlowableDataStateManager.swift in Sources */,
 				E375348C257344CC0048EB33 /* AnyDataStateManager.swift in Sources */,
 				E336D3C025823290001E8E6D /* StoreFlowableResponder.swift in Sources */,
+				E3D22F6625938F7A00CF4E36 /* PagingStoreFlowable.swift in Sources */,
 				E375344F257336AD0048EB33 /* FlowAccessor.swift in Sources */,
 				E336D3DE2583BA0F001E8E6D /* StoreFlowableExtension.swift in Sources */,
 				E3F556CE2590499A0087FC85 /* UnitHash.swift in Sources */,
@@ -337,7 +363,9 @@
 				E375349A257349200048EB33 /* AnyOriginDataManager.swift in Sources */,
 				E3C053042593352800DB555B /* PagingOriginDataManager.swift in Sources */,
 				E37534692573389D0048EB33 /* OriginDataManager.swift in Sources */,
+				E3D22F7225939CD300CF4E36 /* PagingStoreFlowableExtension.swift in Sources */,
 				E3D61B83257E3C58005FC400 /* NoSuchElementError.swift in Sources */,
+				E3D22F7E25939DDB00CF4E36 /* AnyPagingStoreFlowableResponder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -17,7 +17,7 @@ struct DataSelector<KEY, DATA> {
     private let originDataManager: AnyOriginDataManager<DATA>
     private let needRefresh: (_ data: DATA) -> AnyPublisher<Bool, Never>
 
-    init(key: KEY, dataStateManager: AnyDataStateManager<KEY>, cacheDataManager: AnyCacheDataManager<DATA>, originDataManager: AnyOriginDataManager<DATA>, needRefresh: @escaping (DATA) -> AnyPublisher<Bool, Never>) {
+    init(key: KEY, dataStateManager: AnyDataStateManager<KEY>, cacheDataManager: AnyCacheDataManager<DATA>, originDataManager: AnyOriginDataManager<DATA>, needRefresh: @escaping (_ data: DATA) -> AnyPublisher<Bool, Never>) {
         self.key = key
         self.dataStateManager = dataStateManager
         self.cacheDataManager = cacheDataManager

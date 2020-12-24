@@ -11,22 +11,20 @@ import Alamofire
 
 struct GithubApi {
 
+    private let baseApiUrl = URL(string: "https://api.github.com/")!
+
     func getMeta() -> AnyPublisher<GithubMeta, Error> {
-        return Future { promise in
-            AF.request("https://api.github.com/meta")
-                .response { response in
-                    switch response.result {
-                    case .success(let element): do {
-                        let decodedResponse = try JSONDecoder().decode(GithubMeta.self, from: element!)
-                        promise(.success(decodedResponse))
-                    } catch {
-                        promise(.failure(error))
-                    }
-                    case .failure(let error):
-                        promise(.failure(error))
-                    }
-                }
-        }
-        .eraseToAnyPublisher()
+        return AF.request(baseApiUrl.appendingPathComponent("meta"))
+            .publishResponse(GithubMeta.self)
+    }
+
+    func getOrgs(since: Int?, perPage: Int) -> AnyPublisher<GithubOrg, Error> {
+        var queryItems: [URLQueryItem] = []
+        queryItems.append(URLQueryItem(name: "per_page", value: String(perPage)))
+        if let since = since { queryItems.append(URLQueryItem(name: "since", value: String(since))) }
+        var urlComponents = URLComponents(url: baseApiUrl.appendingPathComponent("organizations"), resolvingAgainstBaseURL: true)!
+        urlComponents.queryItems = queryItems
+        return AF.request(try! urlComponents.asURL())
+            .publishResponse(GithubOrg.self)
     }
 }
