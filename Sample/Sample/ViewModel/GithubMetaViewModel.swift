@@ -13,14 +13,26 @@ final class GithubMetaViewModel : ObservableObject {
     @Published var githubMeta: GithubMeta?
     @Published var isLoading: Bool = false
     @Published var error: Error?
+    @Published var refreshingError: Error?
+    @Published var isShowRefreshingError: Bool = false
     private let githubRepository = GithubRepository()
+    private var shouldNoticeErrorOnNextState: Bool = false
     private var cancellableSet = Set<AnyCancellable>()
 
-    init() {
+    func initialize() {
+        cancellableSet.removeAll()
         subscribe()
     }
 
     func request() {
+        shouldNoticeErrorOnNextState = true
+        githubRepository.requestMeta()
+            .receive(on: DispatchQueue.main)
+            .sink {}
+            .store(in: &cancellableSet)
+    }
+
+    func retry() {
         githubRepository.requestMeta()
             .receive(on: DispatchQueue.main)
             .sink {}
@@ -33,6 +45,7 @@ final class GithubMetaViewModel : ObservableObject {
             .sink { state in
                 state.doAction(
                     onFixed: {
+                        self.shouldNoticeErrorOnNextState = false
                         state.stateContent.doAction(
                             onExist: { value in
                                 self.githubMeta = value
@@ -61,6 +74,11 @@ final class GithubMetaViewModel : ObservableObject {
                         )
                     },
                     onError: { error in
+                        if self.shouldNoticeErrorOnNextState {
+                            self.refreshingError = error
+                            self.isShowRefreshingError = true
+                        }
+                        self.shouldNoticeErrorOnNextState = false
                         state.stateContent.doAction(
                             onExist: { value in
                                 self.githubMeta = value

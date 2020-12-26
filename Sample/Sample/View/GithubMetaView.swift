@@ -28,6 +28,19 @@ struct GithubMetaView: View {
             if (githubMetaViewModel.isLoading) {
                 ProgressView()
             }
+            if let error = githubMetaViewModel.error {
+                VStack {
+                    Text(error.localizedDescription)
+                        .foregroundColor(Color.red)
+                        .multilineTextAlignment(.center)
+                    Spacer()
+                        .frame(height: 4)
+                    Button("Retry") {
+                        githubMetaViewModel.retry()
+                    }
+                }
+                .padding()
+            }
         }
         .padding()
         .toolbar {
@@ -36,6 +49,12 @@ struct GithubMetaView: View {
                     githubMetaViewModel.request()
                 }
             }
+        }
+        .alert(isPresented: $githubMetaViewModel.isShowRefreshingError) {
+            Alert(title: Text(githubMetaViewModel.refreshingError!.localizedDescription))
+        }
+        .onAppear {
+            githubMetaViewModel.initialize()
         }
     }
 }

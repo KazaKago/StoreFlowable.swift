@@ -25,7 +25,7 @@ struct MainView: View {
                     }
                     Spacer()
                         .frame(width: 20)
-                    NavigationLink(destination: GithubMetaView()) {
+                    NavigationLink(destination: GithubOrgsView()) {
                         Text("Github Organizations\n(Paging cache sample)")
                             .font(.system(size: 15))
                             .multilineTextAlignment(.center)

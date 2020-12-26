@@ -17,7 +17,7 @@ struct GithubMetaResponder : StoreFlowableResponder {
 
     var key: UnitHash = UnitHash()
 
-    let flowableDataStateManager: FlowableDataStateManager<UnitHash> = GithubMetaStateManager.sharedInstance
+    let flowableDataStateManager: FlowableDataStateManager<UnitHash> = GithubMetaStateManager.shared
 
     func loadData() -> AnyPublisher<GithubMeta?, Never> {
         Future { promise in
