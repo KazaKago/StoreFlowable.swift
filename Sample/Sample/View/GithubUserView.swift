@@ -29,12 +29,16 @@ struct GithubUserView: View {
                         .multilineTextAlignment(.center)
                         .font(.caption)
                 }
-                Text(githubUserViewModel.githubUser?.name ?? "")
-                    .multilineTextAlignment(.center)
+                if let name = githubUserViewModel.githubUser?.name {
+                    Text(name)
+                        .multilineTextAlignment(.center)
+                }
                 Spacer()
                     .frame(height: 10)
-                Text(githubUserViewModel.githubUser?.htmlUrl ?? "")
-                    .multilineTextAlignment(.center)
+                if let htmlUrl = githubUserViewModel.githubUser?.htmlUrl {
+                    Text(htmlUrl)
+                        .multilineTextAlignment(.center)
+                }
             }
             if githubUserViewModel.isLoading {
                 ProgressView()
