@@ -21,9 +21,8 @@ struct GithubRepoItem: View {
                 .font(.body)
             Spacer()
                 .frame(height: 4)
-            Text(githubRepo.htmlUrl)
+            Link(githubRepo.htmlUrl, destination: URL(string: githubRepo.htmlUrl)!)
                 .foregroundColor(Color.blue)
-                .font(.caption2)
         }
         .padding(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
     }
