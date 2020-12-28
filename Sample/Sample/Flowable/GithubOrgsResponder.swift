@@ -44,8 +44,8 @@ struct GithubOrgsResponder : PagingStoreFlowableResponder {
 
     func needRefresh(data: [GithubOrg]) -> AnyPublisher<Bool, Never> {
         Future { promise in
-            if let expiredTime = GithubInMemoryCache.orgsCacheCreatedAt {
-                promise(.success(expiredTime + 30 < Date()))
+            if let createdAt = GithubInMemoryCache.orgsCacheCreatedAt {
+                promise(.success(createdAt + 30 < Date()))
             } else {
                 promise(.success(true))
             }
