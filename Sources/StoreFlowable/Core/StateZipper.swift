@@ -1,5 +1,5 @@
 //
-//  FlowableStateZipper.swift
+//  StateZipper.swift
 //  StoreFlowable
 //
 //  Created by Kensuke Tamura on 2020/12/28.
@@ -8,9 +8,9 @@
 import Foundation
 import Combine
 
-public extension FlowableState {
+public extension State {
 
-    func zip<B, Z>(_ otherState: FlowableState<B>, _ transform: (_ content1: T, _ content2: B) -> Z) -> FlowableState<Z> {
+    func zip<B, Z>(_ otherState: State<B>, _ transform: (_ content1: T, _ content2: B) -> Z) -> State<Z> {
         switch self {
         case .fixed(let stateContent):
             switch otherState {
@@ -42,7 +42,7 @@ public extension FlowableState {
         }
     }
 
-    func zip<B, C, Z>(_ otherState1: FlowableState<B>, _ otherState2: FlowableState<C>, _ transform: (_ content1: T, _ content2: B, _ content3: C) -> Z) -> FlowableState<Z> {
+    func zip<B, C, Z>(_ otherState1: State<B>, _ otherState2: State<C>, _ transform: (_ content1: T, _ content2: B, _ content3: C) -> Z) -> State<Z> {
         zip(otherState1) { (content1, content2) in
             (content1, content2)
         }
@@ -51,7 +51,7 @@ public extension FlowableState {
         }
     }
 
-    func zip<B, C, D, Z>(_ otherState1: FlowableState<B>, _ otherState2: FlowableState<C>, _ otherState3: FlowableState<D>, _ transform: (_ content1: T, _ content2: B, _ content3: C, _ content4: D) -> Z) -> FlowableState<Z> {
+    func zip<B, C, D, Z>(_ otherState1: State<B>, _ otherState2: State<C>, _ otherState3: State<D>, _ transform: (_ content1: T, _ content2: B, _ content3: C, _ content4: D) -> Z) -> State<Z> {
         zip(otherState1) { (content1, content2) in
             (content1, content2)
         }
@@ -63,7 +63,7 @@ public extension FlowableState {
         }
     }
 
-    func zip<B, C, D, E, Z>(_ otherState1: FlowableState<B>, _ otherState2: FlowableState<C>, _ otherState3: FlowableState<D>, _ otherState4: FlowableState<E>, _ transform: (_ content1: T, _ content2: B, _ content3: C, _ content4: D, _ content5: E) -> Z) -> FlowableState<Z> {
+    func zip<B, C, D, E, Z>(_ otherState1: State<B>, _ otherState2: State<C>, _ otherState3: State<D>, _ otherState4: State<E>, _ transform: (_ content1: T, _ content2: B, _ content3: C, _ content4: D, _ content5: E) -> Z) -> State<Z> {
         zip(otherState1) { (content1, content2) in
             (content1, content2)
         }

@@ -10,14 +10,14 @@ import Combine
 
 public extension Publisher {
 
-    func combineState<A, B, Z>(_ otherPublisher: AnyPublisher<FlowableState<B>, Self.Failure>, _ transform: @escaping (_ content1: A, _ content2: B) -> Z) -> AnyPublisher<FlowableState<Z>, Self.Failure> where Self.Output == FlowableState<A> {
+    func combineState<A, B, Z>(_ otherPublisher: AnyPublisher<State<B>, Self.Failure>, _ transform: @escaping (_ content1: A, _ content2: B) -> Z) -> AnyPublisher<State<Z>, Self.Failure> where Self.Output == State<A> {
         zip(otherPublisher) { (state1, state2) in
             state1.zip(state2, transform)
         }
         .eraseToAnyPublisher()
     }
 
-    func combineState<A, B, C, Z>(_ otherPublisher1: AnyPublisher<FlowableState<B>, Self.Failure>, _ otherPublisher2: AnyPublisher<FlowableState<C>, Self.Failure>, _ transform: @escaping (_ content1: A, _ content2: B, _ content3: C) -> Z) -> AnyPublisher<FlowableState<Z>, Self.Failure> where Self.Output == FlowableState<A> {
+    func combineState<A, B, C, Z>(_ otherPublisher1: AnyPublisher<State<B>, Self.Failure>, _ otherPublisher2: AnyPublisher<State<C>, Self.Failure>, _ transform: @escaping (_ content1: A, _ content2: B, _ content3: C) -> Z) -> AnyPublisher<State<Z>, Self.Failure> where Self.Output == State<A> {
         combineState(otherPublisher1) { (state1, state2) in
             (state1, state2)
         }
@@ -27,7 +27,7 @@ public extension Publisher {
         .eraseToAnyPublisher()
     }
 
-    func combineState<A, B, C, D, Z>(_ otherPublisher1: AnyPublisher<FlowableState<B>, Self.Failure>, _ otherPublisher2: AnyPublisher<FlowableState<C>, Self.Failure>, _ otherPublisher3: AnyPublisher<FlowableState<D>, Self.Failure>, _ transform: @escaping (_ content1: A, _ content2: B, _ content3: C, _ content4: D) -> Z) -> AnyPublisher<FlowableState<Z>, Self.Failure> where Self.Output == FlowableState<A> {
+    func combineState<A, B, C, D, Z>(_ otherPublisher1: AnyPublisher<State<B>, Self.Failure>, _ otherPublisher2: AnyPublisher<State<C>, Self.Failure>, _ otherPublisher3: AnyPublisher<State<D>, Self.Failure>, _ transform: @escaping (_ content1: A, _ content2: B, _ content3: C, _ content4: D) -> Z) -> AnyPublisher<State<Z>, Self.Failure> where Self.Output == State<A> {
         combineState(otherPublisher1) { (state1, state2) in
             (state1, state2)
         }
@@ -40,7 +40,7 @@ public extension Publisher {
         .eraseToAnyPublisher()
     }
 
-    func combineState<A, B, C, D, E, Z>(_ otherPublisher1: AnyPublisher<FlowableState<B>, Self.Failure>, _ otherPublisher2: AnyPublisher<FlowableState<C>, Self.Failure>, _ otherPublisher3: AnyPublisher<FlowableState<D>, Self.Failure>, _ otherPublisher4: AnyPublisher<FlowableState<E>, Self.Failure>, _ transform: @escaping (_ content1: A, _ content2: B, _ content3: C, _ content4: D, _ content5: E) -> Z) -> AnyPublisher<FlowableState<Z>, Self.Failure> where Self.Output == FlowableState<A> {
+    func combineState<A, B, C, D, E, Z>(_ otherPublisher1: AnyPublisher<State<B>, Self.Failure>, _ otherPublisher2: AnyPublisher<State<C>, Self.Failure>, _ otherPublisher3: AnyPublisher<State<D>, Self.Failure>, _ otherPublisher4: AnyPublisher<State<E>, Self.Failure>, _ transform: @escaping (_ content1: A, _ content2: B, _ content3: C, _ content4: D, _ content5: E) -> Z) -> AnyPublisher<State<Z>, Self.Failure> where Self.Output == State<A> {
         combineState(otherPublisher1) { (state1, state2) in
             (state1, state2)
         }

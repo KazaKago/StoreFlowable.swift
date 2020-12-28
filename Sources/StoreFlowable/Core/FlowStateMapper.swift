@@ -1,5 +1,5 @@
 //
-//  FlowableStateZipper.swift
+//  FlowStateZipper.swift
 //  StoreFlowable
 //
 //  Created by Kensuke Tamura on 2020/12/28.
@@ -10,7 +10,7 @@ import Combine
 
 public extension Publisher {
 
-    func mapContent<A, Z>(_ transform: @escaping (A) -> Z) -> Publishers.Map<Self, FlowableState<Z>> where Self.Output == FlowableState<A> {
+    func mapContent<A, Z>(_ transform: @escaping (A) -> Z) -> Publishers.Map<Self, State<Z>> where Self.Output == State<A> {
         map { input in
             switch input {
             case .fixed(let stateContent):

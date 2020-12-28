@@ -13,7 +13,7 @@ public protocol PagingStoreFlowable {
     associatedtype KEY: Hashable
     associatedtype DATA
 
-    func asFlow(forceRefresh: Bool) -> AnyPublisher<FlowableState<[DATA]>, Never>
+    func asFlow(forceRefresh: Bool) -> AnyPublisher<State<[DATA]>, Never>
 
     func get(type: AsDataType) -> AnyPublisher<[DATA], Error>
 
@@ -28,7 +28,7 @@ public protocol PagingStoreFlowable {
 
 public extension PagingStoreFlowable {
 
-    func asFlow(forceRefresh: Bool = false) -> AnyPublisher<FlowableState<[DATA]>, Never> {
+    func asFlow(forceRefresh: Bool = false) -> AnyPublisher<State<[DATA]>, Never> {
         asFlow(forceRefresh: forceRefresh)
     }
 

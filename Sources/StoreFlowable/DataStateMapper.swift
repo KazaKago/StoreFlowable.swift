@@ -8,7 +8,7 @@
 import Foundation
 
 extension DataState {
-    func mapState<DATA>(stateContent: StateContent<DATA>) -> FlowableState<DATA> {
+    func mapState<DATA>(stateContent: StateContent<DATA>) -> State<DATA> {
         switch (self) {
         case .fixed:
             return .fixed(stateContent: stateContent)

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum FlowableState<T> {
+public enum State<T> {
     case fixed(stateContent: StateContent<T>)
     case loading(stateContent: StateContent<T>)
     case error(stateContent: StateContent<T>, rawError: Error)

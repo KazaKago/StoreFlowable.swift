@@ -11,7 +11,7 @@ import StoreFlowable
 
 struct GithubRepository {
 
-    func followMeta() -> AnyPublisher<FlowableState<GithubMeta>, Never> {
+    func followMeta() -> AnyPublisher<State<GithubMeta>, Never> {
         let githubMetaFlowable = GithubMetaResponder().create()
         return githubMetaFlowable.asFlow()
     }
@@ -21,7 +21,7 @@ struct GithubRepository {
         return githubMetaFlowable.refresh()
     }
 
-    func followOrgs() -> AnyPublisher<FlowableState<[GithubOrg]>, Never> {
+    func followOrgs() -> AnyPublisher<State<[GithubOrg]>, Never> {
         let githubOrgsFlowable = GithubOrgsResponder().create()
         return githubOrgsFlowable.asFlow()
     }

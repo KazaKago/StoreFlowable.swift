@@ -21,7 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		E308A93525728CC90059EF00 /* FlowableState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E308A93425728CC90059EF00 /* FlowableState.swift */; };
+		E308A93525728CC90059EF00 /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = E308A93425728CC90059EF00 /* State.swift */; };
 		E308A93B25728EA30059EF00 /* StateContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E308A93A25728EA30059EF00 /* StateContent.swift */; };
 		E336D3C025823290001E8E6D /* StoreFlowableResponder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3BF25823290001E8E6D /* StoreFlowableResponder.swift */; };
 		E336D3CA25832922001E8E6D /* StoreFlowableImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3C925832922001E8E6D /* StoreFlowableImpl.swift */; };
@@ -40,9 +40,9 @@
 		E375348C257344CC0048EB33 /* AnyDataStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E375348B257344CC0048EB33 /* AnyDataStateManager.swift */; };
 		E375349A257349200048EB33 /* AnyOriginDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3753499257349200048EB33 /* AnyOriginDataManager.swift */; };
 		E37534A025734A3F0048EB33 /* AnyCacheDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E375349F25734A3F0048EB33 /* AnyCacheDataManager.swift */; };
-		E38393BC2599B4CB0021FB76 /* FlowableStateMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38393BB2599B4CB0021FB76 /* FlowableStateMapper.swift */; };
+		E38393BC2599B4CB0021FB76 /* FlowStateMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38393BB2599B4CB0021FB76 /* FlowStateMapper.swift */; };
 		E38393C62599BBD40021FB76 /* StateContentZipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38393C52599BBD40021FB76 /* StateContentZipper.swift */; };
-		E38393D42599C1BE0021FB76 /* FlowableStateZipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38393D32599C1BE0021FB76 /* FlowableStateZipper.swift */; };
+		E38393D42599C1BE0021FB76 /* StateZipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38393D32599C1BE0021FB76 /* StateZipper.swift */; };
 		E38393E62599C4540021FB76 /* FlowStateCombiner.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38393E52599C4540021FB76 /* FlowStateCombiner.swift */; };
 		E3C052F42593343100DB555B /* PagingCacheDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C052F32593343100DB555B /* PagingCacheDataManager.swift */; };
 		E3C052FE2593348100DB555B /* AnyPagingCacheDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C052FD2593348100DB555B /* AnyPagingCacheDataManager.swift */; };
@@ -83,7 +83,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		E308A93425728CC90059EF00 /* FlowableState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowableState.swift; sourceTree = "<group>"; };
+		E308A93425728CC90059EF00 /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
 		E308A93A25728EA30059EF00 /* StateContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateContent.swift; sourceTree = "<group>"; };
 		E336D3BF25823290001E8E6D /* StoreFlowableResponder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowableResponder.swift; sourceTree = "<group>"; };
 		E336D3C925832922001E8E6D /* StoreFlowableImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowableImpl.swift; sourceTree = "<group>"; };
@@ -101,9 +101,9 @@
 		E375348B257344CC0048EB33 /* AnyDataStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyDataStateManager.swift; sourceTree = "<group>"; };
 		E3753499257349200048EB33 /* AnyOriginDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyOriginDataManager.swift; sourceTree = "<group>"; };
 		E375349F25734A3F0048EB33 /* AnyCacheDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCacheDataManager.swift; sourceTree = "<group>"; };
-		E38393BB2599B4CB0021FB76 /* FlowableStateMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowableStateMapper.swift; sourceTree = "<group>"; };
+		E38393BB2599B4CB0021FB76 /* FlowStateMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowStateMapper.swift; sourceTree = "<group>"; };
 		E38393C52599BBD40021FB76 /* StateContentZipper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateContentZipper.swift; sourceTree = "<group>"; };
-		E38393D32599C1BE0021FB76 /* FlowableStateZipper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowableStateZipper.swift; sourceTree = "<group>"; };
+		E38393D32599C1BE0021FB76 /* StateZipper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateZipper.swift; sourceTree = "<group>"; };
 		E38393E52599C4540021FB76 /* FlowStateCombiner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowStateCombiner.swift; sourceTree = "<group>"; };
 		E3C052F32593343100DB555B /* PagingCacheDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingCacheDataManager.swift; sourceTree = "<group>"; };
 		E3C052FD2593348100DB555B /* AnyPagingCacheDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyPagingCacheDataManager.swift; sourceTree = "<group>"; };
@@ -151,11 +151,11 @@
 		E375348025733F9B0048EB33 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				E308A93425728CC90059EF00 /* FlowableState.swift */,
+				E308A93425728CC90059EF00 /* State.swift */,
 				E308A93A25728EA30059EF00 /* StateContent.swift */,
-				E38393BB2599B4CB0021FB76 /* FlowableStateMapper.swift */,
-				E38393D32599C1BE0021FB76 /* FlowableStateZipper.swift */,
+				E38393D32599C1BE0021FB76 /* StateZipper.swift */,
 				E38393C52599BBD40021FB76 /* StateContentZipper.swift */,
+				E38393BB2599B4CB0021FB76 /* FlowStateMapper.swift */,
 				E38393E52599C4540021FB76 /* FlowStateCombiner.swift */,
 				E3D61B82257E3C58005FC400 /* NoSuchElementError.swift */,
 			);
@@ -353,7 +353,7 @@
 				E3D22F8425939EA000CF4E36 /* PagingDataSelector.swift in Sources */,
 				E3C0530A259335A600DB555B /* AnyPagingOriginDataManager.swift in Sources */,
 				E3C052F42593343100DB555B /* PagingCacheDataManager.swift in Sources */,
-				E38393BC2599B4CB0021FB76 /* FlowableStateMapper.swift in Sources */,
+				E38393BC2599B4CB0021FB76 /* FlowStateMapper.swift in Sources */,
 				E308A93B25728EA30059EF00 /* StateContent.swift in Sources */,
 				E375346F257338FC0048EB33 /* CacheDataManager.swift in Sources */,
 				E3753463257338430048EB33 /* DataStateManager.swift in Sources */,
@@ -373,7 +373,7 @@
 				E375344F257336AD0048EB33 /* FlowAccessor.swift in Sources */,
 				E336D3DE2583BA0F001E8E6D /* StoreFlowableExtension.swift in Sources */,
 				E3F556CE2590499A0087FC85 /* UnitHash.swift in Sources */,
-				E308A93525728CC90059EF00 /* FlowableState.swift in Sources */,
+				E308A93525728CC90059EF00 /* State.swift in Sources */,
 				E375349A257349200048EB33 /* AnyOriginDataManager.swift in Sources */,
 				E3C053042593352800DB555B /* PagingOriginDataManager.swift in Sources */,
 				E37534692573389D0048EB33 /* OriginDataManager.swift in Sources */,
@@ -381,7 +381,7 @@
 				E3D61B83257E3C58005FC400 /* NoSuchElementError.swift in Sources */,
 				E3D22F7E25939DDB00CF4E36 /* AnyPagingStoreFlowableResponder.swift in Sources */,
 				E38393E62599C4540021FB76 /* FlowStateCombiner.swift in Sources */,
-				E38393D42599C1BE0021FB76 /* FlowableStateZipper.swift in Sources */,
+				E38393D42599C1BE0021FB76 /* StateZipper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

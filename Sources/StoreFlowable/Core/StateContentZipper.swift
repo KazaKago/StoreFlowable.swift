@@ -45,8 +45,8 @@ public extension StateContent {
         .zip(otherStateContent2) { (content1_2, content3) in
             (content1_2.0, content1_2.1, content3)
         }
-        .zip(otherStateContent3) { (content1_2_3, content3) in
-            transform(content1_2_3.0, content1_2_3.1, content1_2_3.2, content3)
+        .zip(otherStateContent3) { (content1_2_3, content4) in
+            transform(content1_2_3.0, content1_2_3.1, content1_2_3.2, content4)
         }
     }
 
@@ -57,11 +57,11 @@ public extension StateContent {
         .zip(otherStateContent2) { (content1_2, content3) in
             (content1_2.0, content1_2.1, content3)
         }
-        .zip(otherStateContent3) { (content1_2_3, content3) in
-            (content1_2_3.0, content1_2_3.1, content1_2_3.2, content3)
+        .zip(otherStateContent3) { (content1_2_3, content4) in
+            (content1_2_3.0, content1_2_3.1, content1_2_3.2, content4)
         }
-        .zip(otherStateContent4) { (content1_2_3_4, content4) in
-            transform(content1_2_3_4.0, content1_2_3_4.1, content1_2_3_4.2, content1_2_3_4.3, content4)
+        .zip(otherStateContent4) { (content1_2_3_4, content5) in
+            transform(content1_2_3_4.0, content1_2_3_4.1, content1_2_3_4.2, content1_2_3_4.3, content5)
         }
     }
 }
