@@ -10,7 +10,7 @@ import SwiftUI
 struct ErrorItem: View {
 
     let error: Error
-    let retry: (() -> Void)
+    let retry: () -> Void
 
     var body: some View {
         VStack {

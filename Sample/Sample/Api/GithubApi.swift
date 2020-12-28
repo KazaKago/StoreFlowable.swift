@@ -14,7 +14,7 @@ struct GithubApi {
     private let baseApiUrl = URL(string: "https://api.github.com/")!
 
     func getMeta() -> AnyPublisher<GithubMeta, Error> {
-        return AF.request(baseApiUrl.appendingPathComponent("meta").toUrlRequest())
+        AF.request(baseApiUrl.appendingPathComponent("meta").toUrlRequest())
             .publishResponse(GithubMeta.self)
             .delay(for: .seconds(1.0), scheduler: RunLoop.main) // dummy delay
             .eraseToAnyPublisher()

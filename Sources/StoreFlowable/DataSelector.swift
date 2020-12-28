@@ -61,7 +61,7 @@ struct DataSelector<KEY, DATA> {
     private func doDataAction(forceRefresh: Bool, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool) -> AnyPublisher<Void, Never> {
         async { yield in
             let data = try await(cacheDataManager.loadData())
-            if (data == nil || forceRefresh || (try! await(self.needRefresh(data!)))) {
+            if (data == nil || forceRefresh || (try! await(needRefresh(data!)))) {
                 try await(prepareFetch(clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching))
             }
         }

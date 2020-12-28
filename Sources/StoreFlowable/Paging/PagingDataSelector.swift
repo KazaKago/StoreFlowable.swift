@@ -61,7 +61,7 @@ struct PagingDataSelector<KEY, DATA> {
 
     private func doDataAction(data: [DATA]?, forceRefresh: Bool, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool, additionalRequest: Bool, currentIsReachLast: Bool) -> AnyPublisher<Void, Never> {
         async { yield in
-            if (data == nil || forceRefresh || (try! await(self.needRefresh(data!))) || (additionalRequest && !currentIsReachLast)) {
+            if (data == nil || forceRefresh || (try! await(needRefresh(data!))) || (additionalRequest && !currentIsReachLast)) {
                 try await(prepareFetch(data: data, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, additionalRequest: additionalRequest))
             }
         }
