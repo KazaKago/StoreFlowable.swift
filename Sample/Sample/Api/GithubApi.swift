@@ -31,6 +31,13 @@ struct GithubApi {
             .delay(for: .seconds(1.0), scheduler: RunLoop.main) // dummy delay
             .eraseToAnyPublisher()
     }
+
+    func getUser(userName: String) -> AnyPublisher<GithubUser, Error> {
+        AF.request(baseApiUrl.appendingPathComponent("users/\(userName)").toUrlRequest())
+            .publishResponse(GithubUser.self)
+            .delay(for: .seconds(1.0), scheduler: RunLoop.main) // dummy delay
+            .eraseToAnyPublisher()
+    }
 }
 
 extension URL {

@@ -31,7 +31,7 @@ struct GithubOrgsView: View {
                     }
                 }
             }
-            if (githubOrgsViewModel.isMainLoading) {
+            if githubOrgsViewModel.isMainLoading {
                 ProgressView()
             }
             if let error = githubOrgsViewModel.mainError {

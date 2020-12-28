@@ -14,10 +14,11 @@ struct GithubOrgsResponder : PagingStoreFlowableResponder {
     typealias KEY = UnitHash
     typealias DATA = GithubOrg
 
+    private static let EXPIRE_SECONDS = TimeInterval(30)
     private static let PER_PAGE = 20
     private let githubApi = GithubApi()
 
-    var key: UnitHash = UnitHash()
+    let key: UnitHash = UnitHash()
 
     let flowableDataStateManager: FlowableDataStateManager<UnitHash> = GithubMetaStateManager.shared
 
@@ -45,7 +46,7 @@ struct GithubOrgsResponder : PagingStoreFlowableResponder {
     func needRefresh(data: [GithubOrg]) -> AnyPublisher<Bool, Never> {
         Future { promise in
             if let createdAt = GithubInMemoryCache.orgsCacheCreatedAt {
-                promise(.success(createdAt + 30 < Date()))
+                promise(.success(createdAt + GithubOrgsResponder.EXPIRE_SECONDS < Date()))
             } else {
                 promise(.success(true))
             }

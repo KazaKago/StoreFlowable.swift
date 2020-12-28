@@ -35,4 +35,14 @@ struct GithubRepository {
         let githubOrgsFlowable = GithubOrgsResponder().create()
         return githubOrgsFlowable.requestAdditional(continueWhenError: continueWhenError)
     }
+
+    func followUser(userName: String) -> AnyPublisher<State<GithubUser>, Never> {
+        let githubUserFlowable = GithubUserResponder(key: userName).create()
+        return githubUserFlowable.asFlow()
+    }
+
+    func refreshUser(userName: String) -> AnyPublisher<Void, Never> {
+        let githubUserFlowable = GithubUserResponder(key: userName).create()
+        return githubUserFlowable.refresh()
+    }
 }

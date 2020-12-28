@@ -25,7 +25,7 @@ struct GithubMetaView: View {
                         .multilineTextAlignment(.center)
                 }
             }
-            if (githubMetaViewModel.isLoading) {
+            if githubMetaViewModel.isLoading {
                 ProgressView()
             }
             if let error = githubMetaViewModel.error {

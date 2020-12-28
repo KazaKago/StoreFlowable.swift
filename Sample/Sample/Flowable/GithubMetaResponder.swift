@@ -10,12 +10,14 @@ import Combine
 import StoreFlowable
 
 struct GithubMetaResponder : StoreFlowableResponder {
+
     typealias KEY = UnitHash
     typealias DATA = GithubMeta
 
+    private static let EXPIRE_SECONDS = TimeInterval(30)
     private let githubApi = GithubApi()
 
-    var key: UnitHash = UnitHash()
+    let key: UnitHash = UnitHash()
 
     let flowableDataStateManager: FlowableDataStateManager<UnitHash> = GithubMetaStateManager.shared
 
@@ -40,7 +42,7 @@ struct GithubMetaResponder : StoreFlowableResponder {
     func needRefresh(data: GithubMeta) -> AnyPublisher<Bool, Never> {
         Future { promise in
             if let createdAt = GithubInMemoryCache.metaCacheCreatedAt {
-                promise(.success(createdAt + 30 < Date()))
+                promise(.success(createdAt + GithubMetaResponder.EXPIRE_SECONDS < Date()))
             } else {
                 promise(.success(true))
             }

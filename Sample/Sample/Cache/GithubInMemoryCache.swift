@@ -13,4 +13,7 @@ struct GithubInMemoryCache {
 
     static var orgsCache: [GithubOrg]?
     static var orgsCacheCreatedAt: Date?
+
+    static var userCache: [String: GithubUser] = [:]
+    static var userCacheCreatedAt: [String: Date] = [:]
 }

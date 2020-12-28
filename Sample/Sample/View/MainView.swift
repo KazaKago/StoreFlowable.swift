@@ -40,7 +40,7 @@ struct MainView: View {
                 Spacer()
                     .frame(height: 10)
                 HStack {
-                    NavigationLink(destination: GithubMetaView()) {
+                    NavigationLink(destination: GithubUserView(userName: githubName)) {
                         Text("Github User's info\n(Single cache sample)")
                             .font(.system(size: 15))
                             .multilineTextAlignment(.center)

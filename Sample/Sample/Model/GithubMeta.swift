@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct GithubMeta: Codable {
+struct GithubMeta: Codable, Equatable {
     let verifiablePasswordAuthentication: Bool
     let sshKeyFingerprints: SshKeyFingerprints
 
@@ -17,7 +17,7 @@ struct GithubMeta: Codable {
    }
 }
 
-struct SshKeyFingerprints: Codable {
+struct SshKeyFingerprints: Codable, Equatable {
     let sha256Rsa: String
     let sha256Dsa: String
 
