@@ -17,6 +17,10 @@ struct GithubUserResponder : StoreFlowableResponder {
     private static let EXPIRE_SECONDS = TimeInterval(30)
     private let githubApi = GithubApi()
 
+    init(userName: String) {
+        key = userName
+    }
+
     let key: String
 
     let flowableDataStateManager: FlowableDataStateManager<String> = GithubUserStateManager.shared

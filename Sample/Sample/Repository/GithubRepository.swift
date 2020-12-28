@@ -37,12 +37,27 @@ struct GithubRepository {
     }
 
     func followUser(userName: String) -> AnyPublisher<State<GithubUser>, Never> {
-        let githubUserFlowable = GithubUserResponder(key: userName).create()
+        let githubUserFlowable = GithubUserResponder(userName: userName).create()
         return githubUserFlowable.asFlow()
     }
 
     func refreshUser(userName: String) -> AnyPublisher<Void, Never> {
-        let githubUserFlowable = GithubUserResponder(key: userName).create()
+        let githubUserFlowable = GithubUserResponder(userName: userName).create()
         return githubUserFlowable.refresh()
+    }
+
+    func followRepos(userName: String) -> AnyPublisher<State<[GithubRepo]>, Never> {
+        let githubReposFlowable = GithubReposResponder(userName: userName).create()
+        return githubReposFlowable.asFlow()
+    }
+
+    func refreshRepos(userName: String) -> AnyPublisher<Void, Never> {
+        let githubReposFlowable = GithubReposResponder(userName: userName).create()
+        return githubReposFlowable.refresh()
+    }
+
+    func requestAdditionalRepos(userName: String, continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+        let githubReposFlowable = GithubReposResponder(userName: userName).create()
+        return githubReposFlowable.requestAdditional(continueWhenError: continueWhenError)
     }
 }

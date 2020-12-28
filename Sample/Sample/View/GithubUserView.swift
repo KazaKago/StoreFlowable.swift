@@ -37,6 +37,7 @@ struct GithubUserView: View {
                     .frame(height: 10)
                 if let htmlUrl = githubUserViewModel.githubUser?.htmlUrl {
                     Text(htmlUrl)
+                        .foregroundColor(Color.blue)
                         .multilineTextAlignment(.center)
                 }
             }

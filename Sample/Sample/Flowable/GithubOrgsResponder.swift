@@ -31,9 +31,7 @@ struct GithubOrgsResponder : PagingStoreFlowableResponder {
     func saveData(data: [GithubOrg]?, additionalRequest: Bool) -> AnyPublisher<Void, Never> {
         Future { promise in
             GithubInMemoryCache.orgsCache = data
-            if !additionalRequest {
-                GithubInMemoryCache.orgsCacheCreatedAt = Date()
-            }
+            if !additionalRequest { GithubInMemoryCache.orgsCacheCreatedAt = Date() }
             promise(.success(()))
         }.eraseToAnyPublisher()
     }

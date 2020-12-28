@@ -38,6 +38,18 @@ struct GithubApi {
             .delay(for: .seconds(1.0), scheduler: RunLoop.main) // dummy delay
             .eraseToAnyPublisher()
     }
+
+    func getRepos(userName: String, since: Int?, perPage: Int) -> AnyPublisher<[GithubRepo], Error> {
+        var queryItems: [URLQueryItem] = []
+        queryItems.append(URLQueryItem(name: "per_page", value: perPage.description))
+        if let since = since { queryItems.append(URLQueryItem(name: "since", value: since.description)) }
+        var urlComponents = URLComponents(url: baseApiUrl.appendingPathComponent("users/\(userName)/repos"), resolvingAgainstBaseURL: true)!
+        urlComponents.queryItems = queryItems
+        return AF.request((try! urlComponents.asURL()).toUrlRequest())
+            .publishResponse([GithubRepo].self)
+            .delay(for: .seconds(1.0), scheduler: RunLoop.main) // dummy delay
+            .eraseToAnyPublisher()
+    }
 }
 
 extension URL {
