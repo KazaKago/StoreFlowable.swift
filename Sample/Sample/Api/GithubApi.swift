@@ -22,8 +22,8 @@ struct GithubApi {
 
     func getOrgs(since: Int?, perPage: Int) -> AnyPublisher<[GithubOrg], Error> {
         var queryItems: [URLQueryItem] = []
-        queryItems.append(URLQueryItem(name: "per_page", value: String(perPage)))
-        if let since = since { queryItems.append(URLQueryItem(name: "since", value: String(since))) }
+        queryItems.append(URLQueryItem(name: "per_page", value: perPage.description))
+        if let since = since { queryItems.append(URLQueryItem(name: "since", value: since.description)) }
         var urlComponents = URLComponents(url: baseApiUrl.appendingPathComponent("organizations"), resolvingAgainstBaseURL: true)!
         urlComponents.queryItems = queryItems
         return AF.request((try! urlComponents.asURL()).toUrlRequest())
