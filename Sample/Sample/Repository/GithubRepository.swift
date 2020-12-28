@@ -16,9 +16,9 @@ struct GithubRepository {
         return githubMetaFlowable.asFlow()
     }
 
-    func requestMeta() -> AnyPublisher<Void, Never> {
+    func refreshMeta() -> AnyPublisher<Void, Never> {
         let githubMetaFlowable = GithubMetaResponder().create()
-        return githubMetaFlowable.request()
+        return githubMetaFlowable.refresh()
     }
 
     func followOrgs() -> AnyPublisher<FlowableState<[GithubOrg]>, Never> {
@@ -26,13 +26,13 @@ struct GithubRepository {
         return githubOrgsFlowable.asFlow()
     }
 
-    func requestOrgs() -> AnyPublisher<Void, Never> {
+    func refreshOrgs() -> AnyPublisher<Void, Never> {
         let githubOrgsFlowable = GithubOrgsResponder().create()
-        return githubOrgsFlowable.request()
+        return githubOrgsFlowable.refresh()
     }
 
-    func requestAdditionalOrgs(fetchAtError: Bool) -> AnyPublisher<Void, Never> {
+    func requestAdditionalOrgs(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
         let githubOrgsFlowable = GithubOrgsResponder().create()
-        return githubOrgsFlowable.requestAdditional(fetchAtError: fetchAtError)
+        return githubOrgsFlowable.requestAdditional(continueWhenError: continueWhenError)
     }
 }

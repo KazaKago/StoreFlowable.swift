@@ -46,12 +46,9 @@ struct GithubMetaView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Refresh") {
-                    githubMetaViewModel.request()
+                    githubMetaViewModel.refresh()
                 }
             }
-        }
-        .alert(isPresented: $githubMetaViewModel.isShowRefreshingError) {
-            Alert(title: Text(githubMetaViewModel.refreshingError!.localizedDescription))
         }
         .onAppear {
             githubMetaViewModel.initialize()

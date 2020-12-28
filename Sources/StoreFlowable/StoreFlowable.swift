@@ -23,7 +23,9 @@ public protocol StoreFlowable {
 
     func validate() -> AnyPublisher<Void, Never>
 
-    func request() -> AnyPublisher<Void, Never>
+    func refresh() -> AnyPublisher<Void, Never>
+
+    func refresh(clearCacheWhenFetchFails: Bool, continueWhenError: Bool) -> AnyPublisher<Void, Never>
 
     func update(newData: DATA?) -> AnyPublisher<Void, Never>
 }

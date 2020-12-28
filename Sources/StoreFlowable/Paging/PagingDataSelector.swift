@@ -42,52 +42,48 @@ struct PagingDataSelector<KEY, DATA> {
         .eraseToAnyPublisher()
     }
 
-    func doStateAction(forceRefresh: Bool, clearCache: Bool, fetchAtError: Bool, fetchAsync: Bool, additionalRequest: Bool) -> AnyPublisher<Void, Never> {
+    func doStateAction(forceRefresh: Bool, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, continueWhenError: Bool, awaitFetching: Bool, additionalRequest: Bool) -> AnyPublisher<Void, Never> {
         async { yield in
             let data = try await(cacheDataManager.loadData())
             switch dataStateManager.loadState(key: key) {
             case .fixed(let isReachLast):
-                try await(doDataAction(data: data, forceRefresh: forceRefresh, clearCache: clearCache, fetchAsync: fetchAsync, additionalRequest: additionalRequest, currentIsReachLast: isReachLast))
+                try await(doDataAction(data: data, forceRefresh: forceRefresh, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, additionalRequest: additionalRequest, currentIsReachLast: isReachLast))
             case .loading:
                 // do nothing.
                 break
             case .error(_):
-                if fetchAtError {
-                    try await(prepareFetch(data: data, clearCache: clearCache, fetchAsync: fetchAsync, additionalRequest: additionalRequest))
-                }
+                if continueWhenError { try await(doDataAction(data: data, forceRefresh: forceRefresh, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, additionalRequest: additionalRequest, currentIsReachLast: false)) }
             }
         }
         .replaceError(with: ())
         .eraseToAnyPublisher()
     }
 
-    private func doDataAction(data: [DATA]?, forceRefresh: Bool, clearCache: Bool, fetchAsync: Bool, additionalRequest: Bool, currentIsReachLast: Bool) -> AnyPublisher<Void, Never> {
+    private func doDataAction(data: [DATA]?, forceRefresh: Bool, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool, additionalRequest: Bool, currentIsReachLast: Bool) -> AnyPublisher<Void, Never> {
         async { yield in
             if (data == nil || forceRefresh || (try! await(self.needRefresh(data!))) || (additionalRequest && !currentIsReachLast)) {
-                try await(prepareFetch(data: data, clearCache: clearCache, fetchAsync: fetchAsync, additionalRequest: additionalRequest))
+                try await(prepareFetch(data: data, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, additionalRequest: additionalRequest))
             }
         }
         .replaceError(with: ())
         .eraseToAnyPublisher()
     }
 
-    private func prepareFetch(data: [DATA]?, clearCache: Bool, fetchAsync: Bool, additionalRequest: Bool) -> AnyPublisher<Void, Never> {
+    private func prepareFetch(data: [DATA]?, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool, additionalRequest: Bool) -> AnyPublisher<Void, Never> {
         async { yield in
-            if clearCache {
-                try await(cacheDataManager.saveData(data: nil, additionalRequest: additionalRequest))
-            }
+            if clearCacheBeforeFetching { try await(cacheDataManager.saveData(data: nil, additionalRequest: additionalRequest)) }
             dataStateManager.saveState(key: key, state: .loading)
-            if fetchAsync {
-                _ = fetchNewData(data: data, additionalRequest: additionalRequest).sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+            if awaitFetching {
+                try await(fetchNewData(data: data, clearCacheWhenFetchFails: clearCacheWhenFetchFails, additionalRequest: additionalRequest))
             } else {
-                try await(fetchNewData(data: data, additionalRequest: additionalRequest))
+                _ = fetchNewData(data: data, clearCacheWhenFetchFails: clearCacheWhenFetchFails, additionalRequest: additionalRequest).sink(receiveCompletion: { _ in }, receiveValue: { _ in })
             }
         }
         .replaceError(with: ())
         .eraseToAnyPublisher()
     }
 
-    private func fetchNewData(data: [DATA]?, additionalRequest: Bool) -> AnyPublisher<Void, Never> {
+    private func fetchNewData(data: [DATA]?, clearCacheWhenFetchFails: Bool, additionalRequest: Bool) -> AnyPublisher<Void, Never> {
         async { yield in
             do {
                 let fetchedData = try await(originDataManager.fetchOrigin(data: data, additionalRequest: additionalRequest))
@@ -96,6 +92,7 @@ struct PagingDataSelector<KEY, DATA> {
                 let isReachLast = fetchedData.isEmpty
                 dataStateManager.saveState(key: key, state: .fixed(isReachLast: isReachLast))
             } catch {
+                if clearCacheWhenFetchFails { try await(cacheDataManager.saveData(data: nil, additionalRequest: additionalRequest)) }
                 dataStateManager.saveState(key: key, state: .error(rawError: error))
             }
         }

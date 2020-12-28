@@ -55,9 +55,6 @@ struct GithubOrgsView: View {
                 }
             }
         }
-        .alert(isPresented: $githubOrgsViewModel.isShowRefreshingError) {
-            Alert(title: Text(githubOrgsViewModel.refreshingError!.localizedDescription))
-        }
         .onAppear {
             githubOrgsViewModel.initialize()
         }

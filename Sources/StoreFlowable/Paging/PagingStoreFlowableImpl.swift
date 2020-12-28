@@ -33,7 +33,7 @@ struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
     }
 
     func asFlow(forceRefresh: Bool) -> AnyPublisher<FlowableState<[DATA]>, Never> {
-        dataSelector.doStateAction(forceRefresh: forceRefresh, clearCache: true, fetchAtError: false, fetchAsync: true, additionalRequest: false)
+        dataSelector.doStateAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: false, additionalRequest: false)
             .flatMap { _ in
                 storeFlowableResponder.flowableDataStateManager.getFlow(key: storeFlowableResponder.key)
             }
@@ -57,9 +57,9 @@ struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
         async { yield in
             switch type {
             case .mix:
-                try await(dataSelector.doStateAction(forceRefresh: false, clearCache: true, fetchAtError: false, fetchAsync: false, additionalRequest: false))
+                try await(dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, additionalRequest: false))
             case .fromOrigin:
-                try await(dataSelector.doStateAction(forceRefresh: true, clearCache: true, fetchAtError: false, fetchAsync: false, additionalRequest: false))
+                try await(dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, additionalRequest: false))
             case .fromCache:
                 //do nothing.
                 break
@@ -99,19 +99,23 @@ struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
     }
 
     func validate() -> AnyPublisher<Void, Never> {
-        dataSelector.doStateAction(forceRefresh: false, clearCache: true, fetchAtError: false, fetchAsync: false, additionalRequest: false)
+        dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, additionalRequest: false)
     }
 
-    func request() -> AnyPublisher<Void, Never> {
-        dataSelector.doStateAction(forceRefresh: true, clearCache: false, fetchAtError: true, fetchAsync: false, additionalRequest: false)
+    func refresh() -> AnyPublisher<Void, Never> {
+        refresh(clearCacheWhenFetchFails: true, continueWhenError: true)
+    }
+
+    func refresh(clearCacheWhenFetchFails: Bool, continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+        dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: clearCacheWhenFetchFails, continueWhenError: continueWhenError, awaitFetching: true, additionalRequest: false)
     }
 
     func requestAdditional() -> AnyPublisher<Void, Never> {
-        requestAdditional(fetchAtError: true)
+        requestAdditional(continueWhenError: true)
     }
 
-    func requestAdditional(fetchAtError: Bool) -> AnyPublisher<Void, Never> {
-        dataSelector.doStateAction(forceRefresh: false, clearCache: false, fetchAtError: fetchAtError, fetchAsync: false, additionalRequest: true)
+    func requestAdditional(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+        dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: false, continueWhenError: continueWhenError, awaitFetching: true, additionalRequest: true)
     }
 
     func update(newData: [DATA]?) -> AnyPublisher<Void, Never> {

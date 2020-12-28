@@ -16,6 +16,8 @@ struct GithubApi {
     func getMeta() -> AnyPublisher<GithubMeta, Error> {
         return AF.request(baseApiUrl.appendingPathComponent("meta").toUrlRequest())
             .publishResponse(GithubMeta.self)
+            .delay(for: .seconds(1.0), scheduler: RunLoop.main) // dummy delay
+            .eraseToAnyPublisher()
     }
 
     func getOrgs(since: Int?, perPage: Int) -> AnyPublisher<[GithubOrg], Error> {
@@ -26,6 +28,8 @@ struct GithubApi {
         urlComponents.queryItems = queryItems
         return AF.request((try! urlComponents.asURL()).toUrlRequest())
             .publishResponse([GithubOrg].self)
+            .delay(for: .seconds(1.0), scheduler: RunLoop.main) // dummy delay
+            .eraseToAnyPublisher()
     }
 }
 

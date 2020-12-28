@@ -18,9 +18,10 @@ public struct AnyPagingStoreFlowable<KEY: Hashable, DATA>: PagingStoreFlowable {
     private let _get: () -> AnyPublisher<[DATA], Error>
     private let _getWithType: (_ type: AsDataType) -> AnyPublisher<[DATA], Error>
     private let _validate: () -> AnyPublisher<Void, Never>
-    private let _request: () -> AnyPublisher<Void, Never>
+    private let _refresh: () -> AnyPublisher<Void, Never>
+    private let _refreshWithClearCacheWhenFetchFailsAndContinueWhenError: (_ clearCacheWhenFetchFails: Bool, _ continueWhenError: Bool) -> AnyPublisher<Void, Never>
     private let _requestAdditional: () -> AnyPublisher<Void, Never>
-    private let _requestAdditionalWithFetchAtError: (_ fetchAtError: Bool) -> AnyPublisher<Void, Never>
+    private let _requestAdditionalWithContinueWhenError: (_ continueWhenError: Bool) -> AnyPublisher<Void, Never>
     private let _update: (_ newData: [DATA]?) -> AnyPublisher<Void, Never>
 
     init<INNER: PagingStoreFlowable>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
@@ -39,14 +40,17 @@ public struct AnyPagingStoreFlowable<KEY: Hashable, DATA>: PagingStoreFlowable {
         _validate = {
             inner.validate()
         }
-        _request = {
-            inner.request()
+        _refresh = {
+            inner.refresh()
+        }
+        _refreshWithClearCacheWhenFetchFailsAndContinueWhenError = { (clearCacheWhenFetchFails, continueWhenError) in
+            inner.refresh(clearCacheWhenFetchFails: clearCacheWhenFetchFails, continueWhenError: continueWhenError)
         }
         _requestAdditional = {
             inner.requestAdditional()
         }
-        _requestAdditionalWithFetchAtError = { fetchOnError in
-            inner.requestAdditional(fetchAtError: fetchOnError)
+        _requestAdditionalWithContinueWhenError = { continueWhenError in
+            inner.requestAdditional(continueWhenError: continueWhenError)
         }
         _update = { newData in
             inner.update(newData: newData)
@@ -73,16 +77,20 @@ public struct AnyPagingStoreFlowable<KEY: Hashable, DATA>: PagingStoreFlowable {
         _validate()
     }
 
-    public func request() -> AnyPublisher<Void, Never> {
-        _request()
+    public func refresh() -> AnyPublisher<Void, Never> {
+        _refresh()
+    }
+
+    public func refresh(clearCacheWhenFetchFails: Bool, continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+        _refreshWithClearCacheWhenFetchFailsAndContinueWhenError(clearCacheWhenFetchFails, continueWhenError)
     }
 
     public func requestAdditional() -> AnyPublisher<Void, Never> {
         _requestAdditional()
     }
 
-    public func requestAdditional(fetchAtError: Bool) -> AnyPublisher<Void, Never> {
-        _requestAdditionalWithFetchAtError(fetchAtError)
+    public func requestAdditional(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+        _requestAdditionalWithContinueWhenError(continueWhenError)
     }
 
     public func update(newData: [DATA]?) -> AnyPublisher<Void, Never> {

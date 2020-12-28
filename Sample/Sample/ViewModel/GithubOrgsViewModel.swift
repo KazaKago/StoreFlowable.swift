@@ -15,10 +15,7 @@ final class GithubOrgsViewModel : ObservableObject {
     @Published var isAdditionalLoading: Bool = false
     @Published var mainError: Error?
     @Published var additionalError: Error?
-    @Published var refreshingError: Error?
-    @Published var isShowRefreshingError: Bool = false
     private let githubRepository = GithubRepository()
-    private var shouldNoticeErrorOnNextState: Bool = false
     private var cancellableSet = Set<AnyCancellable>()
 
     func initialize() {
@@ -27,29 +24,28 @@ final class GithubOrgsViewModel : ObservableObject {
     }
 
     func request() {
-        shouldNoticeErrorOnNextState = true
-        githubRepository.requestOrgs()
+        githubRepository.refreshOrgs()
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     func retry() {
-        githubRepository.requestOrgs()
+        githubRepository.refreshOrgs()
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     func requestAdditional() {
-        githubRepository.requestAdditionalOrgs(fetchAtError: false)
+        githubRepository.requestAdditionalOrgs(continueWhenError: false)
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     func retryAdditional() {
-        githubRepository.requestAdditionalOrgs(fetchAtError: true)
+        githubRepository.requestAdditionalOrgs(continueWhenError: true)
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
@@ -61,7 +57,6 @@ final class GithubOrgsViewModel : ObservableObject {
             .sink { state in
                 state.doAction(
                     onFixed: {
-                        self.shouldNoticeErrorOnNextState = false
                         state.stateContent.doAction(
                             onExist: { value in
                                 self.githubOrgs = value
@@ -98,11 +93,6 @@ final class GithubOrgsViewModel : ObservableObject {
                         )
                     },
                     onError: { error in
-                        if self.shouldNoticeErrorOnNextState {
-                            self.refreshingError = error
-                            self.isShowRefreshingError = true
-                        }
-                        self.shouldNoticeErrorOnNextState = false
                         state.stateContent.doAction(
                             onExist: { value in
                                 self.githubOrgs = value
