@@ -19,7 +19,7 @@ public extension PagingStoreFlowable {
 
     func getOrNil(type: AsDataType = .mix) -> AnyPublisher<[DATA]?, Never> {
         get(type: type)
-            .tryMap { data -> [DATA]? in
+            .tryMap { data in
                 data
             }
             .replaceError(with: nil)

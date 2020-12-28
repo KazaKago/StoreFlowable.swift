@@ -28,10 +28,6 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
         )
     }
 
-    func asFlow() -> AnyPublisher<FlowableState<DATA>, Never> {
-        asFlow(forceRefresh: false)
-    }
-
     func asFlow(forceRefresh: Bool) -> AnyPublisher<FlowableState<DATA>, Never> {
         dataSelector.doStateAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: false)
             .flatMap { _ in
@@ -47,10 +43,6 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
                 return dataState.mapState(stateContent: stateContent)
             }
             .eraseToAnyPublisher()
-    }
-
-    func get() -> AnyPublisher<DATA, Error> {
-        get(type: .mix)
     }
 
     func get(type: AsDataType) -> AnyPublisher<DATA, Error> {
@@ -100,10 +92,6 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
 
     func validate() -> AnyPublisher<Void, Never> {
         dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true)
-    }
-
-    func refresh() -> AnyPublisher<Void, Never> {
-        refresh(clearCacheWhenFetchFails: true, continueWhenError: true)
     }
 
     func refresh(clearCacheWhenFetchFails: Bool, continueWhenError: Bool) -> AnyPublisher<Void, Never> {

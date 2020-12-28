@@ -28,10 +28,6 @@ struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
         )
     }
 
-    func asFlow() -> AnyPublisher<FlowableState<[DATA]>, Never> {
-        asFlow(forceRefresh: false)
-    }
-
     func asFlow(forceRefresh: Bool) -> AnyPublisher<FlowableState<[DATA]>, Never> {
         dataSelector.doStateAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: false, additionalRequest: false)
             .flatMap { _ in
@@ -47,10 +43,6 @@ struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
                 return dataState.mapState(stateContent: stateContent)
             }
             .eraseToAnyPublisher()
-    }
-
-    func get() -> AnyPublisher<[DATA], Error> {
-        get(type: .mix)
     }
 
     func get(type: AsDataType) -> AnyPublisher<[DATA], Error> {
@@ -102,16 +94,8 @@ struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
         dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, additionalRequest: false)
     }
 
-    func refresh() -> AnyPublisher<Void, Never> {
-        refresh(clearCacheWhenFetchFails: true, continueWhenError: true)
-    }
-
     func refresh(clearCacheWhenFetchFails: Bool, continueWhenError: Bool) -> AnyPublisher<Void, Never> {
         dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: clearCacheWhenFetchFails, continueWhenError: continueWhenError, awaitFetching: true, additionalRequest: false)
-    }
-
-    func requestAdditional() -> AnyPublisher<Void, Never> {
-        requestAdditional(continueWhenError: true)
     }
 
     func requestAdditional(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
