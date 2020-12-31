@@ -13,7 +13,7 @@ struct GithubRepository {
 
     func followMeta() -> AnyPublisher<State<GithubMeta>, Never> {
         let githubMetaFlowable = GithubMetaResponder().create()
-        return githubMetaFlowable.asFlow()
+        return githubMetaFlowable.publish()
     }
 
     func refreshMeta() -> AnyPublisher<Void, Never> {
@@ -23,7 +23,7 @@ struct GithubRepository {
 
     func followOrgs() -> AnyPublisher<State<[GithubOrg]>, Never> {
         let githubOrgsFlowable = GithubOrgsResponder().create()
-        return githubOrgsFlowable.asFlow()
+        return githubOrgsFlowable.publish()
     }
 
     func refreshOrgs() -> AnyPublisher<Void, Never> {
@@ -38,7 +38,7 @@ struct GithubRepository {
 
     func followUser(userName: String) -> AnyPublisher<State<GithubUser>, Never> {
         let githubUserFlowable = GithubUserResponder(userName: userName).create()
-        return githubUserFlowable.asFlow()
+        return githubUserFlowable.publish()
     }
 
     func refreshUser(userName: String) -> AnyPublisher<Void, Never> {
@@ -48,7 +48,7 @@ struct GithubRepository {
 
     func followRepos(userName: String) -> AnyPublisher<State<[GithubRepo]>, Never> {
         let githubReposFlowable = GithubReposResponder(userName: userName).create()
-        return githubReposFlowable.asFlow()
+        return githubReposFlowable.publish()
     }
 
     func refreshRepos(userName: String) -> AnyPublisher<Void, Never> {

@@ -13,7 +13,7 @@ public struct AnyPagingStoreFlowable<KEY: Hashable, DATA>: PagingStoreFlowable {
     public typealias KEY = KEY
     public typealias DATA = DATA
 
-    private let _asFlow: (_ forceRefresh: Bool) -> AnyPublisher<State<[DATA]>, Never>
+    private let _publish: (_ forceRefresh: Bool) -> AnyPublisher<State<[DATA]>, Never>
     private let _get: (_ type: AsDataType) -> AnyPublisher<[DATA], Error>
     private let _validate: () -> AnyPublisher<Void, Never>
     private let _refresh: (_ clearCacheWhenFetchFails: Bool, _ continueWhenError: Bool) -> AnyPublisher<Void, Never>
@@ -21,8 +21,8 @@ public struct AnyPagingStoreFlowable<KEY: Hashable, DATA>: PagingStoreFlowable {
     private let _update: (_ newData: [DATA]?) -> AnyPublisher<Void, Never>
 
     init<INNER: PagingStoreFlowable>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
-        _asFlow = { forceRefresh in
-            inner.asFlow(forceRefresh: forceRefresh)
+        _publish = { forceRefresh in
+            inner.publish(forceRefresh: forceRefresh)
         }
         _get = { type in
             inner.get(type: type)
@@ -41,8 +41,8 @@ public struct AnyPagingStoreFlowable<KEY: Hashable, DATA>: PagingStoreFlowable {
         }
     }
 
-    public func asFlow(forceRefresh: Bool) -> AnyPublisher<State<[DATA]>, Never> {
-        _asFlow(forceRefresh)
+    public func publish(forceRefresh: Bool) -> AnyPublisher<State<[DATA]>, Never> {
+        _publish(forceRefresh)
     }
 
     public func get(type: AsDataType) -> AnyPublisher<[DATA], Error> {

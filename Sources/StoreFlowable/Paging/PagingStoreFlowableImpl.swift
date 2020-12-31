@@ -28,7 +28,7 @@ struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
         )
     }
 
-    func asFlow(forceRefresh: Bool) -> AnyPublisher<State<[DATA]>, Never> {
+    func publish(forceRefresh: Bool) -> AnyPublisher<State<[DATA]>, Never> {
         dataSelector.doStateAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: false, additionalRequest: false)
             .flatMap { _ in
                 storeFlowableResponder.flowableDataStateManager.getFlow(key: storeFlowableResponder.key)

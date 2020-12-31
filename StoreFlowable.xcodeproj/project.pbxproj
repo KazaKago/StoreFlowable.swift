@@ -43,7 +43,7 @@
 		E38393BC2599B4CB0021FB76 /* FlowStateMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38393BB2599B4CB0021FB76 /* FlowStateMapper.swift */; };
 		E38393C62599BBD40021FB76 /* StateContentZipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38393C52599BBD40021FB76 /* StateContentZipper.swift */; };
 		E38393D42599C1BE0021FB76 /* StateZipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38393D32599C1BE0021FB76 /* StateZipper.swift */; };
-		E38393E62599C4540021FB76 /* FlowStateCombiner.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38393E52599C4540021FB76 /* FlowStateCombiner.swift */; };
+		E38393E62599C4540021FB76 /* FlowStateZipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38393E52599C4540021FB76 /* FlowStateZipper.swift */; };
 		E3C052F42593343100DB555B /* PagingCacheDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C052F32593343100DB555B /* PagingCacheDataManager.swift */; };
 		E3C052FE2593348100DB555B /* AnyPagingCacheDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C052FD2593348100DB555B /* AnyPagingCacheDataManager.swift */; };
 		E3C053042593352800DB555B /* PagingOriginDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C053032593352800DB555B /* PagingOriginDataManager.swift */; };
@@ -104,7 +104,7 @@
 		E38393BB2599B4CB0021FB76 /* FlowStateMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowStateMapper.swift; sourceTree = "<group>"; };
 		E38393C52599BBD40021FB76 /* StateContentZipper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateContentZipper.swift; sourceTree = "<group>"; };
 		E38393D32599C1BE0021FB76 /* StateZipper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateZipper.swift; sourceTree = "<group>"; };
-		E38393E52599C4540021FB76 /* FlowStateCombiner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowStateCombiner.swift; sourceTree = "<group>"; };
+		E38393E52599C4540021FB76 /* FlowStateZipper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowStateZipper.swift; sourceTree = "<group>"; };
 		E3C052F32593343100DB555B /* PagingCacheDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingCacheDataManager.swift; sourceTree = "<group>"; };
 		E3C052FD2593348100DB555B /* AnyPagingCacheDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyPagingCacheDataManager.swift; sourceTree = "<group>"; };
 		E3C053032593352800DB555B /* PagingOriginDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingOriginDataManager.swift; sourceTree = "<group>"; };
@@ -156,7 +156,7 @@
 				E38393D32599C1BE0021FB76 /* StateZipper.swift */,
 				E38393C52599BBD40021FB76 /* StateContentZipper.swift */,
 				E38393BB2599B4CB0021FB76 /* FlowStateMapper.swift */,
-				E38393E52599C4540021FB76 /* FlowStateCombiner.swift */,
+				E38393E52599C4540021FB76 /* FlowStateZipper.swift */,
 				E3D61B82257E3C58005FC400 /* NoSuchElementError.swift */,
 			);
 			path = Core;
@@ -380,7 +380,7 @@
 				E3D22F7225939CD300CF4E36 /* PagingStoreFlowableExtension.swift in Sources */,
 				E3D61B83257E3C58005FC400 /* NoSuchElementError.swift in Sources */,
 				E3D22F7E25939DDB00CF4E36 /* AnyPagingStoreFlowableResponder.swift in Sources */,
-				E38393E62599C4540021FB76 /* FlowStateCombiner.swift in Sources */,
+				E38393E62599C4540021FB76 /* FlowStateZipper.swift in Sources */,
 				E38393D42599C1BE0021FB76 /* StateZipper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
