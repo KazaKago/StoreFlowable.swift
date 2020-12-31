@@ -63,6 +63,7 @@ Put the type you want to use as a key in `<KEY: Hashable>`. If you don't need th
 ```swift
 class UserStateManager: FlowableDataStateManager<UserId> {
     static let shared = UserStateManager()
+    private override init() {}
 }
 ```
 
@@ -279,6 +280,7 @@ An example is shown below.
 ```swift
 class UserListStateManager: FlowableDataStateManager<UnitHash> {
     static let shared = UserListStateManager()
+    private override init() {}
 }
 ```
 ```swift

@@ -9,5 +9,9 @@ import Foundation
 import StoreFlowable
 
 class GithubMetaStateManager: FlowableDataStateManager<UnitHash> {
+
     static let shared = GithubMetaStateManager()
+
+    private override init() {
+    }
 }

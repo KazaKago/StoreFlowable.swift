@@ -9,5 +9,9 @@ import Foundation
 import StoreFlowable
 
 class GithubUserStateManager: FlowableDataStateManager<String> {
+
     static let shared = GithubUserStateManager()
+
+    private override init() {
+    }
 }
