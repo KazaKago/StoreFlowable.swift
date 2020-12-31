@@ -46,7 +46,8 @@ struct GithubUserResponder : StoreFlowableResponder {
     func needRefresh(data: GithubUser) -> AnyPublisher<Bool, Never> {
         Future { promise in
             if let createdAt = GithubInMemoryCache.userCacheCreatedAt[key] {
-                promise(.success(createdAt + GithubUserResponder.EXPIRE_SECONDS < Date()))
+                let expiredAt = createdAt + GithubUserResponder.EXPIRE_SECONDS
+                promise(.success(expiredAt < Date()))
             } else {
                 promise(.success(true))
             }

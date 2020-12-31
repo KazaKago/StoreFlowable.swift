@@ -42,7 +42,8 @@ struct GithubMetaResponder : StoreFlowableResponder {
     func needRefresh(data: GithubMeta) -> AnyPublisher<Bool, Never> {
         Future { promise in
             if let createdAt = GithubInMemoryCache.metaCacheCreatedAt {
-                promise(.success(createdAt + GithubMetaResponder.EXPIRE_SECONDS < Date()))
+                let expiredAt = createdAt + GithubMetaResponder.EXPIRE_SECONDS
+                promise(.success(expiredAt < Date()))
             } else {
                 promise(.success(true))
             }
