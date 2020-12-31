@@ -199,16 +199,13 @@ This example accesses the [Github API](https://docs.github.com/en/free-pro-team@
 
 ## Advanced Usage
 
-### Get data without [State](Sources/StoreFlowable/Core/State.swift) class
+### Get data without [State](Sources/StoreFlowable/Core/State.swift) enum
 
-If you don't need [`State`](Sources/StoreFlowable/Core/State.swift) class, you can use [`get()`](Sources/StoreFlowable/StoreFlowable.swift) or [`getOrNil()`](Sources/StoreFlowable/StoreFlowableExtension.swift).  
+If you don't need [`State`](Sources/StoreFlowable/Core/State.swift) enum, you can use [`get()`](Sources/StoreFlowable/StoreFlowable.swift) or [`getOrNil()`](Sources/StoreFlowable/StoreFlowableExtension.swift).  
 [`get()`](Sources/StoreFlowable/StoreFlowable.swift) throws an Error if there is no valid cache and fails to get new data.  
 [`getOrNil()`](Sources/StoreFlowable/StoreFlowableExtension.swift) returns nil instead of Error.  
 
 ```swift
-public protocol StoreFlowable {
-    func get(type: AsDataType) -> AnyPublisher<DATA, Error>
-}
 public extension StoreFlowable {
     func get(type: AsDataType = .mix) -> AnyPublisher<DATA, Error>
 }
@@ -234,9 +231,6 @@ However, use [`get()`](Sources/StoreFlowable/StoreFlowable.swift) or [`getOrNil(
 If you want to ignore the cache and get new data, add `forceRefresh` parameter to [`publish()`](Sources/StoreFlowable/StoreFlowable.swift).  
 
 ```swift
-public protocol StoreFlowable {
-    func publish(forceRefresh: Bool) -> AnyPublisher<State<DATA>, Never>
-}
 public extension StoreFlowable {
     func publish(forceRefresh: Bool = false) -> AnyPublisher<State<DATA>, Never>
 }
@@ -245,9 +239,6 @@ public extension StoreFlowable {
 Or you can use [`refresh()`](Sources/StoreFlowable/StoreFlowable.swift) if you are already observing the `Publisher`.  
 
 ```swift
-public protocol StoreFlowable {
-    func refresh(clearCacheWhenFetchFails: Bool, continueWhenError: Bool) -> AnyPublisher<Void, Never>
-}
 public extension StoreFlowable {
     func refresh(clearCacheWhenFetchFails: Bool = true, continueWhenError: Bool = true) -> AnyPublisher<Void, Never>
 }
