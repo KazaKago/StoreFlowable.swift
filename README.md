@@ -22,11 +22,11 @@ Created according to the following 5 policies.
 
 The following is the class structure of Repository pattern using this library.  
 
-![https://user-images.githubusercontent.com/7742104/100694803-2235cf80-33d3-11eb-917c-a2ad24bd1c32.jpg](https://user-images.githubusercontent.com/7742104/100694803-2235cf80-33d3-11eb-917c-a2ad24bd1c32.jpg)
+![https://user-images.githubusercontent.com/7742104/103459433-bc7e8f80-4d52-11eb-8c3d-c885d76565fc.jpg](https://user-images.githubusercontent.com/7742104/103459433-bc7e8f80-4d52-11eb-8c3d-c885d76565fc.jpg)
 
 The following is an example of screen display using [`State`](Sources/StoreFlowable/Core/State.swift).
 
-![https://user-images.githubusercontent.com/7742104/100700024-c9206880-33df-11eb-8026-8d0ff3b42c7b.jpg](https://user-images.githubusercontent.com/7742104/100700024-c9206880-33df-11eb-8026-8d0ff3b42c7b.jpg)
+![https://user-images.githubusercontent.com/7742104/103459431-bab4cc00-4d52-11eb-983a-2087dd3100a0.jpg](https://user-images.githubusercontent.com/7742104/103459431-bab4cc00-4d52-11eb-983a-2087dd3100a0.jpg)
 
 ## Requirement
 
