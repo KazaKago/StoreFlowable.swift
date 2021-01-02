@@ -202,7 +202,7 @@ This example accesses the [Github API](https://docs.github.com/en/free-pro-team@
 
 ### Get data without [State](Sources/StoreFlowable/Core/State.swift) enum
 
-If you don't need [`State`](Sources/StoreFlowable/Core/State.swift) enum, you can use [`get()`](Sources/StoreFlowable/StoreFlowable.swift) or [`getOrNil()`](Sources/StoreFlowable/StoreFlowableExtension.swift).  
+If you don't need value flow and [`State`](Sources/StoreFlowable/Core/State.swift) enum, you can use [`get()`](Sources/StoreFlowable/StoreFlowable.swift) or [`getOrNil()`](Sources/StoreFlowable/StoreFlowableExtension.swift).  
 [`get()`](Sources/StoreFlowable/StoreFlowable.swift) throws an Error if there is no valid cache and fails to get new data.  
 [`getOrNil()`](Sources/StoreFlowable/StoreFlowableExtension.swift) returns nil instead of Error.  
 
