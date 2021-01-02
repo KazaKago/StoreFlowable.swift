@@ -39,10 +39,10 @@ struct GithubApi {
             .eraseToAnyPublisher()
     }
 
-    func getRepos(userName: String, since: Int?, perPage: Int) -> AnyPublisher<[GithubRepo], Error> {
+    func getRepos(userName: String, page: Int, perPage: Int) -> AnyPublisher<[GithubRepo], Error> {
         var queryItems: [URLQueryItem] = []
         queryItems.append(URLQueryItem(name: "per_page", value: perPage.description))
-        if let since = since { queryItems.append(URLQueryItem(name: "since", value: since.description)) }
+        queryItems.append(URLQueryItem(name: "page", value: page.description))
         var urlComponents = URLComponents(url: baseApiUrl.appendingPathComponent("users/\(userName)/repos"), resolvingAgainstBaseURL: true)!
         urlComponents.queryItems = queryItems
         return AF.request((try! urlComponents.asURL()).toUrlRequest())

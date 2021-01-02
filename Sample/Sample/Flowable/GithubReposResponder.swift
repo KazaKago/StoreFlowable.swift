@@ -41,8 +41,8 @@ struct GithubReposResponder : PagingStoreFlowableResponder {
     }
 
     func fetchOrigin(data: [GithubRepo]?, additionalRequest: Bool) -> AnyPublisher<[GithubRepo], Error> {
-        let since = additionalRequest ? data?.last?.id : nil
-        return githubApi.getRepos(userName: key, since: since, perPage: GithubReposResponder.PER_PAGE)
+        let page = additionalRequest ? ((data?.count ?? 0) / GithubReposResponder.PER_PAGE + 1) : 1
+        return githubApi.getRepos(userName: key, page: page, perPage: GithubReposResponder.PER_PAGE)
     }
 
     func needRefresh(data: [GithubRepo]) -> AnyPublisher<Bool, Never> {

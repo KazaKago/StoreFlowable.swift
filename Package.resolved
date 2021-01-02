@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "CombineAsync",
+        "repositoryURL": "https://github.com/rizumita/CombineAsync.git",
+        "state": {
+          "branch": null,
+          "revision": "c2572b184829030cd377e5876dde4b17345f0c62",
+          "version": "0.1.5"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
