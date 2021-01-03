@@ -271,7 +271,7 @@ public protocol StoreFlowable {
 
 This library includes Paging support.  
 
-<img src="https://user-images.githubusercontent.com/7742104/100849417-e29be000-34c5-11eb-8dba-0149e07d5017.gif" width="280"> <img src="https://user-images.githubusercontent.com/7742104/100849432-e7f92a80-34c5-11eb-918f-377ac6c4eb9e.gif" width="280">
+<img src="(https://user-images.githubusercontent.com/7742104/103469911-75be8300-4dae-11eb-924e-af509abd273a.gif" width="280"> <img src="https://user-images.githubusercontent.com/7742104/103469914-7a833700-4dae-11eb-8ff8-98de478f20f8.gif" width="280">
 
 Inherit [`PagingStoreFlowableResponder<KEY: Hashable, DATA>`](Sources/StoreFlowable/Paging/PagingStoreFlowable.swift) instead of [`StoreFlowableResponder<KEY: Hashable, DATA>`](Sources/StoreFlowable/StoreFlowableResponder.swift).
 
