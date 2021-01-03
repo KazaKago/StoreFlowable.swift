@@ -57,7 +57,7 @@ final class GithubOrgsViewModel : ObservableObject {
             .sink { state in
                 state.doAction(
                     onFixed: {
-                        state.stateContent.doAction(
+                        state.content.doAction(
                             onExist: { value in
                                 self.githubOrgs = value
                                 self.isMainLoading = false
@@ -75,7 +75,7 @@ final class GithubOrgsViewModel : ObservableObject {
                         )
                     },
                     onLoading: {
-                        state.stateContent.doAction(
+                        state.content.doAction(
                             onExist: { value in
                                 self.githubOrgs = value
                                 self.isMainLoading = false
@@ -93,7 +93,7 @@ final class GithubOrgsViewModel : ObservableObject {
                         )
                     },
                     onError: { error in
-                        state.stateContent.doAction(
+                        state.content.doAction(
                             onExist: { value in
                                 self.githubOrgs = value
                                 self.isMainLoading = false

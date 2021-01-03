@@ -13,12 +13,12 @@ public extension Publisher {
     func mapContent<A, Z>(_ transform: @escaping (A) -> Z) -> Publishers.Map<Self, State<Z>> where Self.Output == State<A> {
         map { input in
             switch input {
-            case .fixed(let stateContent):
-                return .fixed(stateContent: stateContent.mapContent(transform))
-            case .loading(let stateContent):
-                return .loading(stateContent: stateContent.mapContent(transform))
-            case .error(let stateContent, let rawError):
-                return .error(stateContent: stateContent.mapContent(transform), rawError: rawError)
+            case .fixed(let content):
+                return .fixed(content: content.mapContent(transform))
+            case .loading(let content):
+                return .loading(content: content.mapContent(transform))
+            case .error(let content, let rawError):
+                return .error(content: content.mapContent(transform), rawError: rawError)
             }
         }
     }

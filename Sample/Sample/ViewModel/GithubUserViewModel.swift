@@ -46,7 +46,7 @@ final class GithubUserViewModel : ObservableObject {
             .sink { state in
                 state.doAction(
                     onFixed: {
-                        state.stateContent.doAction(
+                        state.content.doAction(
                             onExist: { value in
                                 self.githubUser = value
                                 self.isLoading = false
@@ -60,7 +60,7 @@ final class GithubUserViewModel : ObservableObject {
                         )
                     },
                     onLoading: {
-                        state.stateContent.doAction(
+                        state.content.doAction(
                             onExist: { value in
                                 self.githubUser = value
                                 self.isLoading = true
@@ -74,7 +74,7 @@ final class GithubUserViewModel : ObservableObject {
                         )
                     },
                     onError: { error in
-                        state.stateContent.doAction(
+                        state.content.doAction(
                             onExist: { value in
                                 self.githubUser = value
                                 self.isLoading = false

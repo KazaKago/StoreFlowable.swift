@@ -11,32 +11,32 @@ public extension State {
 
     func zip<B, Z>(_ otherState: State<B>, _ transform: (_ content1: T, _ content2: B) -> Z) -> State<Z> {
         switch self {
-        case .fixed(let stateContent):
+        case .fixed(let content):
             switch otherState {
-            case .fixed(let otherStateContent):
-                return .fixed(stateContent: stateContent.zip(otherStateContent, transform))
-            case .loading(let otherStateContent):
-                return .loading(stateContent: stateContent.zip(otherStateContent, transform))
-            case .error(let otherStateContent, let otherRawError):
-                return .error(stateContent: stateContent.zip(otherStateContent, transform), rawError: otherRawError)
+            case .fixed(let otherContent):
+                return .fixed(content: content.zip(otherContent, transform))
+            case .loading(let otherContent):
+                return .loading(content: content.zip(otherContent, transform))
+            case .error(let otherContent, let otherRawError):
+                return .error(content: content.zip(otherContent, transform), rawError: otherRawError)
             }
-        case .loading(let stateContent):
+        case .loading(let content):
             switch otherState {
-            case .fixed(let otherStateContent):
-                return .loading(stateContent: stateContent.zip(otherStateContent, transform))
-            case .loading(let otherStateContent):
-                return .loading(stateContent: stateContent.zip(otherStateContent, transform))
-            case .error(let otherStateContent, let rawError):
-                return .error(stateContent: stateContent.zip(otherStateContent, transform), rawError: rawError)
+            case .fixed(let otherContent):
+                return .loading(content: content.zip(otherContent, transform))
+            case .loading(let otherContent):
+                return .loading(content: content.zip(otherContent, transform))
+            case .error(let otherContent, let rawError):
+                return .error(content: content.zip(otherContent, transform), rawError: rawError)
             }
-        case .error(let stateContent, let rawError):
+        case .error(let content, let rawError):
             switch otherState {
-            case .fixed(let otherStateContent):
-                return .error(stateContent: stateContent.zip(otherStateContent, transform), rawError: rawError)
-            case .loading(let otherStateContent):
-                return .error(stateContent: stateContent.zip(otherStateContent, transform), rawError: rawError)
-            case .error(let otherStateContent, _):
-                return .error(stateContent: stateContent.zip(otherStateContent, transform), rawError: rawError)
+            case .fixed(let otherContent):
+                return .error(content: content.zip(otherContent, transform), rawError: rawError)
+            case .loading(let otherContent):
+                return .error(content: content.zip(otherContent, transform), rawError: rawError)
+            case .error(let otherContent, _):
+                return .error(content: content.zip(otherContent, transform), rawError: rawError)
             }
         }
     }

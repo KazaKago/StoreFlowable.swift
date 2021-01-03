@@ -155,7 +155,7 @@ private func subscribe(userId: UserId) {
         .sink { state in
             state.doAction(
                 onFixed: {
-                    state.stateContent.doAction(
+                    state.content.doAction(
                         onExist: { value in
                             ...
                         },
@@ -165,7 +165,7 @@ private func subscribe(userId: UserId) {
                     )
                 },
                 onLoading: {
-                    state.stateContent.doAction(
+                    state.content.doAction(
                         onExist: { value in
                             ...
                         },
@@ -175,7 +175,7 @@ private func subscribe(userId: UserId) {
                     )
                 },
                 onError: { error in
-                    state.stateContent.doAction(
+                    state.content.doAction(
                         onExist: { value in
                             ...
                         },

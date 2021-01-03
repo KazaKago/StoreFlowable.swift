@@ -39,8 +39,8 @@ struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
                 }
             }
             .map { (dataState, data) in
-                let stateContent = StateContent.wrap(rawContent: data)
-                return dataState.mapState(stateContent: stateContent)
+                let content = StateContent.wrap(rawContent: data)
+                return dataState.mapState(content: content)
             }
             .eraseToAnyPublisher()
     }

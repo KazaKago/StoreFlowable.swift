@@ -62,7 +62,7 @@ final class GithubReposViewModel : ObservableObject {
             .sink { state in
                 state.doAction(
                     onFixed: {
-                        state.stateContent.doAction(
+                        state.content.doAction(
                             onExist: { value in
                                 self.githubRepos = value
                                 self.isMainLoading = false
@@ -80,7 +80,7 @@ final class GithubReposViewModel : ObservableObject {
                         )
                     },
                     onLoading: {
-                        state.stateContent.doAction(
+                        state.content.doAction(
                             onExist: { value in
                                 self.githubRepos = value
                                 self.isMainLoading = false
@@ -98,7 +98,7 @@ final class GithubReposViewModel : ObservableObject {
                         )
                     },
                     onError: { error in
-                        state.stateContent.doAction(
+                        state.content.doAction(
                             onExist: { value in
                                 self.githubRepos = value
                                 self.isMainLoading = false

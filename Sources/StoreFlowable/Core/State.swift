@@ -8,14 +8,14 @@
 import Foundation
 
 public enum State<T> {
-    case fixed(stateContent: StateContent<T>)
-    case loading(stateContent: StateContent<T>)
-    case error(stateContent: StateContent<T>, rawError: Error)
+    case fixed(content: StateContent<T>)
+    case loading(content: StateContent<T>)
+    case error(content: StateContent<T>, rawError: Error)
 
-    public var stateContent: StateContent<T> {
+    public var content: StateContent<T> {
         switch self {
-        case .fixed(let stateContent), .loading(let stateContent), .error(let stateContent, _):
-            return stateContent
+        case .fixed(let content), .loading(let content), .error(let content, _):
+            return content
         }
     }
 

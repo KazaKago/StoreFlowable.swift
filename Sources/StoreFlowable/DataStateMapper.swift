@@ -8,14 +8,14 @@
 import Foundation
 
 extension DataState {
-    func mapState<DATA>(stateContent: StateContent<DATA>) -> State<DATA> {
+    func mapState<DATA>(content: StateContent<DATA>) -> State<DATA> {
         switch (self) {
         case .fixed:
-            return .fixed(stateContent: stateContent)
+            return .fixed(content: content)
         case .loading:
-            return .loading(stateContent: stateContent)
+            return .loading(content: content)
         case .error(let rawError):
-            return .error(stateContent: stateContent, rawError: rawError)
+            return .error(content: content, rawError: rawError)
         }
     }
 }

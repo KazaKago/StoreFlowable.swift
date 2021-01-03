@@ -41,7 +41,7 @@ final class GithubMetaViewModel : ObservableObject {
             .sink { state in
                 state.doAction(
                     onFixed: {
-                        state.stateContent.doAction(
+                        state.content.doAction(
                             onExist: { value in
                                 self.githubMeta = value
                                 self.isLoading = false
@@ -55,7 +55,7 @@ final class GithubMetaViewModel : ObservableObject {
                         )
                     },
                     onLoading: {
-                        state.stateContent.doAction(
+                        state.content.doAction(
                             onExist: { value in
                                 self.githubMeta = value
                                 self.isLoading = true
@@ -69,7 +69,7 @@ final class GithubMetaViewModel : ObservableObject {
                         )
                     },
                     onError: { error in
-                        state.stateContent.doAction(
+                        state.content.doAction(
                             onExist: { value in
                                 self.githubMeta = value
                                 self.isLoading = false
