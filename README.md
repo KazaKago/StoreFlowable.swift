@@ -1,6 +1,7 @@
 # StoreFlowable.swift
 
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/kazakago/storeflowable.swift)
+[![Test](https://github.com/KazaKago/StoreFlowable.swift/workflows/Test/badge.svg)](https://github.com/KazaKago/StoreFlowable.swift/actions?query=workflow%3ATest)
 [![license](https://img.shields.io/github/license/kazakago/storeflowable.swift.svg)](LICENSE)
 
 [Repository pattern](https://msdn.microsoft.com/en-us/library/ff649690.aspx) support library for Swift with Combine Framework.  
