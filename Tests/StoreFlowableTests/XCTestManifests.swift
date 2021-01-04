@@ -7,7 +7,7 @@ public func allTests() -> [XCTestCaseEntry] {
         testCase(StateZipperTest.allTests),
         testCase(StateContentTests.allTests),
         testCase(StateContentZipperTests.allTests),
-//        testCase(FlowStateMapperTests.allTests),
+        testCase(FlowStateMapperTests.allTests),
         testCase(FlowStateZipperTests.allTests),
         testCase(DataSelectorTest.allTests),
         testCase(FlowableDataStateManagerTests.allTests),
