@@ -20,6 +20,15 @@
         }
       },
       {
+        "package": "CombineExpectations",
+        "repositoryURL": "https://github.com/groue/CombineExpectations.git",
+        "state": {
+          "branch": null,
+          "revision": "989a92221899929ab8347a5878aa2b16db8b81ca",
+          "version": "0.6.0"
+        }
+      },
+      {
         "package": "Kingfisher",
         "repositoryURL": "https://github.com/onevcat/Kingfisher",
         "state": {

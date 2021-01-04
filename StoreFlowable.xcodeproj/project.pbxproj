@@ -23,12 +23,21 @@
 /* Begin PBXBuildFile section */
 		E308A93525728CC90059EF00 /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = E308A93425728CC90059EF00 /* State.swift */; };
 		E308A93B25728EA30059EF00 /* StateContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E308A93A25728EA30059EF00 /* StateContent.swift */; };
+		E323C2F225A2A79C0095A7CD /* FlowStateZipperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E323C2F125A2A79C0095A7CD /* FlowStateZipperTests.swift */; };
+		E323C31025A2B97F0095A7CD /* DataSelectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E323C30F25A2B97F0095A7CD /* DataSelectorTests.swift */; };
+		E323C31B25A2F9500095A7CD /* CombineExpectations in Frameworks */ = {isa = PBXBuildFile; productRef = E323C31A25A2F9500095A7CD /* CombineExpectations */; };
+		E323C32125A3068A0095A7CD /* FlowableDataStateManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E323C32025A3068A0095A7CD /* FlowableDataStateManagerTests.swift */; };
 		E336D3C025823290001E8E6D /* StoreFlowableResponder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3BF25823290001E8E6D /* StoreFlowableResponder.swift */; };
 		E336D3CA25832922001E8E6D /* StoreFlowableImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3C925832922001E8E6D /* StoreFlowableImpl.swift */; };
 		E336D3D825832AA3001E8E6D /* AnyStoreFlowableResponder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3D725832AA3001E8E6D /* AnyStoreFlowableResponder.swift */; };
 		E336D3DE2583BA0F001E8E6D /* StoreFlowableExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3DD2583BA0F001E8E6D /* StoreFlowableExtension.swift */; };
 		E336D3E82583CC3E001E8E6D /* CombineAsync in Frameworks */ = {isa = PBXBuildFile; productRef = E3D61B5C257D1D16005FC400 /* CombineAsync */; };
 		E336D3EE2583D3EC001E8E6D /* AnyStoreFlowable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336D3ED2583D3EC001E8E6D /* AnyStoreFlowable.swift */; };
+		E34E082525A1C82900152947 /* StateContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34E082425A1C82900152947 /* StateContentTests.swift */; };
+		E34E083425A1CB2E00152947 /* StateContentZipperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34E083325A1CB2E00152947 /* StateContentZipperTests.swift */; };
+		E34E083A25A1F1F500152947 /* StateZipperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34E083925A1F1F500152947 /* StateZipperTests.swift */; };
+		E34E084425A2A40E00152947 /* FlowStateMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34E084325A2A40E00152947 /* FlowStateMapperTests.swift */; };
+		E3612E1625A1750A00E29EC2 /* StateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3612E1525A1750A00E29EC2 /* StateTests.swift */; };
 		E375344F257336AD0048EB33 /* FlowAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E375344E257336AD0048EB33 /* FlowAccessor.swift */; };
 		E375345D257337C80048EB33 /* DataState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E375345C257337C80048EB33 /* DataState.swift */; };
 		E3753463257338430048EB33 /* DataStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3753462257338430048EB33 /* DataStateManager.swift */; };
@@ -85,11 +94,19 @@
 /* Begin PBXFileReference section */
 		E308A93425728CC90059EF00 /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
 		E308A93A25728EA30059EF00 /* StateContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateContent.swift; sourceTree = "<group>"; };
+		E323C2F125A2A79C0095A7CD /* FlowStateZipperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowStateZipperTests.swift; sourceTree = "<group>"; };
+		E323C30F25A2B97F0095A7CD /* DataSelectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSelectorTests.swift; sourceTree = "<group>"; };
+		E323C32025A3068A0095A7CD /* FlowableDataStateManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowableDataStateManagerTests.swift; sourceTree = "<group>"; };
 		E336D3BF25823290001E8E6D /* StoreFlowableResponder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowableResponder.swift; sourceTree = "<group>"; };
 		E336D3C925832922001E8E6D /* StoreFlowableImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowableImpl.swift; sourceTree = "<group>"; };
 		E336D3D725832AA3001E8E6D /* AnyStoreFlowableResponder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyStoreFlowableResponder.swift; sourceTree = "<group>"; };
 		E336D3DD2583BA0F001E8E6D /* StoreFlowableExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFlowableExtension.swift; sourceTree = "<group>"; };
 		E336D3ED2583D3EC001E8E6D /* AnyStoreFlowable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyStoreFlowable.swift; sourceTree = "<group>"; };
+		E34E082425A1C82900152947 /* StateContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateContentTests.swift; sourceTree = "<group>"; };
+		E34E083325A1CB2E00152947 /* StateContentZipperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateContentZipperTests.swift; sourceTree = "<group>"; };
+		E34E083925A1F1F500152947 /* StateZipperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateZipperTests.swift; sourceTree = "<group>"; };
+		E34E084325A2A40E00152947 /* FlowStateMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowStateMapperTests.swift; sourceTree = "<group>"; };
+		E3612E1525A1750A00E29EC2 /* StateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateTests.swift; sourceTree = "<group>"; };
 		E375344E257336AD0048EB33 /* FlowAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowAccessor.swift; sourceTree = "<group>"; };
 		E375345C257337C80048EB33 /* DataState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataState.swift; sourceTree = "<group>"; };
 		E3753462257338430048EB33 /* DataStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStateManager.swift; sourceTree = "<group>"; };
@@ -142,12 +159,26 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_44 /* StoreFlowable.framework in Frameworks */,
+				E323C31B25A2F9500095A7CD /* CombineExpectations in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E34E082E25A1CA9E00152947 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				E3612E1525A1750A00E29EC2 /* StateTests.swift */,
+				E34E082425A1C82900152947 /* StateContentTests.swift */,
+				E34E083925A1F1F500152947 /* StateZipperTests.swift */,
+				E34E083325A1CB2E00152947 /* StateContentZipperTests.swift */,
+				E34E084325A2A40E00152947 /* FlowStateMapperTests.swift */,
+				E323C2F125A2A79C0095A7CD /* FlowStateZipperTests.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
 		E375348025733F9B0048EB33 /* Core */ = {
 			isa = PBXGroup;
 			children = (
@@ -191,6 +222,9 @@
 		OBJ_11 /* StoreFlowableTests */ = {
 			isa = PBXGroup;
 			children = (
+				E34E082E25A1CA9E00152947 /* Core */,
+				E323C30F25A2B97F0095A7CD /* DataSelectorTests.swift */,
+				E323C32025A3068A0095A7CD /* FlowableDataStateManagerTests.swift */,
 				OBJ_12 /* StoreFlowableTests.swift */,
 				OBJ_13 /* XCTestManifests.swift */,
 			);
@@ -290,6 +324,9 @@
 				OBJ_45 /* PBXTargetDependency */,
 			);
 			name = StoreFlowableTests;
+			packageProductDependencies = (
+				E323C31A25A2F9500095A7CD /* CombineExpectations */,
+			);
 			productName = StoreFlowableTests;
 			productReference = "StoreFlowable::StoreFlowableTests::Product" /* StoreFlowableTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -327,6 +364,7 @@
 			mainGroup = OBJ_5;
 			packageReferences = (
 				E3D61B5B257D1D16005FC400 /* XCRemoteSwiftPackageReference "CombineAsync" */,
+				E323C31925A2F9500095A7CD /* XCRemoteSwiftPackageReference "CombineExpectations" */,
 			);
 			productRefGroup = OBJ_14 /* Products */;
 			projectDirPath = "";
@@ -397,8 +435,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
+				E34E084425A2A40E00152947 /* FlowStateMapperTests.swift in Sources */,
+				E3612E1625A1750A00E29EC2 /* StateTests.swift in Sources */,
+				E323C2F225A2A79C0095A7CD /* FlowStateZipperTests.swift in Sources */,
+				E34E083A25A1F1F500152947 /* StateZipperTests.swift in Sources */,
+				E34E083425A1CB2E00152947 /* StateContentZipperTests.swift in Sources */,
+				E34E082525A1C82900152947 /* StateContentTests.swift in Sources */,
 				OBJ_41 /* StoreFlowableTests.swift in Sources */,
+				E323C32125A3068A0095A7CD /* FlowableDataStateManagerTests.swift in Sources */,
 				OBJ_42 /* XCTestManifests.swift in Sources */,
+				E323C31025A2B97F0095A7CD /* DataSelectorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -661,6 +707,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		E323C31925A2F9500095A7CD /* XCRemoteSwiftPackageReference "CombineExpectations" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/CombineExpectations.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.6.0;
+			};
+		};
 		E3D61B5B257D1D16005FC400 /* XCRemoteSwiftPackageReference "CombineAsync" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/rizumita/CombineAsync";
@@ -672,6 +726,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		E323C31A25A2F9500095A7CD /* CombineExpectations */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E323C31925A2F9500095A7CD /* XCRemoteSwiftPackageReference "CombineExpectations" */;
+			productName = CombineExpectations;
+		};
 		E3D61B5C257D1D16005FC400 /* CombineAsync */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E3D61B5B257D1D16005FC400 /* XCRemoteSwiftPackageReference "CombineAsync" */;

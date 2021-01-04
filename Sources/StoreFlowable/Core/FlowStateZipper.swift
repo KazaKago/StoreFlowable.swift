@@ -10,14 +10,14 @@ import Combine
 
 public extension Publisher {
 
-    func zipState<A, B, Z>(_ otherPublisher: AnyPublisher<State<B>, Self.Failure>, _ transform: @escaping (_ content1: A, _ content2: B) -> Z) -> AnyPublisher<State<Z>, Self.Failure> where Self.Output == State<A> {
+    func zipState<OTHER_1, RAW_SELF, RAW_1, OUTPUT>(_ otherPublisher: OTHER_1, _ transform: @escaping (_ content1: RAW_SELF, _ content2: RAW_1) -> OUTPUT) -> AnyPublisher<State<OUTPUT>, Self.Failure> where Self.Output == State<RAW_SELF>, OTHER_1 : Publisher, OTHER_1.Output == State<RAW_1>, Self.Failure == OTHER_1.Failure {
         zip(otherPublisher) { (state1, state2) in
             state1.zip(state2, transform)
         }
         .eraseToAnyPublisher()
     }
 
-    func zipState<A, B, C, Z>(_ otherPublisher1: AnyPublisher<State<B>, Self.Failure>, _ otherPublisher2: AnyPublisher<State<C>, Self.Failure>, _ transform: @escaping (_ content1: A, _ content2: B, _ content3: C) -> Z) -> AnyPublisher<State<Z>, Self.Failure> where Self.Output == State<A> {
+    func zipState<OTHER_1, OTHER_2, RAW_SELF, RAW_1, RAW_2, OUTPUT>(_ otherPublisher1: OTHER_1, _ otherPublisher2: OTHER_2, _ transform: @escaping (_ content1: RAW_SELF, _ content2: RAW_1, _ content3: RAW_2) -> OUTPUT) -> AnyPublisher<State<OUTPUT>, Self.Failure> where Self.Output == State<RAW_SELF>, OTHER_1 : Publisher, OTHER_1.Output == State<RAW_1>, Self.Failure == OTHER_1.Failure, OTHER_2 : Publisher, OTHER_2.Output == State<RAW_2>, Self.Failure == OTHER_2.Failure {
         zipState(otherPublisher1) { (state1, state2) in
             (state1, state2)
         }
@@ -27,7 +27,7 @@ public extension Publisher {
         .eraseToAnyPublisher()
     }
 
-    func zipState<A, B, C, D, Z>(_ otherPublisher1: AnyPublisher<State<B>, Self.Failure>, _ otherPublisher2: AnyPublisher<State<C>, Self.Failure>, _ otherPublisher3: AnyPublisher<State<D>, Self.Failure>, _ transform: @escaping (_ content1: A, _ content2: B, _ content3: C, _ content4: D) -> Z) -> AnyPublisher<State<Z>, Self.Failure> where Self.Output == State<A> {
+    func zipState<OTHER_1, OTHER_2, OTHER_3, RAW_SELF, RAW_1, RAW_2, RAW_3, OUTPUT>(_ otherPublisher1: OTHER_1, _ otherPublisher2: OTHER_2, _ otherPublisher3: OTHER_3, _ transform: @escaping (_ content1: RAW_SELF, _ content2: RAW_1, _ content3: RAW_2, _ content4: RAW_3) -> OUTPUT) -> AnyPublisher<State<OUTPUT>, Self.Failure> where Self.Output == State<RAW_SELF>, OTHER_1 : Publisher, OTHER_1.Output == State<RAW_1>, Self.Failure == OTHER_1.Failure, OTHER_2 : Publisher, OTHER_2.Output == State<RAW_2>, Self.Failure == OTHER_2.Failure, OTHER_3 : Publisher, OTHER_3.Output == State<RAW_3>, Self.Failure == OTHER_3.Failure {
         zipState(otherPublisher1) { (state1, state2) in
             (state1, state2)
         }
@@ -40,7 +40,7 @@ public extension Publisher {
         .eraseToAnyPublisher()
     }
 
-    func zipState<A, B, C, D, E, Z>(_ otherPublisher1: AnyPublisher<State<B>, Self.Failure>, _ otherPublisher2: AnyPublisher<State<C>, Self.Failure>, _ otherPublisher3: AnyPublisher<State<D>, Self.Failure>, _ otherPublisher4: AnyPublisher<State<E>, Self.Failure>, _ transform: @escaping (_ content1: A, _ content2: B, _ content3: C, _ content4: D, _ content5: E) -> Z) -> AnyPublisher<State<Z>, Self.Failure> where Self.Output == State<A> {
+    func zipState<OTHER_1, OTHER_2, OTHER_3, OTHER_4, RAW_SELF, RAW_1, RAW_2, RAW_3, RAW_4, OUTPUT>(_ otherPublisher1: OTHER_1, _ otherPublisher2: OTHER_2, _ otherPublisher3: OTHER_3, _ otherPublisher4: OTHER_4, _ transform: @escaping (_ content1: RAW_SELF, _ content2: RAW_1, _ content3: RAW_2, _ content4: RAW_3, _ content5: RAW_4) -> OUTPUT) -> AnyPublisher<State<OUTPUT>, Self.Failure> where Self.Output == State<RAW_SELF>, OTHER_1 : Publisher, OTHER_1.Output == State<RAW_1>, Self.Failure == OTHER_1.Failure, OTHER_2 : Publisher, OTHER_2.Output == State<RAW_2>, Self.Failure == OTHER_2.Failure, OTHER_3 : Publisher, OTHER_3.Output == State<RAW_3>, Self.Failure == OTHER_3.Failure, OTHER_4 : Publisher, OTHER_4.Output == State<RAW_4>, Self.Failure == OTHER_4.Failure {
         zipState(otherPublisher1) { (state1, state2) in
             (state1, state2)
         }
