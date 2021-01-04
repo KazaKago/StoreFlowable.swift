@@ -7,7 +7,7 @@ final class FlowStateMapperTests: XCTestCase {
 
     private let fixedStatePublisher: Just<State<Int>> = Just(.fixed(content: .wrap(rawContent: 30)))
 
-    func testMapContent() throws {
+//    func testMapContent() throws {
 //TODO
 //        let recorder = fixedStatePublisher
 //            .mapContent { value in
@@ -30,9 +30,9 @@ final class FlowStateMapperTests: XCTestCase {
 //        case .notExist:
 //            XCTFail()
 //        }
-    }
+//    }
 
-    static var allTests = [
-        ("testMapContent", testMapContent),
-    ]
+//    static var allTests = [
+//        ("testMapContent", testMapContent),
+//    ]
 }
