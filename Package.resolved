@@ -9,6 +9,15 @@
           "revision": "c2572b184829030cd377e5876dde4b17345f0c62",
           "version": "0.1.5"
         }
+      },
+      {
+        "package": "CombineExpectations",
+        "repositoryURL": "https://github.com/groue/CombineExpectations.git",
+        "state": {
+          "branch": null,
+          "revision": "989a92221899929ab8347a5878aa2b16db8b81ca",
+          "version": "0.6.0"
+        }
       }
     ]
   },
