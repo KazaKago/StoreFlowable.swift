@@ -31,10 +31,10 @@ The following is an example of screen display using [`State`](Sources/StoreFlowa
 
 ## Requirement
 
-- iOS 14 or later
-- MacOS 11 or later
-- tvOS 14 or later
-- watchOS 7 or later
+- iOS 13.0 or later
+- MacOS 10.15 or later
+- tvOS 13.0 or later
+- watchOS 6.0 or later
 
 ## Install
 
