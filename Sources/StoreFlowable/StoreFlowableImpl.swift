@@ -59,11 +59,13 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
         }
         .flatMap {
             storeFlowableResponder.flowableDataStateManager.getFlow(key: storeFlowableResponder.key)
+                .setFailureType(to: Error.self) // Workaround for macOS10.15/iOS13.0/tvOS13.0/watchOS6.0 https://www.donnywals.com/configuring-error-types-when-using-flatmap-in-combine/
         }
         .flatMap { dataState in
             dataSelector.load().map { data in
                 (dataState, data)
             }
+            .setFailureType(to: Error.self) // Workaround for macOS10.15/iOS13.0/tvOS13.0/watchOS6.0 https://www.donnywals.com/configuring-error-types-when-using-flatmap-in-combine/
         }
         .flatMap { (dataState, data) in
             async { yield in
