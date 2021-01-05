@@ -132,11 +132,4 @@ final class FlowStateZipperTests: XCTestCase {
             }
         )
     }
-
-    static var allTests = [
-        ("testZipWithFixedLoading", testZipWithFixedLoading),
-        ("testZipWithFixedError", testZipWithFixedError),
-        ("testZipWithLoadingError", testZipWithLoadingError),
-        ("testZipWithFixedFixed", testZipWithFixedFixed),
-    ]
 }

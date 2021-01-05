@@ -5,6 +5,83 @@ import CombineExpectations
 
 final class StoreFlowableTests: XCTestCase {
 
+    private enum TestData {
+        case validData
+        case invalidData
+        case fetchedData
+
+        var needRefresh: Bool {
+            switch self {
+            case .validData: return false
+            case .invalidData: return true
+            case .fetchedData: return false
+            }
+        }
+    }
+
+    private class TestResponder: StoreFlowableResponder {
+
+        typealias KEY = String
+        typealias DATA = TestData
+
+        private var dataCache: TestData?
+
+        init(dataCache: TestData?) {
+            self.dataCache = dataCache
+        }
+
+        let key: String = "Key"
+
+        let flowableDataStateManager: FlowableDataStateManager<String> = FlowableDataStateManager<String>()
+
+        func loadData() -> AnyPublisher<TestData?, Never> {
+            Just(dataCache)
+                .eraseToAnyPublisher()
+        }
+
+        func saveData(data: TestData?) -> AnyPublisher<Void, Never> {
+            Future { promise in
+                self.dataCache = data
+                promise(.success(()))
+            }.eraseToAnyPublisher()
+        }
+
+        func fetchOrigin() -> AnyPublisher<TestData, Error> {
+            fatalError()
+        }
+
+        func needRefresh(data: TestData) -> AnyPublisher<Bool, Never> {
+            Just(data.needRefresh)
+                .eraseToAnyPublisher()
+        }
+    }
+
+    private class SucceedTestResponder: TestResponder {
+
+        override init(dataCache: TestData?) {
+            super.init(dataCache: dataCache)
+        }
+
+        override func fetchOrigin() -> AnyPublisher<TestData, Error> {
+            Just(TestData.fetchedData)
+                .setFailureType(to: Error.self)
+                .eraseToAnyPublisher()
+        }
+    }
+
+    private class FailedTestResponder: TestResponder {
+
+        override init(dataCache: TestData?) {
+            super.init(dataCache: dataCache)
+        }
+
+        override func fetchOrigin() -> AnyPublisher<TestData, Error> {
+            Future { promise in
+                promise(.failure(NoSuchElementError()))
+            }.eraseToAnyPublisher()
+        }
+    }
+
     func testFlowWithNoCache() throws {
         // TODO
     }
@@ -29,76 +106,193 @@ final class StoreFlowableTests: XCTestCase {
         // TODO
     }
 
-    func testGetFromMixWithNoCache() {
-        // TODO
+    func testGetFromMixWithNoCache() throws {
+        let storeFlowable = SucceedTestResponder(dataCache: nil).create()
+        let recorder = storeFlowable.get(type: .mix).record()
+        let elements = try wait(for: recorder.elements, timeout: 1)
+        XCTAssertEqual(elements.count, 1)
+        switch elements.first! {
+        case .validData:
+            XCTFail()
+        case .invalidData:
+            XCTFail()
+        case .fetchedData:
+            break // ok
+        }
     }
 
-    func testGetFromMixWithValidCache() {
-        // TODO
+    func testGetFromMixWithValidCache() throws {
+        let storeFlowable = SucceedTestResponder(dataCache: .validData).create()
+        let recorder = storeFlowable.get(type: .mix).record()
+        let elements = try wait(for: recorder.elements, timeout: 1)
+        XCTAssertEqual(elements.count, 1)
+        switch elements.first! {
+        case .validData:
+            break // ok
+        case .invalidData:
+            XCTFail()
+        case .fetchedData:
+            XCTFail()
+        }
     }
 
-    func testGetFromMixWithInvalidCache() {
-        // TODO
+    func testGetFromMixWithInvalidCache() throws {
+        let storeFlowable = SucceedTestResponder(dataCache: .invalidData).create()
+        let recorder = storeFlowable.get(type: .mix).record()
+        let elements = try wait(for: recorder.elements, timeout: 1)
+        XCTAssertEqual(elements.count, 1)
+        switch elements.first! {
+        case .validData:
+            XCTFail()
+        case .invalidData:
+            XCTFail()
+        case .fetchedData:
+            break // ok
+        }
     }
 
-    func testGetFromCacheWithNoCache() {
-        // TODO
+    func testGetFromCacheWithNoCache() throws {
+        let storeFlowable = SucceedTestResponder(dataCache: nil).create()
+        let recorder = storeFlowable.get(type: .fromCache).record()
+        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
     }
 
-    func testGetFromCacheWithValidCache() {
-        // TODO
+    func testGetFromCacheWithValidCache() throws {
+        let storeFlowable = SucceedTestResponder(dataCache: .validData).create()
+        let recorder = storeFlowable.get(type: .fromCache).record()
+        let elements = try wait(for: recorder.elements, timeout: 1)
+        XCTAssertEqual(elements.count, 1)
+        switch elements.first! {
+        case .validData:
+            break // ok
+        case .invalidData:
+            XCTFail()
+        case .fetchedData:
+            XCTFail()
+        }
     }
 
-    func testGetFromCacheWithInvalidCache() {
-        // TODO
+    func testGetFromCacheWithInvalidCache() throws {
+        let storeFlowable = SucceedTestResponder(dataCache: .invalidData).create()
+        let recorder = storeFlowable.get(type: .fromCache).record()
+        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
     }
 
-    func testGetFromOriginWithNoCache() {
-        // TODO
+    func testGetFromOriginWithNoCache() throws {
+        let storeFlowable = SucceedTestResponder(dataCache: nil).create()
+        let recorder = storeFlowable.get(type: .mix).record()
+        let elements = try wait(for: recorder.elements, timeout: 1)
+        XCTAssertEqual(elements.count, 1)
+        switch elements.first! {
+        case .validData:
+            XCTFail()
+        case .invalidData:
+            XCTFail()
+        case .fetchedData:
+            break // ok
+        }
     }
 
-    func testGetFromOriginWithValidCache() {
-        // TODO
+    func testGetFromOriginWithValidCache() throws {
+        let storeFlowable = SucceedTestResponder(dataCache: nil).create()
+        let recorder = storeFlowable.get(type: .mix).record()
+        let elements = try wait(for: recorder.elements, timeout: 1)
+        XCTAssertEqual(elements.count, 1)
+        switch elements.first! {
+        case .validData:
+            XCTFail()
+        case .invalidData:
+            XCTFail()
+        case .fetchedData:
+            break // ok
+        }
     }
 
-    func testGetFromOriginWithInvalidCache() {
-        // TODO
+    func testGetFromOriginWithInvalidCache() throws {
+        let storeFlowable = SucceedTestResponder(dataCache: nil).create()
+        let recorder = storeFlowable.get(type: .mix).record()
+        let elements = try wait(for: recorder.elements, timeout: 1)
+        XCTAssertEqual(elements.count, 1)
+        switch elements.first! {
+        case .validData:
+            XCTFail()
+        case .invalidData:
+            XCTFail()
+        case .fetchedData:
+            break // ok
+        }
     }
 
-    func testGetFailedFromMixWithNoCache() {
-        // TODO
+    func testGetFailedFromMixWithNoCache() throws {
+        let storeFlowable = FailedTestResponder(dataCache: nil).create()
+        let recorder = storeFlowable.get(type: .mix).record()
+        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
     }
 
-    func testGetFailedFromMixWithValidCache() {
-        // TODO
+    func testGetFailedFromMixWithValidCache() throws {
+        let storeFlowable = FailedTestResponder(dataCache: .validData).create()
+        let recorder = storeFlowable.get(type: .mix).record()
+        let elements = try wait(for: recorder.elements, timeout: 1)
+        XCTAssertEqual(elements.count, 1)
+        switch elements.first! {
+        case .validData:
+            break // ok
+        case .invalidData:
+            XCTFail()
+        case .fetchedData:
+            XCTFail()
+        }
     }
 
-    func testGetFailedFromMixWithInvalidCache() {
-        // TODO
+    func testGetFailedFromMixWithInvalidCache() throws {
+        let storeFlowable = FailedTestResponder(dataCache: .invalidData).create()
+        let recorder = storeFlowable.get(type: .mix).record()
+        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
     }
 
-    func testGetFailedFromCacheWithNoCache() {
-        // TODO
+    func testGetFailedFromCacheWithNoCache() throws {
+        let storeFlowable = FailedTestResponder(dataCache: nil).create()
+        let recorder = storeFlowable.get(type: .fromCache).record()
+        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
     }
 
-    func testGetFailedFromCacheWithValidCache() {
-        // TODO
+    func testGetFailedFromCacheWithValidCache() throws {
+        let storeFlowable = FailedTestResponder(dataCache: .validData).create()
+        let recorder = storeFlowable.get(type: .fromCache).record()
+        let elements = try wait(for: recorder.elements, timeout: 1)
+        XCTAssertEqual(elements.count, 1)
+        switch elements.first! {
+        case .validData:
+            break // ok
+        case .invalidData:
+            XCTFail()
+        case .fetchedData:
+            XCTFail()
+        }
     }
 
-    func testGetFailedFromCacheWithInvalidCache() {
-        // TODO
+    func testGetFailedFromCacheWithInvalidCache() throws {
+        let storeFlowable = FailedTestResponder(dataCache: .invalidData).create()
+        let recorder = storeFlowable.get(type: .fromCache).record()
+        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
     }
 
-    func testGetFailedFromOriginWithNoCache() {
-        // TODO
+    func testGetFailedFromOriginWithNoCache() throws {
+        let storeFlowable = FailedTestResponder(dataCache: nil).create()
+        let recorder = storeFlowable.get(type: .fromOrigin).record()
+        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
     }
 
-    func testGetFailedFromOriginWithValidCache() {
-        // TODO
+    func testGetFailedFromOriginWithValidCache() throws {
+        let storeFlowable = FailedTestResponder(dataCache: .validData).create()
+        let recorder = storeFlowable.get(type: .fromOrigin).record()
+        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
     }
 
-    func testGetFailedFromOriginWithInvalidCache() {
-        // TODO
+    func testGetFailedFromOriginWithInvalidCache() throws {
+        let storeFlowable = FailedTestResponder(dataCache: nil).create()
+        let recorder = storeFlowable.get(type: .fromOrigin).record()
+        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
     }
 
     func testUpdateData() throws {
@@ -124,37 +318,4 @@ final class StoreFlowableTests: XCTestCase {
     func testRefresh() throws {
         // TODO
     }
-
-    static var allTests = [
-        ("testFlowWithNoCache", testFlowWithNoCache),
-        ("testFlowWithValidCache", testFlowWithValidCache),
-        ("testFlowWithInvalidCache", testFlowWithInvalidCache),
-        ("testFlowFailedWithNoCache", testFlowFailedWithNoCache),
-        ("testFlowFailedWithValidCache", testFlowFailedWithValidCache),
-        ("testFlowFailedWithInvalidCache", testFlowFailedWithInvalidCache),
-        ("testGetFromMixWithNoCache", testGetFromMixWithNoCache),
-        ("testGetFromMixWithValidCache", testGetFromMixWithValidCache),
-        ("testGetFromMixWithInvalidCache", testGetFromMixWithInvalidCache),
-        ("testGetFromCacheWithNoCache", testGetFromCacheWithNoCache),
-        ("testGetFromCacheWithValidCache", testGetFromCacheWithValidCache),
-        ("testGetFromCacheWithInvalidCache", testGetFromCacheWithInvalidCache),
-        ("testGetFromOriginWithNoCache", testGetFromOriginWithNoCache),
-        ("testGetFromOriginWithValidCache", testGetFromOriginWithValidCache),
-        ("testGetFromOriginWithInvalidCache", testGetFromOriginWithInvalidCache),
-        ("testGetFailedFromMixWithNoCache", testGetFailedFromMixWithNoCache),
-        ("testGetFailedFromMixWithValidCache", testGetFailedFromMixWithValidCache),
-        ("testGetFailedFromMixWithInvalidCache", testGetFailedFromMixWithInvalidCache),
-        ("testGetFailedFromCacheWithNoCache", testGetFailedFromCacheWithNoCache),
-        ("testGetFailedFromCacheWithValidCache", testGetFailedFromCacheWithValidCache),
-        ("testGetFailedFromCacheWithInvalidCache", testGetFailedFromCacheWithInvalidCache),
-        ("testGetFailedFromOriginWithNoCache", testGetFailedFromOriginWithNoCache),
-        ("testGetFailedFromOriginWithValidCache", testGetFailedFromOriginWithValidCache),
-        ("testGetFailedFromOriginWithInvalidCache", testGetFailedFromOriginWithInvalidCache),
-        ("testUpdateData", testUpdateData),
-        ("testUpdateNull", testUpdateNull),
-        ("testValidateWithNoCache", testValidateWithNoCache),
-        ("testValidateWithValidData", testValidateWithValidData),
-        ("testValidateWithInvalidData", testValidateWithInvalidData),
-        ("testRefresh", testRefresh),
-    ]
 }

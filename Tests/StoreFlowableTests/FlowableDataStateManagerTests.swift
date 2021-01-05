@@ -18,9 +18,4 @@ final class FlowableDataStateManagerTests: XCTestCase {
     func testFlowDifferentKeyEvent() throws {
         //TODO
     }
-
-    static var allTests = [
-        ("testFlowSameKeyEvent", testFlowSameKeyEvent),
-        ("testFlowDifferentKeyEvent", testFlowDifferentKeyEvent),
-    ]
 }

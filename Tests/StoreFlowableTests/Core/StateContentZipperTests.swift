@@ -53,10 +53,4 @@ final class StateContentZipperTests: XCTestCase {
             }
         )
     }
-
-    static var allTests = [
-        ("testZipWithExistExist", testZipWithExistExist),
-        ("testZipWithExistNotExist", testZipWithExistNotExist),
-        ("testZipWithNotExistNotExist", testZipWithNotExistNotExist),
-    ]
 }

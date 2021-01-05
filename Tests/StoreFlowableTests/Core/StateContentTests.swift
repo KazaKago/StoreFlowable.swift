@@ -52,11 +52,4 @@ final class StateContentTests: XCTestCase {
             }
         )
     }
-
-    static var allTests = [
-        ("testWrap", testWrap),
-        ("testRawContent", testRawContent),
-        ("testDoActionWithExist", testDoActionWithExist),
-        ("testDoActionWithNotExist", testDoActionWithNotExist),
-    ]
 }

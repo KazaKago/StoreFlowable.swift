@@ -60,11 +60,4 @@ final class StateTests: XCTestCase {
             }
         )
     }
-
-    static var allTests = [
-        ("testContent", testContent),
-        ("testDoActionWithFixed", testDoActionWithFixed),
-        ("testDoActionWithLoading", testDoActionWithLoading),
-        ("testDoActionWithError", testDoActionWithError),
-    ]
 }

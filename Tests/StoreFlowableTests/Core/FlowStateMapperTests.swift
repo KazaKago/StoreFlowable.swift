@@ -30,8 +30,4 @@ final class FlowStateMapperTests: XCTestCase {
             XCTFail()
         }
     }
-
-    static var allTests = [
-        ("testMapContent", testMapContent),
-    ]
 }

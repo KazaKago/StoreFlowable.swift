@@ -114,11 +114,4 @@ final class StateZipperTest: XCTestCase {
             }
         )
     }
-
-    static var allTests = [
-        ("testZipWithFixedLoading", testZipWithFixedLoading),
-        ("testZipWithFixedError", testZipWithFixedError),
-        ("testZipWithLoadingError", testZipWithLoadingError),
-        ("testZipWithFixedFixedNotExist", testZipWithFixedFixedNotExist),
-    ]
 }

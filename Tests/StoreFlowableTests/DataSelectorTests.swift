@@ -10,7 +10,7 @@ final class DataSelectorTest: XCTestCase {
         case invalidData
         case fetchedData
 
-        var isState: Bool {
+        var needRefresh: Bool {
             switch self {
             case .validData: return false
             case .invalidData: return true
@@ -65,7 +65,7 @@ final class DataSelectorTest: XCTestCase {
             dataStateManager: AnyDataStateManager(testDataStateManager),
             cacheDataManager: AnyCacheDataManager(testCacheDataManager),
             originDataManager: AnyOriginDataManager(testOriginDataManager),
-            needRefresh: { value in Just(value.isState).eraseToAnyPublisher() }
+            needRefresh: { value in Just(value.needRefresh).eraseToAnyPublisher() }
         )
     }
 
@@ -867,14 +867,4 @@ final class DataSelectorTest: XCTestCase {
         case .fetchedData: break // ok
         }
     }
-
-    static var allTests = [
-        ("testDoActionWithFixedStateNoCache", testDoActionWithFixedStateNoCache),
-        ("testDoActionWithLoadingStateNoCache", testDoActionWithLoadingStateNoCache),
-        ("testDoActionWithErrorStateNoCache", testDoActionWithErrorStateNoCache),
-        ("testDoActionWithFixedStateValidCache", testDoActionWithFixedStateValidCache),
-        ("testDoActionWithLoadingStateValidCache", testDoActionWithLoadingStateValidCache),
-        ("testDoActionWithErrorStateValidCache", testDoActionWithErrorStateValidCache),
-        ("testDoActionWithFixedStateInvalidData", testDoActionWithFixedStateInvalidData),
-    ]
 }
