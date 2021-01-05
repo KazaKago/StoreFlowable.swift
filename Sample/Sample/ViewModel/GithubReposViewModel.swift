@@ -28,7 +28,7 @@ final class GithubReposViewModel : ObservableObject {
         subscribe()
     }
 
-    func request() {
+    func refresh() {
         githubRepository.refreshRepos(userName: userName)
             .receive(on: DispatchQueue.main)
             .sink {}

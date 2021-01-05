@@ -16,51 +16,60 @@ struct GithubReposView: View {
     }
 
     var body: some View {
-        ZStack {
-            List {
-                ForEach(githubReposViewModel.githubRepos) { githubRepo in
-                    GithubRepoItem(githubRepo: githubRepo)
-                        .onAppear {
-                            if githubRepo == githubReposViewModel.githubRepos.last {
-                                githubReposViewModel.requestAdditional()
+        ScrollViewReader { scrollProxy in
+            ZStack {
+                List {
+                    ForEach(githubReposViewModel.githubRepos) { githubRepo in
+                        GithubRepoItem(githubRepo: githubRepo)
+                            .onAppear {
+                                if githubRepo == githubReposViewModel.githubRepos.last {
+                                    githubReposViewModel.requestAdditional()
+                                }
+                            }
+                    }
+                    if githubReposViewModel.isAdditionalLoading {
+                        LoadingItem()
+                    }
+                    if let error = githubReposViewModel.additionalError {
+                        ErrorItem(error: error) {
+                            githubReposViewModel.retryAdditional()
+                        }
+                    }
+                }
+                if githubReposViewModel.isMainLoading {
+                    ProgressView()
+                }
+                if let error = githubReposViewModel.mainError {
+                    VStack {
+                        Text(error.localizedDescription)
+                            .foregroundColor(Color.red)
+                            .multilineTextAlignment(.center)
+                        Spacer()
+                            .frame(height: 4)
+                        Button("Retry") {
+                            githubReposViewModel.retry()
+                        }
+                    }
+                    .padding()
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if githubReposViewModel.isMainLoading || githubReposViewModel.isAdditionalLoading {
+                        ProgressView()
+                    } else {
+                        Button("Refresh") {
+                            githubReposViewModel.refresh()
+                            if let first = githubReposViewModel.githubRepos.first {
+                                withAnimation { scrollProxy.scrollTo(first.id) }
                             }
                         }
-                }
-                if githubReposViewModel.isAdditionalLoading {
-                    LoadingItem()
-                }
-                if let error = githubReposViewModel.additionalError {
-                    ErrorItem(error: error) {
-                        githubReposViewModel.retryAdditional()
                     }
                 }
             }
-            if githubReposViewModel.isMainLoading {
-                ProgressView()
+            .onAppear {
+                githubReposViewModel.initialize()
             }
-            if let error = githubReposViewModel.mainError {
-                VStack {
-                    Text(error.localizedDescription)
-                        .foregroundColor(Color.red)
-                        .multilineTextAlignment(.center)
-                    Spacer()
-                        .frame(height: 4)
-                    Button("Retry") {
-                        githubReposViewModel.retry()
-                    }
-                }
-                .padding()
-            }
-        }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Refresh") {
-                    githubReposViewModel.request()
-                }
-            }
-        }
-        .onAppear {
-            githubReposViewModel.initialize()
         }
     }
 }

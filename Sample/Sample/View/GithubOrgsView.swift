@@ -12,51 +12,60 @@ struct GithubOrgsView: View {
     @ObservedObject private var githubOrgsViewModel = GithubOrgsViewModel()
 
     var body: some View {
-        ZStack {
-            List {
-                ForEach(githubOrgsViewModel.githubOrgs) { githubOrg in
-                    GithubOrgItem(githubOrg: githubOrg)
-                        .onAppear {
-                            if githubOrg == githubOrgsViewModel.githubOrgs.last {
-                                githubOrgsViewModel.requestAdditional()
+        ScrollViewReader { scrollProxy in
+            ZStack {
+                List {
+                    ForEach(githubOrgsViewModel.githubOrgs) { githubOrg in
+                        GithubOrgItem(githubOrg: githubOrg)
+                            .onAppear {
+                                if githubOrg == githubOrgsViewModel.githubOrgs.last {
+                                    githubOrgsViewModel.requestAdditional()
+                                }
+                            }
+                    }
+                    if githubOrgsViewModel.isAdditionalLoading {
+                        LoadingItem()
+                    }
+                    if let error = githubOrgsViewModel.additionalError {
+                        ErrorItem(error: error) {
+                            githubOrgsViewModel.retryAdditional()
+                        }
+                    }
+                }
+                if githubOrgsViewModel.isMainLoading {
+                    ProgressView()
+                }
+                if let error = githubOrgsViewModel.mainError {
+                    VStack {
+                        Text(error.localizedDescription)
+                            .foregroundColor(Color.red)
+                            .multilineTextAlignment(.center)
+                        Spacer()
+                            .frame(height: 4)
+                        Button("Retry") {
+                            githubOrgsViewModel.retry()
+                        }
+                    }
+                    .padding()
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if githubOrgsViewModel.isMainLoading || githubOrgsViewModel.isAdditionalLoading {
+                        ProgressView()
+                    } else {
+                        Button("Refresh") {
+                            githubOrgsViewModel.refresh()
+                            if let first = githubOrgsViewModel.githubOrgs.first {
+                                withAnimation { scrollProxy.scrollTo(first.id) }
                             }
                         }
-                }
-                if githubOrgsViewModel.isAdditionalLoading {
-                    LoadingItem()
-                }
-                if let error = githubOrgsViewModel.additionalError {
-                    ErrorItem(error: error) {
-                        githubOrgsViewModel.retryAdditional()
                     }
                 }
             }
-            if githubOrgsViewModel.isMainLoading {
-                ProgressView()
+            .onAppear {
+                githubOrgsViewModel.initialize()
             }
-            if let error = githubOrgsViewModel.mainError {
-                VStack {
-                    Text(error.localizedDescription)
-                        .foregroundColor(Color.red)
-                        .multilineTextAlignment(.center)
-                    Spacer()
-                        .frame(height: 4)
-                    Button("Retry") {
-                        githubOrgsViewModel.retry()
-                    }
-                }
-                .padding()
-            }
-        }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Refresh") {
-                    githubOrgsViewModel.request()
-                }
-            }
-        }
-        .onAppear {
-            githubOrgsViewModel.initialize()
         }
     }
 }

@@ -23,7 +23,7 @@ final class GithubOrgsViewModel : ObservableObject {
         subscribe()
     }
 
-    func request() {
+    func refresh() {
         githubRepository.refreshOrgs()
             .receive(on: DispatchQueue.main)
             .sink {}
