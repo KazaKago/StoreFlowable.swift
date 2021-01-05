@@ -25,9 +25,11 @@ final class StoreFlowableTests: XCTestCase {
         typealias DATA = TestData
 
         private var dataCache: TestData?
+        private let fetchingData: Future<TestData, Error>
 
-        init(dataCache: TestData?) {
-            self.dataCache = dataCache
+        init(initialData: TestData?, fetchingData: Future<TestData, Error>) {
+            dataCache = initialData
+            self.fetchingData = fetchingData
         }
 
         let key: String = "Key"
@@ -47,7 +49,9 @@ final class StoreFlowableTests: XCTestCase {
         }
 
         func fetchOrigin() -> AnyPublisher<TestData, Error> {
-            fatalError()
+            fetchingData
+                .delay(for: .seconds(0.1), scheduler: RunLoop.main) // dummy delay
+                .eraseToAnyPublisher()
         }
 
         func needRefresh(data: TestData) -> AnyPublisher<Bool, Never> {
@@ -58,56 +62,208 @@ final class StoreFlowableTests: XCTestCase {
 
     private class SucceedTestResponder: TestResponder {
 
-        override init(dataCache: TestData?) {
-            super.init(dataCache: dataCache)
-        }
-
-        override func fetchOrigin() -> AnyPublisher<TestData, Error> {
-            Just(TestData.fetchedData)
-                .setFailureType(to: Error.self)
-                .eraseToAnyPublisher()
+        init(initialData: TestData?) {
+            let fetchingData = Future<TestData, Error> { promise in
+                promise(.success(.fetchedData))
+            }
+            super.init(initialData: initialData, fetchingData: fetchingData)
         }
     }
 
     private class FailedTestResponder: TestResponder {
 
-        override init(dataCache: TestData?) {
-            super.init(dataCache: dataCache)
-        }
-
-        override func fetchOrigin() -> AnyPublisher<TestData, Error> {
-            Future { promise in
+        init(initialData: TestData?) {
+            let fetchingData = Future<TestData, Error> { promise in
                 promise(.failure(NoSuchElementError()))
-            }.eraseToAnyPublisher()
+            }
+            super.init(initialData: initialData, fetchingData: fetchingData)
         }
     }
 
     func testFlowWithNoCache() throws {
-        // TODO
+        let storeFlowable = SucceedTestResponder(initialData: nil).create()
+        let recorder = storeFlowable.publish().record()
+        let elements = try wait(for: recorder.availableElements, timeout: 1)
+        XCTAssertEqual(elements.count, 2)
+        switch elements[0] {
+        case .fixed:
+            XCTFail()
+        case .loading:
+            break // ok
+        case .error:
+            XCTFail()
+        }
+        switch elements[0].content {
+        case .exist:
+            XCTFail()
+        case .notExist:
+            break // ok
+        }
+        switch elements[1] {
+        case .fixed:
+            break // ok
+        case .loading:
+            XCTFail()
+        case .error:
+            XCTFail()
+        }
+        switch elements[1].content {
+        case .exist:
+            break // ok
+        case .notExist:
+            XCTFail()
+        }
     }
 
     func testFlowWithValidCache() throws {
-        // TODO
+        let storeFlowable = SucceedTestResponder(initialData: .validData).create()
+        let recorder = storeFlowable.publish().record()
+        let elements = try wait(for: recorder.availableElements, timeout: 1)
+        XCTAssertEqual(elements.count, 1)
+        switch elements[0] {
+        case .fixed:
+            break // ok
+        case .loading:
+            XCTFail()
+        case .error:
+            XCTFail()
+        }
+        switch elements[0].content {
+        case .exist:
+            break // ok
+        case .notExist:
+            XCTFail()
+        }
     }
 
     func testFlowWithInvalidCache() throws {
-        // TODO
+        let storeFlowable = SucceedTestResponder(initialData: .invalidData).create()
+        let recorder = storeFlowable.publish().record()
+        let elements = try wait(for: recorder.availableElements, timeout: 1)
+        XCTAssertEqual(elements.count, 2)
+        switch elements[0] {
+        case .fixed:
+            XCTFail()
+        case .loading:
+            break // ok
+        case .error:
+            XCTFail()
+        }
+        switch elements[0].content {
+        case .exist:
+            XCTFail()
+        case .notExist:
+            break // ok
+        }
+        switch elements[1] {
+        case .fixed:
+            break // ok
+        case .loading:
+            XCTFail()
+        case .error:
+            XCTFail()
+        }
+        switch elements[1].content {
+        case .exist:
+            break // ok
+        case .notExist:
+            XCTFail()
+        }
     }
 
     func testFlowFailedWithNoCache() throws {
-        // TODO
+        let storeFlowable = FailedTestResponder(initialData: nil).create()
+        let recorder = storeFlowable.publish().record()
+        let elements = try wait(for: recorder.availableElements, timeout: 1)
+        XCTAssertEqual(elements.count, 2)
+        switch elements[0] {
+        case .fixed:
+            XCTFail()
+        case .loading:
+            break // ok
+        case .error:
+            XCTFail()
+        }
+        switch elements[0].content {
+        case .exist:
+            XCTFail()
+        case .notExist:
+            break // ok
+        }
+        switch elements[1] {
+        case .fixed:
+            XCTFail()
+        case .loading:
+            XCTFail()
+        case .error:
+            break // ok
+        }
+        switch elements[1].content {
+        case .exist:
+            XCTFail()
+        case .notExist:
+            break // ok
+        }
     }
 
     func testFlowFailedWithValidCache() throws {
-        // TODO
+        let storeFlowable = FailedTestResponder(initialData: .validData).create()
+        let recorder = storeFlowable.publish().record()
+        let elements = try wait(for: recorder.availableElements, timeout: 1)
+        XCTAssertEqual(elements.count, 1)
+        switch elements[0] {
+        case .fixed:
+            break // ok
+        case .loading:
+            XCTFail()
+        case .error:
+            XCTFail()
+        }
+        switch elements[0].content {
+        case .exist:
+            break // ok
+        case .notExist:
+            XCTFail()
+        }
     }
 
     func testFlowFailedWithInvalidCache() throws {
-        // TODO
+        let storeFlowable = FailedTestResponder(initialData: .invalidData).create()
+        let recorder = storeFlowable.publish().record()
+        let elements = try wait(for: recorder.availableElements, timeout: 1)
+        XCTAssertEqual(elements.count, 2)
+        switch elements[0] {
+        case .fixed:
+            XCTFail()
+        case .loading:
+            break // ok
+        case .error:
+            XCTFail()
+        }
+        switch elements[0].content {
+        case .exist:
+            XCTFail()
+        case .notExist:
+            break // ok
+        }
+        switch elements[1] {
+        case .fixed:
+            XCTFail()
+        case .loading:
+            XCTFail()
+        case .error:
+            break // ok
+        }
+        switch elements[1].content {
+        case .exist:
+            XCTFail()
+        case .notExist:
+            break // ok
+        }
     }
 
     func testGetFromMixWithNoCache() throws {
-        let storeFlowable = SucceedTestResponder(dataCache: nil).create()
+        let storeFlowable = SucceedTestResponder(initialData: nil).create()
         let recorder = storeFlowable.get(type: .mix).record()
         let elements = try wait(for: recorder.elements, timeout: 1)
         XCTAssertEqual(elements.count, 1)
@@ -122,7 +278,7 @@ final class StoreFlowableTests: XCTestCase {
     }
 
     func testGetFromMixWithValidCache() throws {
-        let storeFlowable = SucceedTestResponder(dataCache: .validData).create()
+        let storeFlowable = SucceedTestResponder(initialData: .validData).create()
         let recorder = storeFlowable.get(type: .mix).record()
         let elements = try wait(for: recorder.elements, timeout: 1)
         XCTAssertEqual(elements.count, 1)
@@ -137,7 +293,7 @@ final class StoreFlowableTests: XCTestCase {
     }
 
     func testGetFromMixWithInvalidCache() throws {
-        let storeFlowable = SucceedTestResponder(dataCache: .invalidData).create()
+        let storeFlowable = SucceedTestResponder(initialData: .invalidData).create()
         let recorder = storeFlowable.get(type: .mix).record()
         let elements = try wait(for: recorder.elements, timeout: 1)
         XCTAssertEqual(elements.count, 1)
@@ -152,13 +308,13 @@ final class StoreFlowableTests: XCTestCase {
     }
 
     func testGetFromCacheWithNoCache() throws {
-        let storeFlowable = SucceedTestResponder(dataCache: nil).create()
+        let storeFlowable = SucceedTestResponder(initialData: nil).create()
         let recorder = storeFlowable.get(type: .fromCache).record()
-        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
+        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
     }
 
     func testGetFromCacheWithValidCache() throws {
-        let storeFlowable = SucceedTestResponder(dataCache: .validData).create()
+        let storeFlowable = SucceedTestResponder(initialData: .validData).create()
         let recorder = storeFlowable.get(type: .fromCache).record()
         let elements = try wait(for: recorder.elements, timeout: 1)
         XCTAssertEqual(elements.count, 1)
@@ -173,13 +329,13 @@ final class StoreFlowableTests: XCTestCase {
     }
 
     func testGetFromCacheWithInvalidCache() throws {
-        let storeFlowable = SucceedTestResponder(dataCache: .invalidData).create()
+        let storeFlowable = SucceedTestResponder(initialData: .invalidData).create()
         let recorder = storeFlowable.get(type: .fromCache).record()
-        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
+        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
     }
 
     func testGetFromOriginWithNoCache() throws {
-        let storeFlowable = SucceedTestResponder(dataCache: nil).create()
+        let storeFlowable = SucceedTestResponder(initialData: nil).create()
         let recorder = storeFlowable.get(type: .mix).record()
         let elements = try wait(for: recorder.elements, timeout: 1)
         XCTAssertEqual(elements.count, 1)
@@ -194,7 +350,7 @@ final class StoreFlowableTests: XCTestCase {
     }
 
     func testGetFromOriginWithValidCache() throws {
-        let storeFlowable = SucceedTestResponder(dataCache: nil).create()
+        let storeFlowable = SucceedTestResponder(initialData: nil).create()
         let recorder = storeFlowable.get(type: .mix).record()
         let elements = try wait(for: recorder.elements, timeout: 1)
         XCTAssertEqual(elements.count, 1)
@@ -209,7 +365,7 @@ final class StoreFlowableTests: XCTestCase {
     }
 
     func testGetFromOriginWithInvalidCache() throws {
-        let storeFlowable = SucceedTestResponder(dataCache: nil).create()
+        let storeFlowable = SucceedTestResponder(initialData: nil).create()
         let recorder = storeFlowable.get(type: .mix).record()
         let elements = try wait(for: recorder.elements, timeout: 1)
         XCTAssertEqual(elements.count, 1)
@@ -224,13 +380,13 @@ final class StoreFlowableTests: XCTestCase {
     }
 
     func testGetFailedFromMixWithNoCache() throws {
-        let storeFlowable = FailedTestResponder(dataCache: nil).create()
+        let storeFlowable = FailedTestResponder(initialData: nil).create()
         let recorder = storeFlowable.get(type: .mix).record()
-        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
+        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
     }
 
     func testGetFailedFromMixWithValidCache() throws {
-        let storeFlowable = FailedTestResponder(dataCache: .validData).create()
+        let storeFlowable = FailedTestResponder(initialData: .validData).create()
         let recorder = storeFlowable.get(type: .mix).record()
         let elements = try wait(for: recorder.elements, timeout: 1)
         XCTAssertEqual(elements.count, 1)
@@ -245,19 +401,19 @@ final class StoreFlowableTests: XCTestCase {
     }
 
     func testGetFailedFromMixWithInvalidCache() throws {
-        let storeFlowable = FailedTestResponder(dataCache: .invalidData).create()
+        let storeFlowable = FailedTestResponder(initialData: .invalidData).create()
         let recorder = storeFlowable.get(type: .mix).record()
-        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
+        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
     }
 
     func testGetFailedFromCacheWithNoCache() throws {
-        let storeFlowable = FailedTestResponder(dataCache: nil).create()
+        let storeFlowable = FailedTestResponder(initialData: nil).create()
         let recorder = storeFlowable.get(type: .fromCache).record()
-        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
+        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
     }
 
     func testGetFailedFromCacheWithValidCache() throws {
-        let storeFlowable = FailedTestResponder(dataCache: .validData).create()
+        let storeFlowable = FailedTestResponder(initialData: .validData).create()
         let recorder = storeFlowable.get(type: .fromCache).record()
         let elements = try wait(for: recorder.elements, timeout: 1)
         XCTAssertEqual(elements.count, 1)
@@ -272,50 +428,113 @@ final class StoreFlowableTests: XCTestCase {
     }
 
     func testGetFailedFromCacheWithInvalidCache() throws {
-        let storeFlowable = FailedTestResponder(dataCache: .invalidData).create()
+        let storeFlowable = FailedTestResponder(initialData: .invalidData).create()
         let recorder = storeFlowable.get(type: .fromCache).record()
-        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
+        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
     }
 
     func testGetFailedFromOriginWithNoCache() throws {
-        let storeFlowable = FailedTestResponder(dataCache: nil).create()
+        let storeFlowable = FailedTestResponder(initialData: nil).create()
         let recorder = storeFlowable.get(type: .fromOrigin).record()
-        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
+        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
     }
 
     func testGetFailedFromOriginWithValidCache() throws {
-        let storeFlowable = FailedTestResponder(dataCache: .validData).create()
+        let storeFlowable = FailedTestResponder(initialData: .validData).create()
         let recorder = storeFlowable.get(type: .fromOrigin).record()
-        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
+        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
     }
 
     func testGetFailedFromOriginWithInvalidCache() throws {
-        let storeFlowable = FailedTestResponder(dataCache: nil).create()
+        let storeFlowable = FailedTestResponder(initialData: nil).create()
         let recorder = storeFlowable.get(type: .fromOrigin).record()
-        XCTAssertThrowsError(try wait(for: recorder.elements, timeout: 1))
+        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
     }
 
     func testUpdateData() throws {
-        // TODO
+        let storeFlowable = SucceedTestResponder(initialData: .validData).create()
+        let publishRecorder = storeFlowable.publish().record()
+        _ = try wait(for: publishRecorder.next(), timeout: 1)
+        let updateRecorder = storeFlowable.update(newData: .validData).record()
+        _ = try wait(for: updateRecorder.finished, timeout: 1)
+        let element = try wait(for: publishRecorder.next(), timeout: 1)
+        switch element {
+        case .fixed:
+            break // ok
+        case .loading:
+            XCTFail()
+        case .error:
+            XCTFail()
+        }
+        switch element.content {
+        case .exist(let rawContent):
+            XCTAssertEqual(rawContent, .validData)
+        case .notExist:
+            XCTFail()
+        }
     }
 
-    func testUpdateNull() throws {
-        // TODO
+    func testUpdateNil() throws {
+        let storeFlowable = SucceedTestResponder(initialData: .validData).create()
+        let publishRecorder = storeFlowable.publish().record()
+        _ = try wait(for: publishRecorder.next(), timeout: 1)
+        _ = storeFlowable.update(newData: nil).record()
+        let element = try wait(for: publishRecorder.next(), timeout: 1)
+        switch element {
+        case .fixed:
+            break // ok
+        case .loading:
+            XCTFail()
+        case .error:
+            XCTFail()
+        }
+        switch element.content {
+        case .exist:
+            XCTFail()
+        case .notExist:
+            break // ok
+        }
     }
 
     func testValidateWithNoCache() throws {
-        // TODO
+        let storeFlowable = SucceedTestResponder(initialData: .validData).create()
+        let recorder = storeFlowable.publish().record()
+        _ = try wait(for: recorder.next(), timeout: 1)
+        _ = storeFlowable.update(newData: nil).record()
+        _ = try wait(for: recorder.next(), timeout: 1)
+        _ = storeFlowable.validate().record()
+        let elements = try wait(for: recorder.availableElements, timeout: 1)
+        XCTAssertEqual(elements.count, 4)
     }
 
     func testValidateWithValidData() throws {
-        // TODO
+        let storeFlowable = SucceedTestResponder(initialData: .validData).create()
+        let recorder = storeFlowable.publish().record()
+        _ = try wait(for: recorder.next(), timeout: 1)
+        _ = storeFlowable.update(newData: .validData).record()
+        _ = try wait(for: recorder.next(), timeout: 1)
+        _ = storeFlowable.validate().record()
+        let elements = try wait(for: recorder.availableElements, timeout: 1)
+        XCTAssertEqual(elements.count, 2)
     }
 
     func testValidateWithInvalidData() throws {
-        // TODO
+        let storeFlowable = SucceedTestResponder(initialData: .validData).create()
+        let recorder = storeFlowable.publish().record()
+        _ = try wait(for: recorder.next(), timeout: 1)
+        _ = storeFlowable.update(newData: .invalidData).record()
+        _ = try wait(for: recorder.next(), timeout: 1)
+        _ = storeFlowable.validate().record()
+        let elements = try wait(for: recorder.availableElements, timeout: 1)
+        XCTAssertEqual(elements.count, 4)
     }
 
     func testRefresh() throws {
-        // TODO
+        let storeFlowable = SucceedTestResponder(initialData: .validData).create()
+        let recorder = storeFlowable.publish().record()
+        _ = try wait(for: recorder.next(), timeout: 1)
+        _ = storeFlowable.refresh().record()
+        let elements = try wait(for: recorder.availableElements, timeout: 1)
+        XCTAssertEqual(elements.count, 3)
     }
 }

@@ -125,7 +125,7 @@ extension StoreFlowableTests {
         ("testGetFromOriginWithValidCache", testGetFromOriginWithValidCache),
         ("testRefresh", testRefresh),
         ("testUpdateData", testUpdateData),
-        ("testUpdateNull", testUpdateNull),
+        ("testUpdateNil", testUpdateNil),
         ("testValidateWithInvalidData", testValidateWithInvalidData),
         ("testValidateWithNoCache", testValidateWithNoCache),
         ("testValidateWithValidData", testValidateWithValidData),

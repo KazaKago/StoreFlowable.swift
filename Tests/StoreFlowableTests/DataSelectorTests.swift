@@ -109,7 +109,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStatNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -123,7 +123,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStatNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -137,7 +137,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStatNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -151,7 +151,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStatNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -165,7 +165,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStatNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -179,7 +179,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStatNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -193,7 +193,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStatNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -207,7 +207,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStatNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -225,7 +225,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -235,7 +235,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -245,7 +245,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -255,7 +255,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -265,7 +265,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -275,7 +275,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -285,7 +285,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -295,7 +295,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -309,7 +309,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: XCTFail()
@@ -319,7 +319,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -333,7 +333,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: XCTFail()
@@ -343,7 +343,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -357,7 +357,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: XCTFail()
@@ -367,7 +367,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -381,7 +381,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: XCTFail()
@@ -391,7 +391,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateNoCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -409,7 +409,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -423,7 +423,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -437,7 +437,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -451,7 +451,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -465,7 +465,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -479,7 +479,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -493,7 +493,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -507,7 +507,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -525,7 +525,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -539,7 +539,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -553,7 +553,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -567,7 +567,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -581,7 +581,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -595,7 +595,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -609,7 +609,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -623,7 +623,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupLoadingStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: break // ok
@@ -641,7 +641,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: XCTFail()
@@ -655,7 +655,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: XCTFail()
@@ -669,7 +669,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: XCTFail()
@@ -683,7 +683,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: XCTFail()
@@ -697,7 +697,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: XCTFail()
@@ -711,7 +711,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -725,7 +725,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: XCTFail()
         case .loading: XCTFail()
@@ -739,7 +739,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupErrorStateValidCache()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -757,7 +757,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateInvalidData()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -771,7 +771,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateInvalidData()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -785,7 +785,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateInvalidData()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -799,7 +799,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateInvalidData()
         recorder = dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -813,7 +813,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateInvalidData()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -827,7 +827,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateInvalidData()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -841,7 +841,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateInvalidData()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: false, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
@@ -855,7 +855,7 @@ final class DataSelectorTest: XCTestCase {
 
         setupFixedStateInvalidData()
         recorder = dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        _ = try wait(for: recorder.finished, timeout: 1)
         switch testDataStateManager.dataState {
         case .fixed: break // ok
         case .loading: XCTFail()
