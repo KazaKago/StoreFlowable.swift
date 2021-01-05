@@ -3,5 +3,6 @@ import XCTest
 import StoreFlowableTests
 
 var tests = [XCTestCaseEntry]()
-tests += StoreFlowableTests.allTests()
+tests += StoreFlowableTests.__allTests()
+
 XCTMain(tests)
