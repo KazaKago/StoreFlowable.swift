@@ -100,7 +100,7 @@ struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
         dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: clearCacheWhenFetchFails, continueWhenError: continueWhenError, awaitFetching: true, additionalRequest: false)
     }
 
-    func requestAdditional(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+    func requestAddition(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
         dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: false, continueWhenError: continueWhenError, awaitFetching: true, additionalRequest: true)
     }
 

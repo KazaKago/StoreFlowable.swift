@@ -21,7 +21,7 @@ public protocol PagingStoreFlowable {
 
     func refresh(clearCacheWhenFetchFails: Bool, continueWhenError: Bool) -> AnyPublisher<Void, Never>
 
-    func requestAdditional(continueWhenError: Bool) -> AnyPublisher<Void, Never>
+    func requestAddition(continueWhenError: Bool) -> AnyPublisher<Void, Never>
 
     func update(newData: [DATA]?) -> AnyPublisher<Void, Never>
 }
@@ -40,7 +40,7 @@ public extension PagingStoreFlowable {
         refresh(clearCacheWhenFetchFails: clearCacheWhenFetchFails, continueWhenError: continueWhenError)
     }
 
-    func requestAdditional(continueWhenError: Bool = true) -> AnyPublisher<Void, Never> {
-        requestAdditional(continueWhenError: continueWhenError)
+    func requestAddition(continueWhenError: Bool = true) -> AnyPublisher<Void, Never> {
+        requestAddition(continueWhenError: continueWhenError)
     }
 }

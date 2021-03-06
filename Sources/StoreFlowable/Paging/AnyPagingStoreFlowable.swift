@@ -34,7 +34,7 @@ public struct AnyPagingStoreFlowable<KEY: Hashable, DATA>: PagingStoreFlowable {
             inner.refresh(clearCacheWhenFetchFails: clearCacheWhenFetchFails, continueWhenError: continueWhenError)
         }
         _requestAdditional = { continueWhenError in
-            inner.requestAdditional(continueWhenError: continueWhenError)
+            inner.requestAddition(continueWhenError: continueWhenError)
         }
         _update = { newData in
             inner.update(newData: newData)
@@ -57,7 +57,7 @@ public struct AnyPagingStoreFlowable<KEY: Hashable, DATA>: PagingStoreFlowable {
         _refresh(clearCacheWhenFetchFails, continueWhenError)
     }
 
-    public func requestAdditional(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+    public func requestAddition(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
         _requestAdditional(continueWhenError)
     }
 
