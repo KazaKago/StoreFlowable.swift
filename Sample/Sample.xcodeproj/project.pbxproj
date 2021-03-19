@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E308A92F257281870059EF00 /* StoreFlowable.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E308A92E257281870059EF00 /* StoreFlowable.framework */; };
-		E308A930257281870059EF00 /* StoreFlowable.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E308A92E257281870059EF00 /* StoreFlowable.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E33BD1182596FADB003E6E45 /* GithubOrgsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E33BD1172596FADB003E6E45 /* GithubOrgsView.swift */; };
 		E33BD11C2596FB1B003E6E45 /* GithubOrgsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E33BD11B2596FB1B003E6E45 /* GithubOrgsViewModel.swift */; };
 		E33BD12025970116003E6E45 /* GithubOrgItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E33BD11F25970116003E6E45 /* GithubOrgItem.swift */; };
@@ -33,6 +31,7 @@
 		E372C117259A438600EBD4A0 /* GithubReposViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E372C116259A438600EBD4A0 /* GithubReposViewModel.swift */; };
 		E372C11B259A444A00EBD4A0 /* GithubReposView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E372C11A259A444A00EBD4A0 /* GithubReposView.swift */; };
 		E372C11F259A44B400EBD4A0 /* GithubRepoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E372C11E259A44B400EBD4A0 /* GithubRepoItem.swift */; };
+		E3756A4C2604F46B00799AFE /* StoreFlowable in Frameworks */ = {isa = PBXBuildFile; productRef = E3756A4B2604F46B00799AFE /* StoreFlowable */; };
 		E38A3A802589F3BE00E20174 /* GithubInMemoryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38A3A7F2589F3BE00E20174 /* GithubInMemoryCache.swift */; };
 		E38A3A842589F62700E20174 /* GithubApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38A3A832589F62700E20174 /* GithubApi.swift */; };
 		E38A3A8A2589F92B00E20174 /* GithubMetaStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38A3A892589F92B00E20174 /* GithubMetaStateManager.swift */; };
@@ -63,20 +62,6 @@
 			remoteInfo = Sample;
 		};
 /* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		E308A931257281870059EF00 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				E308A930257281870059EF00 /* StoreFlowable.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		E308A92E257281870059EF00 /* StoreFlowable.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = StoreFlowable.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,6 +94,7 @@
 		E372C116259A438600EBD4A0 /* GithubReposViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GithubReposViewModel.swift; sourceTree = "<group>"; };
 		E372C11A259A444A00EBD4A0 /* GithubReposView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GithubReposView.swift; sourceTree = "<group>"; };
 		E372C11E259A44B400EBD4A0 /* GithubRepoItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GithubRepoItem.swift; sourceTree = "<group>"; };
+		E3756A452604F41900799AFE /* StoreFlowable.swift */ = {isa = PBXFileReference; lastKnownFileType = folder; name = StoreFlowable.swift; path = ..; sourceTree = "<group>"; };
 		E38A3A7F2589F3BE00E20174 /* GithubInMemoryCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GithubInMemoryCache.swift; sourceTree = "<group>"; };
 		E38A3A832589F62700E20174 /* GithubApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GithubApi.swift; sourceTree = "<group>"; };
 		E38A3A892589F92B00E20174 /* GithubMetaStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GithubMetaStateManager.swift; sourceTree = "<group>"; };
@@ -128,8 +114,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				E372C107259A0DBD00EBD4A0 /* KingfisherSwiftUI in Frameworks */,
-				E308A92F257281870059EF00 /* StoreFlowable.framework in Frameworks */,
 				E3C052EF2592EF8200DB555B /* Alamofire in Frameworks */,
+				E3756A4C2604F46B00799AFE /* StoreFlowable in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -172,6 +158,7 @@
 		E35C34F22572808500B085ED = {
 			isa = PBXGroup;
 			children = (
+				E3756A452604F41900799AFE /* StoreFlowable.swift */,
 				E35C34FD2572808500B085ED /* Sample */,
 				E35C350F2572808500B085ED /* SampleTests */,
 				E35C351A2572808500B085ED /* SampleUITests */,
@@ -319,7 +306,6 @@
 				E35C34F72572808500B085ED /* Sources */,
 				E35C34F82572808500B085ED /* Frameworks */,
 				E35C34F92572808500B085ED /* Resources */,
-				E308A931257281870059EF00 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -329,6 +315,7 @@
 			packageProductDependencies = (
 				E3C052EE2592EF8200DB555B /* Alamofire */,
 				E372C106259A0DBD00EBD4A0 /* KingfisherSwiftUI */,
+				E3756A4B2604F46B00799AFE /* StoreFlowable */,
 			);
 			productName = Sample;
 			productReference = E35C34FB2572808500B085ED /* Sample.app */;
@@ -817,6 +804,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E372C105259A0DBD00EBD4A0 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = KingfisherSwiftUI;
+		};
+		E3756A4B2604F46B00799AFE /* StoreFlowable */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StoreFlowable;
 		};
 		E3C052EE2592EF8200DB555B /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;

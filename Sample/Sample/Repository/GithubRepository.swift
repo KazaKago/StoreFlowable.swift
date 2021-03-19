@@ -33,7 +33,7 @@ struct GithubRepository {
 
     func requestAdditionalOrgs(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
         let githubOrgsFlowable = GithubOrgsResponder().create()
-        return githubOrgsFlowable.requestAdditional(continueWhenError: continueWhenError)
+        return githubOrgsFlowable.requestAddition(continueWhenError: continueWhenError)
     }
 
     func followUser(userName: String) -> AnyPublisher<State<GithubUser>, Never> {
@@ -58,6 +58,6 @@ struct GithubRepository {
 
     func requestAdditionalRepos(userName: String, continueWhenError: Bool) -> AnyPublisher<Void, Never> {
         let githubReposFlowable = GithubReposResponder(userName: userName).create()
-        return githubReposFlowable.requestAdditional(continueWhenError: continueWhenError)
+        return githubReposFlowable.requestAddition(continueWhenError: continueWhenError)
     }
 }
