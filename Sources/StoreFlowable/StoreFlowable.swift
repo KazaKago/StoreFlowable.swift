@@ -13,7 +13,7 @@ public protocol StoreFlowable {
     associatedtype KEY: Hashable
     associatedtype DATA
 
-    func publish(forceRefresh: Bool) -> FlowableState<DATA>
+    func publish(forceRefresh: Bool) -> StatePublisher<DATA>
 
     func getData(from: GettingFrom) -> AnyPublisher<DATA?, Never>
 
@@ -28,7 +28,7 @@ public protocol StoreFlowable {
 
 public extension StoreFlowable {
 
-    func publish(forceRefresh: Bool = false) -> FlowableState<DATA> {
+    func publish(forceRefresh: Bool = false) -> StatePublisher<DATA> {
         publish(forceRefresh: forceRefresh)
     }
 

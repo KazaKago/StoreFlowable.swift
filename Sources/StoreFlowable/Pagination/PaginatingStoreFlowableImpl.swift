@@ -28,7 +28,7 @@ struct PaginatingStoreFlowableImpl<KEY: Hashable, DATA>: PaginatingStoreFlowable
         )
     }
 
-    func publish(forceRefresh: Bool) -> FlowableState<DATA> {
+    func publish(forceRefresh: Bool) -> StatePublisher<DATA> {
         dataSelector.doStateAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: false, additionalRequest: false)
             .flatMap { _ in
                 storeFlowableCallback.flowableDataStateManager.getFlow(key: storeFlowableCallback.key)

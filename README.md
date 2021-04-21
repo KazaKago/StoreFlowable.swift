@@ -129,7 +129,7 @@ Be sure to go through the created [`AnyStoreFlowable<KEY: Hashable, DATA>`](Sour
 ```swift
 struct UserRepository {
 
-    func followUserData(userId: UserId) -> FlowableState<UserData> {
+    func followUserData(userId: UserId) -> StatePublisher<UserData> {
         let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableCallback(userId: userId).create()
         return userFlowable.publish()
     }
@@ -141,7 +141,7 @@ struct UserRepository {
 }
 ```
 
-You can get the data in the form of [`FlowableState<DATA>`](Sources/StoreFlowable/Core/FlowableState.swift) (Same as `AnyPublisher<State<DATA>, Never>`) by using the [`publish()`](Sources/StoreFlowable/StoreFlowable.swift) method.  
+You can get the data in the form of [`StatePublisher<DATA>`](Sources/StoreFlowable/Core/StatePublisher.swift) (Same as `AnyPublisher<State<DATA>, Never>`) by using the [`publish()`](Sources/StoreFlowable/StoreFlowable.swift) method.  
 [`State`](Sources/StoreFlowable/Core/State.swift) is a [enum](https://docs.swift.org/swift-book/LanguageGuide/Enumerations.html) that holds raw data.
 
 ### 4. Use Repository class
@@ -234,7 +234,7 @@ If you want to ignore the cache and get new data, add `forceRefresh` parameter t
 
 ```swift
 public extension StoreFlowable {
-    func publish(forceRefresh: Bool = false) -> FlowableState<DATA>
+    func publish(forceRefresh: Bool = false) -> StatePublisher<DATA>
 }
 ```
 

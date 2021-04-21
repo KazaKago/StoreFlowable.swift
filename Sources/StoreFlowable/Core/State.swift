@@ -1,5 +1,5 @@
 //
-//  FlowableState.swift
+//  State.swift
 //  StoreFlowable
 //
 //  Created by Kensuke Tamura on 2020/11/28.

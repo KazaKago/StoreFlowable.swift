@@ -13,7 +13,7 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
     public typealias KEY = KEY
     public typealias DATA = DATA
 
-    private let _publish: (_ forceRefresh: Bool) -> FlowableState<DATA>
+    private let _publish: (_ forceRefresh: Bool) -> StatePublisher<DATA>
     private let _getData: (_ from: GettingFrom) -> AnyPublisher<DATA?, Never>
     private let _requireData: (_ from: GettingFrom) -> AnyPublisher<DATA, Error>
     private let _validate: () -> AnyPublisher<Void, Never>
@@ -41,7 +41,7 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
         }
     }
 
-    public func publish(forceRefresh: Bool) -> FlowableState<DATA> {
+    public func publish(forceRefresh: Bool) -> StatePublisher<DATA> {
         _publish(forceRefresh)
     }
 

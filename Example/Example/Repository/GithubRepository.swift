@@ -11,7 +11,7 @@ import StoreFlowable
 
 struct GithubRepository {
 
-    func followMeta() -> FlowableState<GithubMeta> {
+    func followMeta() -> StatePublisher<GithubMeta> {
         let githubMetaFlowable = GithubMetaFlowableCallback().create()
         return githubMetaFlowable.publish()
     }
@@ -21,7 +21,7 @@ struct GithubRepository {
         return githubMetaFlowable.refresh()
     }
 
-    func followOrgs() -> FlowableState<[GithubOrg]> {
+    func followOrgs() -> StatePublisher<[GithubOrg]> {
         let githubOrgsFlowable = GithubOrgsFlowableCallback().create()
         return githubOrgsFlowable.publish()
     }
@@ -36,7 +36,7 @@ struct GithubRepository {
         return githubOrgsFlowable.requestAdditionalData(continueWhenError: continueWhenError)
     }
 
-    func followUser(userName: String) -> FlowableState<GithubUser> {
+    func followUser(userName: String) -> StatePublisher<GithubUser> {
         let githubUserFlowable = GithubUserFlowableCallback(userName: userName).create()
         return githubUserFlowable.publish()
     }
@@ -46,7 +46,7 @@ struct GithubRepository {
         return githubUserFlowable.refresh()
     }
 
-    func followRepos(userName: String) -> FlowableState<[GithubRepo]> {
+    func followRepos(userName: String) -> StatePublisher<[GithubRepo]> {
         let githubReposFlowable = GithubReposFlowableCallback(userName: userName).create()
         return githubReposFlowable.publish()
     }

@@ -28,7 +28,7 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
         )
     }
 
-    func publish(forceRefresh: Bool) -> FlowableState<DATA> {
+    func publish(forceRefresh: Bool) -> StatePublisher<DATA> {
         dataSelector.doStateAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: false)
             .flatMap { _ in
                 storeFlowableCallback.flowableDataStateManager.getFlow(key: storeFlowableCallback.key)
