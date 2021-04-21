@@ -129,7 +129,7 @@ Be sure to go through the created [`AnyStoreFlowable<KEY: Hashable, DATA>`](Sour
 ```swift
 struct UserRepository {
 
-    func followUserData(userId: UserId) -> AnyPublisher<State<UserData>, Never> {
+    func followUserData(userId: UserId) -> FlowableState<UserData> {
         let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableCallback(userId: userId).create()
         return userFlowable.publish()
     }
@@ -234,7 +234,7 @@ If you want to ignore the cache and get new data, add `forceRefresh` parameter t
 
 ```swift
 public extension StoreFlowable {
-    func publish(forceRefresh: Bool = false) -> AnyPublisher<State<DATA>, Never>
+    func publish(forceRefresh: Bool = false) -> FlowableState<DATA>
 }
 ```
 
