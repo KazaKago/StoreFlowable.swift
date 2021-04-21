@@ -307,7 +307,7 @@ struct UserListFlowableCallback : PaginatingStoreFlowableCallback {
 
     func saveDataToCache(cachedData: [UserData]?, newData: [UserData]) -> AnyPublisher<Void, Never> {
         let mergedData = (cachedData ?? []) + newData
-        return userListCache.save(data: data)
+        return userListCache.save(data: mergedData)
     }
 
     func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<[UserData]>, Error> {
