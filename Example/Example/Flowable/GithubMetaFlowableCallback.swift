@@ -1,5 +1,5 @@
 //
-//  GithubMetaResponder.swift
+//  GithubMetaFlowableCallback.swift
 //  Example
 //
 //  Created by Kensuke Tamura on 2020/12/16.
@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import StoreFlowable
 
-struct GithubMetaResponder : StoreFlowableResponder {
+struct GithubMetaFlowableCallback: StoreFlowableCallback {
 
     typealias KEY = UnitHash
     typealias DATA = GithubMeta
@@ -21,28 +21,30 @@ struct GithubMetaResponder : StoreFlowableResponder {
 
     let flowableDataStateManager: FlowableDataStateManager<UnitHash> = GithubMetaStateManager.shared
 
-    func loadData() -> AnyPublisher<GithubMeta?, Never> {
+    func loadDataFromCache() -> AnyPublisher<GithubMeta?, Never> {
         Future { promise in
             promise(.success(GithubInMemoryCache.metaCache))
         }.eraseToAnyPublisher()
     }
 
-    func saveData(data: GithubMeta?) -> AnyPublisher<Void, Never> {
+    func saveDataToCache(newData: GithubMeta?) -> AnyPublisher<Void, Never> {
         Future { promise in
-            GithubInMemoryCache.metaCache = data
+            GithubInMemoryCache.metaCache = newData
             GithubInMemoryCache.metaCacheCreatedAt = Date()
             promise(.success(()))
         }.eraseToAnyPublisher()
     }
 
-    func fetchOrigin() -> AnyPublisher<GithubMeta, Error> {
-        githubApi.getMeta()
+    func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<GithubMeta>, Error> {
+        githubApi.getMeta().map { data in
+            FetchingResult(data: data)
+        }.eraseToAnyPublisher()
     }
 
-    func needRefresh(data: GithubMeta) -> AnyPublisher<Bool, Never> {
+    func needRefresh(cachedData: GithubMeta) -> AnyPublisher<Bool, Never> {
         Future { promise in
             if let createdAt = GithubInMemoryCache.metaCacheCreatedAt {
-                let expiredAt = createdAt + GithubMetaResponder.EXPIRE_SECONDS
+                let expiredAt = createdAt + GithubMetaFlowableCallback.EXPIRE_SECONDS
                 promise(.success(expiredAt < Date()))
             } else {
                 promise(.success(true))

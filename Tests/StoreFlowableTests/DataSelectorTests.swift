@@ -33,13 +33,13 @@ final class DataSelectorTest: XCTestCase {
     private class TestCacheDataManager : CacheDataManager {
         typealias DATA = TestData
         var dataCache: TestData? = nil
-        func loadData() -> AnyPublisher<TestData?, Never> {
+        func loadDataFromCache() -> AnyPublisher<TestData?, Never> {
             Just(dataCache)
                 .eraseToAnyPublisher()
         }
-        func saveData(data: TestData?) -> AnyPublisher<Void, Never> {
+        func saveDataToCache(newData: TestData?) -> AnyPublisher<Void, Never> {
             Future { promise in
-                self.dataCache = data
+                self.dataCache = newData
                 promise(.success(()))
             }.eraseToAnyPublisher()
         }
@@ -47,9 +47,9 @@ final class DataSelectorTest: XCTestCase {
 
     private class TestOriginDataManager : OriginDataManager {
         typealias DATA = TestData
-        func fetchOrigin() -> AnyPublisher<TestData, Error> {
+        func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<DataSelectorTest.TestData>, Error> {
             Future { promise in
-                promise(.success(.fetchedData))
+                promise(.success(FetchingResult(data: .fetchedData)))
             }.eraseToAnyPublisher()
         }
     }

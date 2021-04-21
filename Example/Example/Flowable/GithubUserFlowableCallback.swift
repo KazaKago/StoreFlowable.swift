@@ -1,5 +1,5 @@
 //
-//  GithubUserResponder.swift
+//  GithubUserFlowableCallback.swift
 //  Example
 //
 //  Created by Kensuke Tamura on 2020/12/28.
@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import StoreFlowable
 
-struct GithubUserResponder : StoreFlowableResponder {
+struct GithubUserFlowableCallback: StoreFlowableCallback {
 
     typealias KEY = String
     typealias DATA = GithubUser
@@ -25,28 +25,30 @@ struct GithubUserResponder : StoreFlowableResponder {
 
     let flowableDataStateManager: FlowableDataStateManager<String> = GithubUserStateManager.shared
 
-    func loadData() -> AnyPublisher<GithubUser?, Never> {
+    func loadDataFromCache() -> AnyPublisher<GithubUser?, Never> {
         Future { promise in
             promise(.success(GithubInMemoryCache.userCache[key]))
         }.eraseToAnyPublisher()
     }
 
-    func saveData(data: GithubUser?) -> AnyPublisher<Void, Never> {
+    func saveDataToCache(newData: GithubUser?) -> AnyPublisher<Void, Never> {
         Future { promise in
-            GithubInMemoryCache.userCache[key] = data
+            GithubInMemoryCache.userCache[key] = newData
             GithubInMemoryCache.userCacheCreatedAt[key] = Date()
             promise(.success(()))
         }.eraseToAnyPublisher()
     }
 
-    func fetchOrigin() -> AnyPublisher<GithubUser, Error> {
-        githubApi.getUser(userName: key)
+    func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<GithubUser>, Error> {
+        githubApi.getUser(userName: key).map { data in
+            FetchingResult(data: data)
+        }.eraseToAnyPublisher()
     }
 
-    func needRefresh(data: GithubUser) -> AnyPublisher<Bool, Never> {
+    func needRefresh(cachedData: GithubUser) -> AnyPublisher<Bool, Never> {
         Future { promise in
             if let createdAt = GithubInMemoryCache.userCacheCreatedAt[key] {
-                let expiredAt = createdAt + GithubUserResponder.EXPIRE_SECONDS
+                let expiredAt = createdAt + GithubUserFlowableCallback.EXPIRE_SECONDS
                 promise(.success(expiredAt < Date()))
             } else {
                 promise(.success(true))

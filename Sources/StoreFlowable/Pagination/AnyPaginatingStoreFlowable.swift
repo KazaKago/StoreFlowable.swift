@@ -1,14 +1,14 @@
 //
-//  AnyStoreFlowable.swift
+//  AnyPaginatingStoreFlowable.swift
 //  StoreFlowable
 //
-//  Created by Kensuke Tamura on 2020/12/12.
+//  Created by Kensuke Tamura on 2020/12/24.
 //
 
 import Foundation
 import Combine
 
-public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
+public struct AnyPaginatingStoreFlowable<KEY: Hashable, DATA>: PaginatingStoreFlowable {
 
     public typealias KEY = KEY
     public typealias DATA = DATA
@@ -18,9 +18,10 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
     private let _requireData: (_ from: GettingFrom) -> AnyPublisher<DATA, Error>
     private let _validate: () -> AnyPublisher<Void, Never>
     private let _refresh: (_ clearCacheWhenFetchFails: Bool, _ continueWhenError: Bool) -> AnyPublisher<Void, Never>
+    private let _requestAdditionalData: (_ continueWhenError: Bool) -> AnyPublisher<Void, Never>
     private let _update: (_ newData: DATA?) -> AnyPublisher<Void, Never>
 
-    init<INNER: StoreFlowable>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
+    init<INNER: PaginatingStoreFlowable>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
         _publish = { forceRefresh in
             inner.publish(forceRefresh: forceRefresh)
         }
@@ -35,6 +36,9 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
         }
         _refresh = { (clearCacheWhenFetchFails, continueWhenError) in
             inner.refresh(clearCacheWhenFetchFails: clearCacheWhenFetchFails, continueWhenError: continueWhenError)
+        }
+        _requestAdditionalData = { continueWhenError in
+            inner.requestAdditionalData(continueWhenError: continueWhenError)
         }
         _update = { newData in
             inner.update(newData: newData)
@@ -59,6 +63,10 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
 
     public func refresh(clearCacheWhenFetchFails: Bool, continueWhenError: Bool) -> AnyPublisher<Void, Never> {
         _refresh(clearCacheWhenFetchFails, continueWhenError)
+    }
+
+    public func requestAdditionalData(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+        _requestAdditionalData(continueWhenError)
     }
 
     public func update(newData: DATA?) -> AnyPublisher<Void, Never> {

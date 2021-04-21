@@ -12,15 +12,15 @@ struct AnyOriginDataManager<DATA>: OriginDataManager {
 
     typealias DATA = DATA
 
-    private let _fetchOrigin: () -> AnyPublisher<DATA, Error>
+    private let _fetchDataFromOrigin: () -> AnyPublisher<FetchingResult<DATA>, Error>
 
     init<INNER: OriginDataManager>(_ inner: INNER) where INNER.DATA == DATA {
-        _fetchOrigin = {
-            inner.fetchOrigin()
+        _fetchDataFromOrigin = {
+            inner.fetchDataFromOrigin()
         }
     }
 
-    func fetchOrigin() -> AnyPublisher<DATA, Error> {
-        _fetchOrigin()
+    func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<DATA>, Error> {
+        _fetchDataFromOrigin()
     }
 }

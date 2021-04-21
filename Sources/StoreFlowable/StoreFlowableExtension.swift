@@ -8,21 +8,9 @@
 import Foundation
 import Combine
 
-public extension StoreFlowableResponder {
+public extension StoreFlowableCallback {
 
     func create() -> AnyStoreFlowable<KEY, DATA> {
-        AnyStoreFlowable(StoreFlowableImpl(storeFlowableResponder: AnyStoreFlowableResponder(self)))
-    }
-}
-
-public extension StoreFlowable {
-
-    func getOrNil(type: AsDataType = .mix) -> AnyPublisher<DATA?, Never> {
-        get(type: type)
-            .tryMap { data -> DATA? in
-                data
-            }
-            .replaceError(with: nil)
-            .eraseToAnyPublisher()
+        AnyStoreFlowable(StoreFlowableImpl(storeFlowableCallback: AnyStoreFlowableCallback(self)))
     }
 }

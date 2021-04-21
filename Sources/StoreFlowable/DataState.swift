@@ -8,7 +8,7 @@
 import Foundation
 
 public enum DataState {
-    case fixed(isReachLast: Bool = false)
+    case fixed(noMoreAdditionalData: Bool = false)
     case loading
     case error(rawError: Error)
 }

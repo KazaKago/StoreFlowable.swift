@@ -14,26 +14,26 @@ struct MainView: View {
     var body: some View {
         NavigationView {
             VStack {
-                Text("Simple sample")
+                Text("Simple example")
                 Spacer()
                     .frame(height: 10)
                 HStack {
                     NavigationLink(destination: GithubMetaView()) {
-                        Text("Github Meta info\n(Single cache sample)")
+                        Text("Github Meta info\n(Single cache)")
                             .font(.system(size: 15))
                             .multilineTextAlignment(.center)
                     }
                     Spacer()
                         .frame(width: 20)
                     NavigationLink(destination: GithubOrgsView()) {
-                        Text("Github Organizations\n(Paging cache sample)")
+                        Text("Github Orgs\n(Paginating cache)")
                             .font(.system(size: 15))
                             .multilineTextAlignment(.center)
                     }
                 }
                 Spacer()
                     .frame(height: 30)
-                Text("Per user sample")
+                Text("Per user example")
                 TextField("Input any Github username", text: $githubName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(EdgeInsets.init(top: 0, leading: 20, bottom: 0, trailing: 20))
@@ -41,21 +41,21 @@ struct MainView: View {
                     .frame(height: 10)
                 HStack {
                     NavigationLink(destination: GithubUserView(userName: githubName)) {
-                        Text("Github User's info\n(Single cache sample)")
+                        Text("Github User's info\n(Single cache)")
                             .font(.system(size: 15))
                             .multilineTextAlignment(.center)
                     }
                     Spacer()
                         .frame(width: 20)
                     NavigationLink(destination: GithubReposView(userName: githubName)) {
-                        Text("Github User's repos\n(Paging cache sample)")
+                        Text("Github User's repos\n(Paginating cache)")
                             .font(.system(size: 15))
                             .multilineTextAlignment(.center)
                     }
                 }
             }
             .padding()
-            .navigationBarTitle("StoreFlowable Sample")
+            .navigationBarTitle("StoreFlowable Example")
             .navigationBarTitleDisplayMode(.inline)
         }
     }

@@ -12,5 +12,5 @@ public protocol OriginDataManager {
 
     associatedtype DATA
 
-    func fetchOrigin() -> AnyPublisher<DATA, Error>
+    func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<DATA>, Error>
 }

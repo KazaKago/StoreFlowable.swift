@@ -12,23 +12,23 @@ struct AnyCacheDataManager<DATA>: CacheDataManager {
 
     typealias DATA = DATA
 
-    private let _loadData: () -> AnyPublisher<DATA?, Never>
-    private let _saveData: (_ data: DATA?) -> AnyPublisher<Void, Never>
+    private let _loadDataFromCache: () -> AnyPublisher<DATA?, Never>
+    private let _saveDataToCache: (_ data: DATA?) -> AnyPublisher<Void, Never>
 
     init<INNER: CacheDataManager>(_ inner: INNER) where INNER.DATA == DATA {
-        _loadData = {
-            inner.loadData()
+        _loadDataFromCache = {
+            inner.loadDataFromCache()
         }
-        _saveData = { data in
-            inner.saveData(data: data)
+        _saveDataToCache = { newData in
+            inner.saveDataToCache(newData: newData)
         }
     }
 
-    func loadData() -> AnyPublisher<DATA?, Never> {
-        _loadData()
+    func loadDataFromCache() -> AnyPublisher<DATA?, Never> {
+        _loadDataFromCache()
     }
 
-    func saveData(data: DATA?) -> AnyPublisher<Void, Never> {
-        _saveData(data)
+    func saveDataToCache(newData: DATA?) -> AnyPublisher<Void, Never> {
+        _saveDataToCache(newData)
     }
 }

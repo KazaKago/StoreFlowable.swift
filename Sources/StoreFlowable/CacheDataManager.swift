@@ -12,7 +12,7 @@ public protocol CacheDataManager {
 
     associatedtype DATA
 
-    func loadData() -> AnyPublisher<DATA?, Never>
+    func loadDataFromCache() -> AnyPublisher<DATA?, Never>
 
-    func saveData(data: DATA?) -> AnyPublisher<Void, Never>
+    func saveDataToCache(newData: DATA?) -> AnyPublisher<Void, Never>
 }

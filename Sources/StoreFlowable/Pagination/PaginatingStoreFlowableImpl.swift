@@ -1,5 +1,5 @@
 //
-//  PagingStoreFlowableImpl.swift
+//  PaginatingStoreFlowableImpl.swift
 //  StoreFlowable
 //
 //  Created by Kensuke Tamura on 2020/12/24.
@@ -9,29 +9,29 @@ import Foundation
 import Combine
 import CombineAsync
 
-struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
+struct PaginatingStoreFlowableImpl<KEY: Hashable, DATA>: PaginatingStoreFlowable {
 
     typealias KEY = KEY
     typealias DATA = DATA
 
-    private let storeFlowableResponder: AnyPagingStoreFlowableResponder<KEY, DATA>
-    private var dataSelector: PagingDataSelector<KEY, DATA>
+    private let storeFlowableCallback: AnyPaginatingStoreFlowableCallback<KEY, DATA>
+    private var dataSelector: PaginatingDataSelector<KEY, DATA>
 
-    init(storeFlowableResponder: AnyPagingStoreFlowableResponder<KEY, DATA>) {
-        self.storeFlowableResponder = storeFlowableResponder
-        dataSelector = PagingDataSelector(
-            key: storeFlowableResponder.key,
-            dataStateManager: AnyDataStateManager(storeFlowableResponder.flowableDataStateManager),
-            cacheDataManager: AnyPagingCacheDataManager(storeFlowableResponder),
-            originDataManager: AnyPagingOriginDataManager(storeFlowableResponder),
-            needRefresh: { data in storeFlowableResponder.needRefresh(data: data) }
+    init(storeFlowableCallback: AnyPaginatingStoreFlowableCallback<KEY, DATA>) {
+        self.storeFlowableCallback = storeFlowableCallback
+        dataSelector = PaginatingDataSelector(
+            key: storeFlowableCallback.key,
+            dataStateManager: AnyDataStateManager(storeFlowableCallback.flowableDataStateManager),
+            cacheDataManager: AnyPaginatingCacheDataManager(storeFlowableCallback),
+            originDataManager: AnyPaginatingOriginDataManager(storeFlowableCallback),
+            needRefresh: { cachedData in storeFlowableCallback.needRefresh(cachedData: cachedData) }
         )
     }
 
-    func publish(forceRefresh: Bool) -> AnyPublisher<State<[DATA]>, Never> {
+    func publish(forceRefresh: Bool) -> FlowableState<DATA> {
         dataSelector.doStateAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: false, additionalRequest: false)
             .flatMap { _ in
-                storeFlowableResponder.flowableDataStateManager.getFlow(key: storeFlowableResponder.key)
+                storeFlowableCallback.flowableDataStateManager.getFlow(key: storeFlowableCallback.key)
             }
             .flatMap { dataState in
                 dataSelector.load().map { data in
@@ -45,9 +45,18 @@ struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
             .eraseToAnyPublisher()
     }
 
-    func get(type: AsDataType) -> AnyPublisher<[DATA], Error> {
+    func getData(from: GettingFrom) -> AnyPublisher<DATA?, Never> {
+        requireData(from: from)
+            .tryMap { data -> DATA? in
+                data
+            }
+            .replaceError(with: nil)
+            .eraseToAnyPublisher()
+    }
+
+    func requireData(from: GettingFrom) -> AnyPublisher<DATA, Error> {
         async { yield in
-            switch type {
+            switch from {
             case .mix:
                 try await(dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, additionalRequest: false))
             case .fromOrigin:
@@ -58,7 +67,7 @@ struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
             }
         }
         .flatMap {
-            storeFlowableResponder.flowableDataStateManager.getFlow(key: storeFlowableResponder.key)
+            storeFlowableCallback.flowableDataStateManager.getFlow(key: storeFlowableCallback.key)
                 .setFailureType(to: Error.self) // Workaround for macOS10.15/iOS13.0/tvOS13.0/watchOS6.0 https://www.donnywals.com/configuring-error-types-when-using-flatmap-in-combine/
         }
         .flatMap { dataState in
@@ -71,7 +80,7 @@ struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
             async { yield in
                 switch dataState {
                 case .fixed:
-                    if (data != nil && !(try! await(storeFlowableResponder.needRefresh(data: data!)))) {
+                    if (data != nil && !(try! await(storeFlowableCallback.needRefresh(cachedData: data!)))) {
                         yield(data!)
                     } else {
                         throw NoSuchElementError()
@@ -80,7 +89,7 @@ struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
                     // do nothing.
                     break
                 case .error(let rawError):
-                    if (data != nil && !(try! await(storeFlowableResponder.needRefresh(data: data!)))) {
+                    if (data != nil && !(try! await(storeFlowableCallback.needRefresh(cachedData: data!)))) {
                         yield(data!)
                     } else {
                         throw rawError
@@ -100,11 +109,11 @@ struct PagingStoreFlowableImpl<KEY: Hashable, DATA>: PagingStoreFlowable {
         dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: clearCacheWhenFetchFails, continueWhenError: continueWhenError, awaitFetching: true, additionalRequest: false)
     }
 
-    func requestAddition(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+    func requestAdditionalData(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
         dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: false, continueWhenError: continueWhenError, awaitFetching: true, additionalRequest: true)
     }
 
-    func update(newData: [DATA]?) -> AnyPublisher<Void, Never> {
+    func update(newData: DATA?) -> AnyPublisher<Void, Never> {
         dataSelector.update(newData: newData)
     }
 }
