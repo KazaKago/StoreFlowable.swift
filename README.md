@@ -70,7 +70,7 @@ class UserStateManager: FlowableDataStateManager<UserId> {
 
 [`FlowableDataStateManager<KEY: Hashable>`](Sources/StoreFlowable/FlowableDataStateManager.swift) needs to be used in Singleton pattern.  
 
-### 2. Create StoreFlowableResponder class
+### 2. Create StoreFlowableCallback class
 
 Next, create a class that implements [`StoreFlowableCallback`](Sources/StoreFlowable/StoreFlowableCallback.swift).
 Put the type you want to use as a Data in `DATA` associatedtype.  
@@ -123,7 +123,7 @@ In this case, `UserApi` and `UserCache` classes.
 
 ### 3. Create Repository class
 
-After that, you can get the [`AnyStoreFlowable<KEY: Hashable, DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class from the [`StoreFlowableResponder.create()`](Sources/StoreFlowable/StoreFlowableExtension.swift) method, and use it to build the Repository class.  
+After that, you can get the [`AnyStoreFlowable<KEY: Hashable, DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class from the [`StoreFlowableCallback.create()`](Sources/StoreFlowable/StoreFlowableExtension.swift) method, and use it to build the Repository class.  
 Be sure to go through the created [`AnyStoreFlowable<KEY: Hashable, DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class when getting / updating data.  
 
 ```swift
