@@ -72,13 +72,13 @@ class UserStateManager: FlowableDataStateManager<UserId> {
 
 ### 2. Create StoreFlowableResponder class
 
-Next, create a class that implements [`StoreFlowableResponder`](Sources/StoreFlowable/StoreFlowableResponder.swift).
+Next, create a class that implements [`StoreFlowableCallback`](Sources/StoreFlowable/StoreFlowableCallback.swift).
 Put the type you want to use as a Data in `DATA` associatedtype.  
 
 An example is shown below.  
 
 ```swift
-struct UserResponder : StoreFlowableResponder {
+struct UserFlowableCallback : StoreFlowableCallback {
 
     typealias KEY = UserId
     typealias DATA = UserData
@@ -97,23 +97,23 @@ struct UserResponder : StoreFlowableResponder {
     let flowableDataStateManager: FlowableDataStateManager<UserId> = UserStateManager.shared
 
     // Get data from local cache.
-    func loadData() -> AnyPublisher<UserData?, Never> {
+    func loadDataFromCache() -> AnyPublisher<UserData?, Never> {
         userCache.load(userId: key)
     }
 
     // Save data to local cache.
-    func saveData(data: UserData?) -> AnyPublisher<Void, Never> {
-        userCache.save(userId: key, data: data)
+    func saveDataToCache(newData: UserData?) -> AnyPublisher<Void, Never> {
+        userCache.save(userId: key, data: newData)
     }
 
     // Get data from remote server.
-    func fetchOrigin() -> AnyPublisher<UserData, Error> {
+    func fetchDataFromOrigin() -> AnyPublisher<UserData, Error> {
         userApi.fetch(userId: key)
     }
 
     // Whether the cache is valid.
-    func needRefresh(data: UserData) -> AnyPublisher<Bool, Never> {
-        data.isExpired()
+    func needRefresh(cachedData: UserData) -> AnyPublisher<Bool, Never> {
+        cachedData.isExpired()
     }
 }
 ```
@@ -130,23 +130,23 @@ Be sure to go through the created [`AnyStoreFlowable<KEY: Hashable, DATA>`](Sour
 struct UserRepository {
 
     func followUserData(userId: UserId) -> AnyPublisher<State<UserData>, Never> {
-        let userFlowable: AnyStoreFlowable<UserId, UserData> = UserResponder(userId: userId).create()
+        let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableCallback(userId: userId).create()
         return userFlowable.publish()
     }
 
     func updateUserData(userData: UserData) -> AnyPublisher<Void, Never> {
-        let userFlowable: AnyStoreFlowable<UserId, UserData> = UserResponder(userId: userId).create()
+        let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableCallback(userId: userId).create()
         return userFlowable.update(newData: userData)
     }
 }
 ```
 
-You can get the data in the form of `AnyPublisher<State<DATA>, Never>` by using the [`publish()`](Sources/StoreFlowable/StoreFlowable.swift) method.  
+You can get the data in the form of [`FlowableState<DATA>`](Sources/StoreFlowable/Core/FlowableState.swift) (Same as `AnyPublisher<State<DATA>, Never>`) by using the [`publish()`](Sources/StoreFlowable/StoreFlowable.swift) method.  
 [`State`](Sources/StoreFlowable/Core/State.swift) is a [enum](https://docs.swift.org/swift-book/LanguageGuide/Enumerations.html) that holds raw data.
 
 ### 4. Use Repository class
 
-You can observe the data by sink [`AnyPublisher<State<Data>, Never>`](https://developer.apple.com/documentation/combine).  
+You can observe the data by sink [`AnyPublisher`](https://developer.apple.com/documentation/combine).  
 and branch the data state with `doAction()` method or `switch` statement.  
 
 ```swift
@@ -194,8 +194,8 @@ private func subscribe(userId: UserId) {
 
 ## Example
 
-Refer to the [**sample project**](Sample) for details. This module works as an iOS app.  
-See [GithubMetaResponder](Sample/Sample/Flowable/GithubMetaResponder.swift) and [GithubUserResponder](Sample/Sample/Flowable/GithubUserResponder.swift).
+Refer to the [**example project**](Example) for details. This module works as an iOS app.  
+See [GithubMetaFlowableCallback](Example/Example/Flowable/GithubMetaFlowableCallback.swift) and [GithubUserFlowableCallback](Example/Example/Flowable/GithubUserFlowableCallback.swift).
 
 This example accesses the [Github API](https://docs.github.com/en/free-pro-team@latest/rest).  
 
@@ -203,20 +203,20 @@ This example accesses the [Github API](https://docs.github.com/en/free-pro-team@
 
 ### Get data without [State](Sources/StoreFlowable/Core/State.swift) enum
 
-If you don't need value flow and [`State`](Sources/StoreFlowable/Core/State.swift) enum, you can use [`get()`](Sources/StoreFlowable/StoreFlowable.swift) or [`getOrNil()`](Sources/StoreFlowable/StoreFlowableExtension.swift).  
-[`get()`](Sources/StoreFlowable/StoreFlowable.swift) throws an Error if there is no valid cache and fails to get new data.  
-[`getOrNil()`](Sources/StoreFlowable/StoreFlowableExtension.swift) returns nil instead of Error.  
+If you don't need value flow and [`State`](Sources/StoreFlowable/Core/State.swift) enum, you can use [`requireData()`](Sources/StoreFlowable/StoreFlowable.swift) or [`getData()`](Sources/StoreFlowable/StoreFlowable.swift).  
+[`requireData()`](Sources/StoreFlowable/StoreFlowable.swift) throws an Error if there is no valid cache and fails to get new data.  
+[`getData()`](Sources/StoreFlowable/StoreFlowable.swift) returns nil instead of Error.  
 
 ```swift
 public extension StoreFlowable {
-    func get(type: AsDataType = .mix) -> AnyPublisher<DATA, Error>
+    func get(from: GettingFrom = .mix) -> AnyPublisher<DATA, Error>
 }
 ```
 
-`AsDataType` parameter specifies where to get the data.  
+[`GettingFrom`](Sources/StoreFlowable/GettingFrom.swift) parameter specifies where to get the data.  
 
 ```swift
-public enum AsDataType {
+public enum GettingFrom {
     // Gets a combination of valid cache and remote. (Default behavior)
     case mix
     // Gets only remotely.
@@ -226,7 +226,7 @@ public enum AsDataType {
 }
 ```
 
-However, use [`get()`](Sources/StoreFlowable/StoreFlowable.swift) or [`getOrNil()`](Sources/StoreFlowable/StoreFlowableExtension.swift) only for one-shot data acquisition, and consider using [`publish()`](Sources/StoreFlowable/StoreFlowable.swift) if possible.  
+However, use [`requireData()`](Sources/StoreFlowable/StoreFlowable.swift) or [`getData()`](Sources/StoreFlowable/StoreFlowable.swift) only for one-shot data acquisition, and consider using [`publish()`](Sources/StoreFlowable/StoreFlowable.swift) if possible.  
 
 ### Refresh data
 
@@ -268,13 +268,13 @@ public protocol StoreFlowable {
 }
 ```
 
-### Paging support
+### Pagination support
 
-This library includes Paging support.  
+This library includes Pagination support.  
 
 <img src="https://user-images.githubusercontent.com/7742104/103469914-7a833700-4dae-11eb-8ff8-98de478f20f8.gif" width="280"> <img src="https://user-images.githubusercontent.com/7742104/103469911-75be8300-4dae-11eb-924e-af509abd273a.gif" width="280">
 
-Inherit [`PagingStoreFlowableResponder<KEY: Hashable, DATA>`](Sources/StoreFlowable/Paging/PagingStoreFlowable.swift) instead of [`StoreFlowableResponder<KEY: Hashable, DATA>`](Sources/StoreFlowable/StoreFlowableResponder.swift).
+Inherit [`PagnatingStoreFlowableCallback<KEY: Hashable, DATA>`](Sources/StoreFlowable/Pagination/PaginatingStoreFlowableCallback.swift) instead of [`StoreFlowableCallback<KEY: Hashable, DATA>`](Sources/StoreFlowable/StoreFlowableCallback.swift).
 
 An example is shown below.  
 
@@ -285,10 +285,10 @@ class UserListStateManager: FlowableDataStateManager<UnitHash> {
 }
 ```
 ```swift
-struct UserListResponder : PagingStoreFlowableResponder {
+struct UserListFlowableCallback : PaginatingStoreFlowableCallback {
 
     typealias KEY = UnitHash
-    typealias DATA = UserData
+    typealias DATA = [UserData]
 
     private let userListApi = UserListApi()
     private let userListCache = UserListCache()
@@ -297,29 +297,38 @@ struct UserListResponder : PagingStoreFlowableResponder {
 
     let flowableDataStateManager: FlowableDataStateManager<UnitHash> = UserListStateManager.shared
 
-    func loadData() -> AnyPublisher<[UserData]?, Never> {
+    func loadDataFromCache() -> AnyPublisher<[UserData]?, Never> {
         userListCache.load()
     }
 
-    func saveData(data: [UserData]?, additionalRequest: Bool) -> AnyPublisher<Void, Never> {
-        userListCache.save(data: data)
+    func saveDataToCache(newData: [UserData]?) -> AnyPublisher<Void, Never> {
+        userListCache.save(data: newData)
     }
 
-    func fetchOrigin(data: [UserData]?, additionalRequest: Bool) -> AnyPublisher<[UserData], Error> {
-        let page = additionalRequest ? ((data?.count ?? 0) / 10 + 1) : 1
+    func saveDataToCache(cachedData: [UserData]?, newData: [UserData]) -> AnyPublisher<Void, Never> {
+        let mergedData = (cachedData ?? []) + newData
+        return userListCache.save(data: data)
+    }
+
+    func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<[UserData]>, Error> {
+        userListApi.fetch(page: 1)
+    }
+
+    func fetchAdditionalDataFromOrigin(cachedData: [UserData]?) -> AnyPublisher<FetchingResult<[UserData]>, Error> {
+        let page = ((cachedData?.count ?? 0) / 10 + 1)
         return userListApi.fetch(page: page)
     }
 
-    func needRefresh(data: [UserData]) -> AnyPublisher<Bool, Never> {
-        data.last.isExpired()
+    func needRefresh(cachedData: [UserData]) -> AnyPublisher<Bool, Never> {
+        cachedData.last.isExpired()
     }
 }
 ```
 
-You can have the data in a list. The retrieved remote data will be merged automatically.  
-`additionalRequest: Bool` parameter indicates whether to load additionally. use if necessary.  
+You need to additionally implements `saveAdditionalDataToCache()` and `fetchAdditionalDataFromOrigin()`.  
+When saving the data, combine the cached data and the new data before saving.  
 
-The [GithubOrgsResponder](Sample/Sample/Flowable/GithubOrgsResponder.swift) and [GithubReposResponder](Sample/Sample/Flowable/GithubReposResponder.swift) classes in [**sample project**](Sample) implement paging.
+The [GithubOrgsFlowableCallback](Example/Example/Flowable/GithubOrgsFlowableCallback.swift) and [GithubReposFlowableCallback](Example/Example/Flowable/GithubReposFlowableCallback.swift) classes in [**example project**](Example) implement pagination.
 
 ## License
 
