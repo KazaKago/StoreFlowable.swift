@@ -9,10 +9,10 @@ import Foundation
 
 public extension State {
 
-    func zip<B, Z>(_ otherState: State<B>, _ transform: (_ content1: T, _ content2: B) -> Z) -> State<Z> {
+    func zip<B, Z>(_ state2: State<B>, _ transform: (_ rawContent1: T, _ rawContent2: B) -> Z) -> State<Z> {
         switch self {
         case .fixed(let content):
-            switch otherState {
+            switch state2 {
             case .fixed(let otherContent):
                 return .fixed(content: content.zip(otherContent, transform))
             case .loading(let otherContent):
@@ -21,7 +21,7 @@ public extension State {
                 return .error(content: content.zip(otherContent, transform), rawError: otherRawError)
             }
         case .loading(let content):
-            switch otherState {
+            switch state2 {
             case .fixed(let otherContent):
                 return .loading(content: content.zip(otherContent, transform))
             case .loading(let otherContent):
@@ -30,7 +30,7 @@ public extension State {
                 return .error(content: content.zip(otherContent, transform), rawError: rawError)
             }
         case .error(let content, let rawError):
-            switch otherState {
+            switch state2 {
             case .fixed(let otherContent):
                 return .error(content: content.zip(otherContent, transform), rawError: rawError)
             case .loading(let otherContent):
@@ -41,39 +41,39 @@ public extension State {
         }
     }
 
-    func zip<B, C, Z>(_ otherState1: State<B>, _ otherState2: State<C>, _ transform: (_ content1: T, _ content2: B, _ content3: C) -> Z) -> State<Z> {
-        zip(otherState1) { (content1, content2) in
-            (content1, content2)
+    func zip<B, C, Z>(_ state2: State<B>, _ state3: State<C>, _ transform: (_ rawContent1: T, _ rawContent2: B, _ rawContent3: C) -> Z) -> State<Z> {
+        zip(state2) { (rawContent, other) in
+            (rawContent, other)
         }
-        .zip(otherState2) { (content1_2, content3) in
-            transform(content1_2.0, content1_2.1, content3)
-        }
-    }
-
-    func zip<B, C, D, Z>(_ otherState1: State<B>, _ otherState2: State<C>, _ otherState3: State<D>, _ transform: (_ content1: T, _ content2: B, _ content3: C, _ content4: D) -> Z) -> State<Z> {
-        zip(otherState1) { (content1, content2) in
-            (content1, content2)
-        }
-        .zip(otherState2) { (content1_2, content3) in
-            (content1_2.0, content1_2.1, content3)
-        }
-        .zip(otherState3) { (content1_2_3, content4) in
-            transform(content1_2_3.0, content1_2_3.1, content1_2_3.2, content4)
+        .zip(state3) { (rawContent, other) in
+            transform(rawContent.0, rawContent.1, other)
         }
     }
 
-    func zip<B, C, D, E, Z>(_ otherState1: State<B>, _ otherState2: State<C>, _ otherState3: State<D>, _ otherState4: State<E>, _ transform: (_ content1: T, _ content2: B, _ content3: C, _ content4: D, _ content5: E) -> Z) -> State<Z> {
-        zip(otherState1) { (content1, content2) in
-            (content1, content2)
+    func zip<B, C, D, Z>(_ state2: State<B>, _ state3: State<C>, _ state4: State<D>, _ transform: (_ rawContent1: T, _ rawContent2: B, _ rawContent3: C, _ rawContent4: D) -> Z) -> State<Z> {
+        zip(state2) { (rawContent, other) in
+            (rawContent, other)
         }
-        .zip(otherState2) { (content1_2, content3) in
-            (content1_2.0, content1_2.1, content3)
+        .zip(state3) { (rawContent, other) in
+            (rawContent.0, rawContent.1, other)
         }
-        .zip(otherState3) { (content1_2_3, content4) in
-            (content1_2_3.0, content1_2_3.1, content1_2_3.2, content4)
+        .zip(state4) { (rawContent, other) in
+            transform(rawContent.0, rawContent.1, rawContent.2, other)
         }
-        .zip(otherState4) { (content1_2_3_4, content5) in
-            transform(content1_2_3_4.0, content1_2_3_4.1, content1_2_3_4.2, content1_2_3_4.3, content5)
+    }
+
+    func zip<B, C, D, E, Z>(_ state2: State<B>, _ state3: State<C>, _ state4: State<D>, _ state5: State<E>, _ transform: (_ rawContent1: T, _ rawContent2: B, _ rawContent3: C, _ rawContent4: D, _ rawContent5: E) -> Z) -> State<Z> {
+        zip(state2) { (rawContent, other) in
+            (rawContent, other)
+        }
+        .zip(state3) { (rawContent, other) in
+            (rawContent.0, rawContent.1, other)
+        }
+        .zip(state4) { (rawContent, other) in
+            (rawContent.0, rawContent.1, rawContent.2, other)
+        }
+        .zip(state5) { (rawContent, other) in
+            transform(rawContent.0, rawContent.1, rawContent.2, rawContent.3, other)
         }
     }
 }
