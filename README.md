@@ -209,7 +209,8 @@ If you don't need value flow and [`State`](Sources/StoreFlowable/Core/State.swif
 
 ```swift
 public extension StoreFlowable {
-    func get(from: GettingFrom = .mix) -> AnyPublisher<DATA, Error>
+    func getData(from: GettingFrom = .mix) -> AnyPublisher<DATA?, Never>
+    func requireData(from: GettingFrom = .mix) -> AnyPublisher<DATA, Error>
 }
 ```
 
@@ -268,7 +269,7 @@ public protocol StoreFlowable {
 }
 ```
 
-### Pagination support
+## Pagination support
 
 This library includes Pagination support.  
 
@@ -329,6 +330,16 @@ You need to additionally implements `saveAdditionalDataToCache()` and `fetchAddi
 When saving the data, combine the cached data and the new data before saving.  
 
 The [GithubOrgsFlowableCallback](Example/Example/Flowable/GithubOrgsFlowableCallback.swift) and [GithubReposFlowableCallback](Example/Example/Flowable/GithubReposFlowableCallback.swift) classes in [**example project**](Example) implement pagination.
+
+### Request additional data
+
+You can request additional data for paginating using the [`requestAdditionalData()`](Sources/StoreFlowable/Pagination/PaginatingStoreFlowable.swift) method.
+
+```swift
+public extension PaginatingStoreFlowable {
+    func requestAdditionalData(continueWhenError: Bool = true) -> AnyPublisher<Void, Never>
+}
+```
 
 ## License
 
