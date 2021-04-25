@@ -8,6 +8,9 @@
 import Foundation
 import Combine
 
+/**
+ * Type erasure of `PaginatingStoreFlowable`.
+ */
 public struct AnyPaginatingStoreFlowable<KEY: Hashable, DATA>: PaginatingStoreFlowable {
 
     public typealias KEY = KEY

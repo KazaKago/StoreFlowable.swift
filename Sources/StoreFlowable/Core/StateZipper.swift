@@ -9,6 +9,13 @@ import Foundation
 
 public extension State {
 
+    /**
+     * Combine multiple `State`.
+     *
+     * - parameter state2: The second `State` to combine.
+     * - parameter transform: This callback that returns the result of combining the data.
+     * - returns: Return `State` containing the combined data.
+     */
     func zip<B, Z>(_ state2: State<B>, _ transform: (_ rawContent1: T, _ rawContent2: B) -> Z) -> State<Z> {
         switch self {
         case .fixed(let content):
@@ -41,6 +48,14 @@ public extension State {
         }
     }
 
+    /**
+     * Combine multiple `State`.
+     *
+     * - parameter state2: The second `State` to combine.
+     * - parameter state3: The third `State` to combine.
+     * - parameter transform: This callback that returns the result of combining the data.
+     * - returns: Return `State` containing the combined data.
+     */
     func zip<B, C, Z>(_ state2: State<B>, _ state3: State<C>, _ transform: (_ rawContent1: T, _ rawContent2: B, _ rawContent3: C) -> Z) -> State<Z> {
         zip(state2) { (rawContent, other) in
             (rawContent, other)
@@ -50,6 +65,15 @@ public extension State {
         }
     }
 
+    /**
+     * Combine multiple `State`.
+     *
+     * - parameter state2: The second `State` to combine.
+     * - parameter state3: The third `State` to combine.
+     * - parameter state4: The fourth `State` to combine.
+     * - parameter transform: This callback that returns the result of combining the data.
+     * - returns: Return `State` containing the combined data.
+     */
     func zip<B, C, D, Z>(_ state2: State<B>, _ state3: State<C>, _ state4: State<D>, _ transform: (_ rawContent1: T, _ rawContent2: B, _ rawContent3: C, _ rawContent4: D) -> Z) -> State<Z> {
         zip(state2) { (rawContent, other) in
             (rawContent, other)
@@ -62,6 +86,16 @@ public extension State {
         }
     }
 
+    /**
+     * Combine multiple `State`.
+     *
+     * - parameter state2: The second `State` to combine.
+     * - parameter state3: The third `State` to combine.
+     * - parameter state4: The fourth `State` to combine.
+     * - parameter state5: The fifth `State` to combine.
+     * - parameter transform: This callback that returns the result of combining the data.
+     * - returns: Return `State` containing the combined data.
+     */
     func zip<B, C, D, E, Z>(_ state2: State<B>, _ state3: State<C>, _ state4: State<D>, _ state5: State<E>, _ transform: (_ rawContent1: T, _ rawContent2: B, _ rawContent3: C, _ rawContent4: D, _ rawContent5: E) -> Z) -> State<Z> {
         zip(state2) { (rawContent, other) in
             (rawContent, other)

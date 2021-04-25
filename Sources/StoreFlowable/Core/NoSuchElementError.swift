@@ -7,5 +7,8 @@
 
 import Foundation
 
+/**
+ * Error thrown when data does not exist.
+ */
 public class NoSuchElementError : Error {
 }

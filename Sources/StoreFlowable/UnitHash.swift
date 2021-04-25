@@ -7,6 +7,9 @@
 
 import Foundation
 
+/**
+ * Specify this type for `StoreFlowableCallback.KEY` when there is only one data.
+ */
 public struct UnitHash: Hashable {
 
     public init() {

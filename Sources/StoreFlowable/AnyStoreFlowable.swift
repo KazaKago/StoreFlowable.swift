@@ -8,6 +8,9 @@
 import Foundation
 import Combine
 
+/**
+ * Type erasure of `StoreFlowable`.
+ */
 public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
 
     public typealias KEY = KEY

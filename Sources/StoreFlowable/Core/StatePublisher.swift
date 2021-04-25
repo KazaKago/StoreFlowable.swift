@@ -8,4 +8,7 @@
 import Foundation
 import Combine
 
+/**
+ * Type alias of `AnyPublisher<State<DATA>, Never>`.
+ */
 public typealias StatePublisher<DATA> = AnyPublisher<State<DATA>, Never>

@@ -10,6 +10,12 @@ import Combine
 
 public extension Publisher {
 
+    /**
+     * Use when mapping raw data in `StatePublisher`.
+     *
+     * - parameter transform: This callback that returns the result of transforming the data.
+     * - returns: Return `StatePublisher` containing the transformed data.
+     */
     func mapContent<A, Z>(_ transform: @escaping (A) -> Z) -> Publishers.Map<Self, State<Z>> where Self.Output == State<A> {
         map { input in
             let content: StateContent<Z>
