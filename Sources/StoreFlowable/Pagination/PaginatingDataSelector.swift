@@ -27,7 +27,7 @@ struct PaginatingDataSelector<KEY, DATA> {
 
     func load() -> AnyPublisher<DATA?, Never> {
         async { yield in
-            yield(try await(cacheDataManager.loadDataFromCache()))
+            yield(try `await`(cacheDataManager.loadDataFromCache()))
         }
         .replaceError(with: nil)
         .eraseToAnyPublisher()
@@ -35,7 +35,7 @@ struct PaginatingDataSelector<KEY, DATA> {
 
     func update(newData: DATA?) -> AnyPublisher<Void, Never> {
         async { yield in
-            try await(cacheDataManager.saveDataToCache(newData: newData))
+            try `await`(cacheDataManager.saveDataToCache(newData: newData))
             dataStateManager.saveState(key: key, state: .fixed())
         }
         .replaceError(with: ())
@@ -46,12 +46,12 @@ struct PaginatingDataSelector<KEY, DATA> {
         async { yield in
             switch dataStateManager.loadState(key: key) {
             case .fixed(let isReachLast):
-                try await(doDataAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, additionalRequest: additionalRequest, currentIsReachLast: isReachLast))
+                try `await`(doDataAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, additionalRequest: additionalRequest, currentIsReachLast: isReachLast))
             case .loading:
                 // do nothing.
                 break
             case .error(_):
-                if continueWhenError { try await(doDataAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, additionalRequest: additionalRequest, currentIsReachLast: false)) }
+                if continueWhenError { try `await`(doDataAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, additionalRequest: additionalRequest, currentIsReachLast: false)) }
             }
         }
         .replaceError(with: ())
@@ -60,9 +60,9 @@ struct PaginatingDataSelector<KEY, DATA> {
 
     private func doDataAction(forceRefresh: Bool, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool, additionalRequest: Bool, currentIsReachLast: Bool) -> AnyPublisher<Void, Never> {
         async { yield in
-            let cachedData = try await(cacheDataManager.loadDataFromCache())
-            if (cachedData == nil || forceRefresh || (!additionalRequest && (try! await(needRefresh(cachedData!)))) || (additionalRequest && !currentIsReachLast)) {
-                try await(prepareFetch(cachedData: cachedData, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, additionalRequest: additionalRequest))
+            let cachedData = try `await`(cacheDataManager.loadDataFromCache())
+            if (cachedData == nil || forceRefresh || (!additionalRequest && (try! `await`(needRefresh(cachedData!)))) || (additionalRequest && !currentIsReachLast)) {
+                try `await`(prepareFetch(cachedData: cachedData, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, additionalRequest: additionalRequest))
             }
         }
         .replaceError(with: ())
@@ -71,10 +71,10 @@ struct PaginatingDataSelector<KEY, DATA> {
 
     private func prepareFetch(cachedData: DATA?, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool, additionalRequest: Bool) -> AnyPublisher<Void, Never> {
         async { yield in
-            if clearCacheBeforeFetching { try await(cacheDataManager.saveDataToCache(newData: nil)) }
+            if clearCacheBeforeFetching { try `await`(cacheDataManager.saveDataToCache(newData: nil)) }
             dataStateManager.saveState(key: key, state: .loading)
             if awaitFetching {
-                try await(fetchNewData(cachedData: cachedData, clearCacheWhenFetchFails: clearCacheWhenFetchFails, additionalRequest: additionalRequest))
+                try `await`(fetchNewData(cachedData: cachedData, clearCacheWhenFetchFails: clearCacheWhenFetchFails, additionalRequest: additionalRequest))
             } else {
                 _ = fetchNewData(cachedData: cachedData, clearCacheWhenFetchFails: clearCacheWhenFetchFails, additionalRequest: additionalRequest).sink(receiveCompletion: { _ in }, receiveValue: { _ in })
             }
@@ -88,18 +88,18 @@ struct PaginatingDataSelector<KEY, DATA> {
             do {
                 var fetchingResult: FetchingResult<DATA>
                 if additionalRequest {
-                    fetchingResult = try await(originDataManager.fetchAdditionalDataFromOrigin(cachedData: cachedData))
+                    fetchingResult = try `await`(originDataManager.fetchAdditionalDataFromOrigin(cachedData: cachedData))
                 } else {
-                    fetchingResult = try await(originDataManager.fetchDataFromOrigin())
+                    fetchingResult = try `await`(originDataManager.fetchDataFromOrigin())
                 }
                 if additionalRequest {
-                    try await(cacheDataManager.saveAdditionalDataToCache(cachedData: cachedData, newData: fetchingResult.data))
+                    try `await`(cacheDataManager.saveAdditionalDataToCache(cachedData: cachedData, newData: fetchingResult.data))
                 } else {
-                    try await(cacheDataManager.saveDataToCache(newData: fetchingResult.data))
+                    try `await`(cacheDataManager.saveDataToCache(newData: fetchingResult.data))
                 }
                 dataStateManager.saveState(key: key, state: .fixed(noMoreAdditionalData: fetchingResult.noMoreAdditionalData))
             } catch {
-                if clearCacheWhenFetchFails { try await(cacheDataManager.saveDataToCache(newData: nil)) }
+                if clearCacheWhenFetchFails { try `await`(cacheDataManager.saveDataToCache(newData: nil)) }
                 dataStateManager.saveState(key: key, state: .error(rawError: error))
             }
         }

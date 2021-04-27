@@ -58,9 +58,9 @@ struct PaginatingStoreFlowableImpl<KEY: Hashable, DATA>: PaginatingStoreFlowable
         async { yield in
             switch from {
             case .mix:
-                try await(dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, additionalRequest: false))
+                try `await`(dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, additionalRequest: false))
             case .fromOrigin:
-                try await(dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, additionalRequest: false))
+                try `await`(dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, additionalRequest: false))
             case .fromCache:
                 //do nothing.
                 break
@@ -80,7 +80,7 @@ struct PaginatingStoreFlowableImpl<KEY: Hashable, DATA>: PaginatingStoreFlowable
             async { yield in
                 switch dataState {
                 case .fixed:
-                    if (data != nil && !(try! await(storeFlowableCallback.needRefresh(cachedData: data!)))) {
+                    if (data != nil && !(try! `await`(storeFlowableCallback.needRefresh(cachedData: data!)))) {
                         yield(data!)
                     } else {
                         throw NoSuchElementError()
@@ -89,7 +89,7 @@ struct PaginatingStoreFlowableImpl<KEY: Hashable, DATA>: PaginatingStoreFlowable
                     // do nothing.
                     break
                 case .error(let rawError):
-                    if (data != nil && !(try! await(storeFlowableCallback.needRefresh(cachedData: data!)))) {
+                    if (data != nil && !(try! `await`(storeFlowableCallback.needRefresh(cachedData: data!)))) {
                         yield(data!)
                     } else {
                         throw rawError
