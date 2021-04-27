@@ -19,3 +19,15 @@ public extension StoreFlowableCallback {
         AnyStoreFlowable(StoreFlowableImpl(storeFlowableCallback: AnyStoreFlowableCallback(self)))
     }
 }
+
+public extension PaginatingStoreFlowableCallback {
+
+    /**
+     * Create `PaginatingStoreFlowable` class from `PaginatingStoreFlowableCallback`.
+     *
+     * - returns: Created PaginatingStoreFlowable.
+     */
+    func create() -> AnyPaginatingStoreFlowable<KEY, DATA> {
+        AnyPaginatingStoreFlowable(PaginatingStoreFlowableImpl(storeFlowableCallback: AnyPaginatingStoreFlowableCallback(self)))
+    }
+}
