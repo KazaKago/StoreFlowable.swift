@@ -34,7 +34,7 @@ struct PaginatingDataSelector<KEY, DATA> {
     }
 
     func update(newData: DATA?) -> AnyPublisher<Void, Never> {
-        async { yield in
+        async { _ in
             try `await`(cacheDataManager.saveDataToCache(newData: newData))
             dataStateManager.saveState(key: key, state: .fixed())
         }
@@ -43,7 +43,7 @@ struct PaginatingDataSelector<KEY, DATA> {
     }
 
     func doStateAction(forceRefresh: Bool, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, continueWhenError: Bool, awaitFetching: Bool, additionalRequest: Bool) -> AnyPublisher<Void, Never> {
-        async { yield in
+        async { _ in
             switch dataStateManager.loadState(key: key) {
             case .fixed(let isReachLast):
                 try `await`(doDataAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, additionalRequest: additionalRequest, currentIsReachLast: isReachLast))
@@ -59,9 +59,9 @@ struct PaginatingDataSelector<KEY, DATA> {
     }
 
     private func doDataAction(forceRefresh: Bool, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool, additionalRequest: Bool, currentIsReachLast: Bool) -> AnyPublisher<Void, Never> {
-        async { yield in
+        async { _ in
             let cachedData = try `await`(cacheDataManager.loadDataFromCache())
-            if (cachedData == nil || forceRefresh || (!additionalRequest && (try! `await`(needRefresh(cachedData!)))) || (additionalRequest && !currentIsReachLast)) {
+            if cachedData == nil || forceRefresh || (!additionalRequest && (try! `await`(needRefresh(cachedData!)))) || (additionalRequest && !currentIsReachLast) {
                 try `await`(prepareFetch(cachedData: cachedData, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, additionalRequest: additionalRequest))
             }
         }
@@ -70,7 +70,7 @@ struct PaginatingDataSelector<KEY, DATA> {
     }
 
     private func prepareFetch(cachedData: DATA?, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool, additionalRequest: Bool) -> AnyPublisher<Void, Never> {
-        async { yield in
+        async { _ in
             if clearCacheBeforeFetching { try `await`(cacheDataManager.saveDataToCache(newData: nil)) }
             dataStateManager.saveState(key: key, state: .loading)
             if awaitFetching {
@@ -84,7 +84,7 @@ struct PaginatingDataSelector<KEY, DATA> {
     }
 
     private func fetchNewData(cachedData: DATA?, clearCacheWhenFetchFails: Bool, additionalRequest: Bool) -> AnyPublisher<Void, Never> {
-        async { yield in
+        async { _ in
             do {
                 var fetchingResult: FetchingResult<DATA>
                 if additionalRequest {

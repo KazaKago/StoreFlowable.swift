@@ -34,7 +34,7 @@ struct DataSelector<KEY, DATA> {
     }
 
     func update(newData: DATA?) -> AnyPublisher<Void, Never> {
-        async { yield in
+        async { _ in
             try `await`(cacheDataManager.saveDataToCache(newData: newData))
             dataStateManager.saveState(key: key, state: .fixed())
         }
@@ -43,7 +43,7 @@ struct DataSelector<KEY, DATA> {
     }
 
     func doStateAction(forceRefresh: Bool, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, continueWhenError: Bool, awaitFetching: Bool) -> AnyPublisher<Void, Never> {
-        async { yield in
+        async { _ in
             switch dataStateManager.loadState(key: key) {
             case .fixed(_):
                 try `await`(doDataAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching))
@@ -59,9 +59,9 @@ struct DataSelector<KEY, DATA> {
     }
 
     private func doDataAction(forceRefresh: Bool, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool) -> AnyPublisher<Void, Never> {
-        async { yield in
+        async { _ in
             let data = try `await`(cacheDataManager.loadDataFromCache())
-            if (data == nil || forceRefresh || (try! `await`(needRefresh(data!)))) {
+            if data == nil || forceRefresh || (try! `await`(needRefresh(data!))) {
                 try `await`(prepareFetch(clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching))
             }
         }
@@ -70,7 +70,7 @@ struct DataSelector<KEY, DATA> {
     }
 
     private func prepareFetch(clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool) -> AnyPublisher<Void, Never> {
-        async { yield in
+        async { _ in
             if clearCacheBeforeFetching { try `await`(cacheDataManager.saveDataToCache(newData: nil)) }
             dataStateManager.saveState(key: key, state: .loading)
             if awaitFetching {
@@ -84,7 +84,7 @@ struct DataSelector<KEY, DATA> {
     }
 
     private func fetchNewData(clearCacheWhenFetchFails: Bool) -> AnyPublisher<Void, Never> {
-        async { yield in
+        async { _ in
             do {
                 let fetchingResult = try `await`(originDataManager.fetchDataFromOrigin())
                 try `await`(cacheDataManager.saveDataToCache(newData: fetchingResult.data))

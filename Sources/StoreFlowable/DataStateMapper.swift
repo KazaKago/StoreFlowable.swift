@@ -9,7 +9,7 @@ import Foundation
 
 extension DataState {
     func mapState<DATA>(content: StateContent<DATA>) -> State<DATA> {
-        switch (self) {
+        switch self {
         case .fixed:
             return .fixed(content: content)
         case .loading:
