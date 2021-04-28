@@ -1,0 +1,43 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Alamofire",
+        "repositoryURL": "https://github.com/Alamofire/Alamofire",
+        "state": {
+          "branch": null,
+          "revision": "eaf6e622dd41b07b251d8f01752eab31bc811493",
+          "version": "5.4.1"
+        }
+      },
+      {
+        "package": "CombineAsync",
+        "repositoryURL": "https://github.com/rizumita/CombineAsync.git",
+        "state": {
+          "branch": null,
+          "revision": "c2572b184829030cd377e5876dde4b17345f0c62",
+          "version": "0.1.5"
+        }
+      },
+      {
+        "package": "CombineExpectations",
+        "repositoryURL": "https://github.com/groue/CombineExpectations.git",
+        "state": {
+          "branch": null,
+          "revision": "5c36f3199960776fc055196a93ca04bfc00e1857",
+          "version": "0.7.0"
+        }
+      },
+      {
+        "package": "Kingfisher",
+        "repositoryURL": "https://github.com/onevcat/Kingfisher",
+        "state": {
+          "branch": null,
+          "revision": "2a10bf41da75599a9f8e872dbd44fe0155a2e00c",
+          "version": "5.15.8"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
