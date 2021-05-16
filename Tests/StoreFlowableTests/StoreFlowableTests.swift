@@ -265,9 +265,9 @@ final class StoreFlowableTests: XCTestCase {
 //        }
 //    }
 //
-//    func testGetFromMixWithNoCache() throws {
+//    func testGetFromBothWithNoCache() throws {
 //        let storeFlowable = SucceedTestFlowableCallback(initialData: nil).create()
-//        let recorder = storeFlowable.requireData(type: .mix).record()
+//        let recorder = storeFlowable.requireData(type: .both).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
 //        switch elements.first! {
@@ -280,9 +280,9 @@ final class StoreFlowableTests: XCTestCase {
 //        }
 //    }
 //
-//    func testGetFromMixWithValidCache() throws {
+//    func testGetFromBothWithValidCache() throws {
 //        let storeFlowable = SucceedTestFlowableCallback(initialData: .validData).create()
-//        let recorder = storeFlowable.requireData(type: .mix).record()
+//        let recorder = storeFlowable.requireData(type: .both).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
 //        switch elements.first! {
@@ -295,9 +295,9 @@ final class StoreFlowableTests: XCTestCase {
 //        }
 //    }
 //
-//    func testGetFromMixWithInvalidCache() throws {
+//    func testGetFromBothWithInvalidCache() throws {
 //        let storeFlowable = SucceedTestFlowableCallback(initialData: .invalidData).create()
-//        let recorder = storeFlowable.requireData(type: .mix).record()
+//        let recorder = storeFlowable.requireData(type: .both).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
 //        switch elements.first! {
@@ -312,13 +312,13 @@ final class StoreFlowableTests: XCTestCase {
 //
 //    func testGetFromCacheWithNoCache() throws {
 //        let storeFlowable = SucceedTestFlowableCallback(initialData: nil).create()
-//        let recorder = storeFlowable.requireData(type: .fromCache).record()
+//        let recorder = storeFlowable.requireData(type: .cache).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFromCacheWithValidCache() throws {
 //        let storeFlowable = SucceedTestFlowableCallback(initialData: .validData).create()
-//        let recorder = storeFlowable.requireData(type: .fromCache).record()
+//        let recorder = storeFlowable.requireData(type: .cache).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
 //        switch elements.first! {
@@ -333,13 +333,13 @@ final class StoreFlowableTests: XCTestCase {
 //
 //    func testGetFromCacheWithInvalidCache() throws {
 //        let storeFlowable = SucceedTestFlowableCallback(initialData: .invalidData).create()
-//        let recorder = storeFlowable.requireData(type: .fromCache).record()
+//        let recorder = storeFlowable.requireData(type: .cache).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFromOriginWithNoCache() throws {
 //        let storeFlowable = SucceedTestFlowableCallback(initialData: nil).create()
-//        let recorder = storeFlowable.requireData(type: .mix).record()
+//        let recorder = storeFlowable.requireData(type: .origin).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
 //        switch elements.first! {
@@ -354,7 +354,7 @@ final class StoreFlowableTests: XCTestCase {
 //
 //    func testGetFromOriginWithValidCache() throws {
 //        let storeFlowable = SucceedTestFlowableCallback(initialData: nil).create()
-//        let recorder = storeFlowable.requireData(type: .mix).record()
+//        let recorder = storeFlowable.requireData(type: .origin).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
 //        switch elements.first! {
@@ -369,7 +369,7 @@ final class StoreFlowableTests: XCTestCase {
 //
 //    func testGetFromOriginWithInvalidCache() throws {
 //        let storeFlowable = SucceedTestFlowableCallback(initialData: nil).create()
-//        let recorder = storeFlowable.requireData(type: .mix).record()
+//        let recorder = storeFlowable.requireData(type: .origin).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
 //        switch elements.first! {
@@ -382,15 +382,15 @@ final class StoreFlowableTests: XCTestCase {
 //        }
 //    }
 //
-//    func testGetFailedFromMixWithNoCache() throws {
+//    func testGetFailedFromBothWithNoCache() throws {
 //        let storeFlowable = FailedTestFlowableCallback(initialData: nil).create()
-//        let recorder = storeFlowable.requireData(type: .mix).record()
+//        let recorder = storeFlowable.requireData(type: .both).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
-//    func testGetFailedFromMixWithValidCache() throws {
+//    func testGetFailedFromBothWithValidCache() throws {
 //        let storeFlowable = FailedTestFlowableCallback(initialData: .validData).create()
-//        let recorder = storeFlowable.requireData(type: .mix).record()
+//        let recorder = storeFlowable.requireData(type: .both).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
 //        switch elements.first! {
@@ -403,21 +403,21 @@ final class StoreFlowableTests: XCTestCase {
 //        }
 //    }
 //
-//    func testGetFailedFromMixWithInvalidCache() throws {
+//    func testGetFailedFromBothWithInvalidCache() throws {
 //        let storeFlowable = FailedTestFlowableCallback(initialData: .invalidData).create()
-//        let recorder = storeFlowable.requireData(type: .mix).record()
+//        let recorder = storeFlowable.requireData(type: .both).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFailedFromCacheWithNoCache() throws {
 //        let storeFlowable = FailedTestFlowableCallback(initialData: nil).create()
-//        let recorder = storeFlowable.requireData(type: .fromCache).record()
+//        let recorder = storeFlowable.requireData(type: .cache).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFailedFromCacheWithValidCache() throws {
 //        let storeFlowable = FailedTestFlowableCallback(initialData: .validData).create()
-//        let recorder = storeFlowable.requireData(type: .fromCache).record()
+//        let recorder = storeFlowable.requireData(type: .cache).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
 //        switch elements.first! {
@@ -432,25 +432,25 @@ final class StoreFlowableTests: XCTestCase {
 //
 //    func testGetFailedFromCacheWithInvalidCache() throws {
 //        let storeFlowable = FailedTestFlowableCallback(initialData: .invalidData).create()
-//        let recorder = storeFlowable.requireData(type: .fromCache).record()
+//        let recorder = storeFlowable.requireData(type: .cache).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFailedFromOriginWithNoCache() throws {
 //        let storeFlowable = FailedTestFlowableCallback(initialData: nil).create()
-//        let recorder = storeFlowable.requireData(type: .fromOrigin).record()
+//        let recorder = storeFlowable.requireData(type: .origin).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFailedFromOriginWithValidCache() throws {
 //        let storeFlowable = FailedTestFlowableCallback(initialData: .validData).create()
-//        let recorder = storeFlowable.requireData(type: .fromOrigin).record()
+//        let recorder = storeFlowable.requireData(type: .origin).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFailedFromOriginWithInvalidCache() throws {
 //        let storeFlowable = FailedTestFlowableCallback(initialData: nil).create()
-//        let recorder = storeFlowable.requireData(type: .fromOrigin).record()
+//        let recorder = storeFlowable.requireData(type: .origin).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 

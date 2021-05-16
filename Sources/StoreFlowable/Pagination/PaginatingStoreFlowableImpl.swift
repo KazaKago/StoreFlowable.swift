@@ -57,11 +57,11 @@ struct PaginatingStoreFlowableImpl<KEY: Hashable, DATA>: PaginatingStoreFlowable
     func requireData(from: GettingFrom) -> AnyPublisher<DATA, Error> {
         async { yield in
             switch from {
-            case .mix:
+            case .both, .mix:
                 try `await`(dataSelector.doStateAction(forceRefresh: true, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, additionalRequest: false))
-            case .fromOrigin:
+            case .origin, .fromOrigin:
                 try `await`(dataSelector.doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, additionalRequest: false))
-            case .fromCache:
+            case .cache, .fromCache:
                 //do nothing.
                 break
             }

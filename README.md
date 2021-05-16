@@ -209,8 +209,8 @@ If you don't need value flow and [`State`](Sources/StoreFlowable/Core/State.swif
 
 ```swift
 public extension StoreFlowable {
-    func getData(from: GettingFrom = .mix) -> AnyPublisher<DATA?, Never>
-    func requireData(from: GettingFrom = .mix) -> AnyPublisher<DATA, Error>
+    func getData(from: GettingFrom = .both) -> AnyPublisher<DATA?, Never>
+    func requireData(from: GettingFrom = .both) -> AnyPublisher<DATA, Error>
 }
 ```
 
@@ -219,11 +219,11 @@ public extension StoreFlowable {
 ```swift
 public enum GettingFrom {
     // Gets a combination of valid cache and remote. (Default behavior)
-    case mix
+    case both
     // Gets only remotely.
-    case fromOrigin
+    case origin
     // Gets only locally.
-    case fromCache
+    case cache
 }
 ```
 
