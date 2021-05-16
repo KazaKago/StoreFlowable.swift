@@ -20,7 +20,7 @@ struct GithubOrgsFlowableCallback: PaginatingStoreFlowableCallback {
 
     let key: UnitHash = UnitHash()
 
-    let flowableDataStateManager: FlowableDataStateManager<UnitHash> = GithubMetaStateManager.shared
+    let flowableDataStateManager: FlowableDataStateManager<UnitHash> = GithubOrgsStateManager.shared
 
     func loadDataFromCache() -> AnyPublisher<[GithubOrg]?, Never> {
         Future { promise in
