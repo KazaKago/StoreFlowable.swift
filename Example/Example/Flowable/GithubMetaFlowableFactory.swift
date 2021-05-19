@@ -1,5 +1,5 @@
 //
-//  GithubMetaFlowableCallback.swift
+//  GithubMetaFlowableFactory.swift
 //  Example
 //
 //  Created by Kensuke Tamura on 2020/12/16.
@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import StoreFlowable
 
-struct GithubMetaFlowableCallback: StoreFlowableCallback {
+struct GithubMetaFlowableFactory: StoreFlowableFactory {
 
     typealias KEY = UnitHash
     typealias DATA = GithubMeta
@@ -44,7 +44,7 @@ struct GithubMetaFlowableCallback: StoreFlowableCallback {
     func needRefresh(cachedData: GithubMeta) -> AnyPublisher<Bool, Never> {
         Future { promise in
             if let createdAt = GithubInMemoryCache.metaCacheCreatedAt {
-                let expiredAt = createdAt + GithubMetaFlowableCallback.EXPIRE_SECONDS
+                let expiredAt = createdAt + GithubMetaFlowableFactory.EXPIRE_SECONDS
                 promise(.success(expiredAt < Date()))
             } else {
                 promise(.success(true))

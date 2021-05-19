@@ -11,7 +11,7 @@ import Combine
 /**
  * Provides input / output methods that abstract the data acquisition destination.
  *
- * This class is generated from `StoreFlowableCallback.create`.
+ * This class is generated from `StoreFlowableFactory.create`.
  */
 public protocol StoreFlowable {
 
@@ -45,7 +45,7 @@ public protocol StoreFlowable {
      *
      * Use `publish` if the state of your data is likely to change.
      *
-     * - parameter from: Specifies where to get the data. Default value is `GettingFrom.mix`
+     * - parameter from: Specifies where to get the data. Default value is `GettingFrom.both`
      * - returns: Returns the entity of the data.
      */
     func getData(from: GettingFrom) -> AnyPublisher<DATA?, Never>
@@ -57,7 +57,7 @@ public protocol StoreFlowable {
      *
      * Use `publish` if the state of your data is likely to change.
      *
-     * - parameter from: Specifies where to get the data. Default value is `GettingFrom.mix`.
+     * - parameter from: Specifies where to get the data. Default value is `GettingFrom.both`.
      * - returns: Returns the entity of the data.
      */
     func requireData(from: GettingFrom) -> AnyPublisher<DATA, Error>
@@ -96,11 +96,11 @@ public extension StoreFlowable {
         publish(forceRefresh: forceRefresh)
     }
 
-    func getData(from: GettingFrom = .mix) -> AnyPublisher<DATA?, Never> {
+    func getData(from: GettingFrom = .both) -> AnyPublisher<DATA?, Never> {
         getData(from: from)
     }
 
-    func requireData(from: GettingFrom = .mix) -> AnyPublisher<DATA, Error> {
+    func requireData(from: GettingFrom = .both) -> AnyPublisher<DATA, Error> {
         requireData(from: from)
     }
 

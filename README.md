@@ -70,15 +70,15 @@ class UserStateManager: FlowableDataStateManager<UserId> {
 
 [`FlowableDataStateManager<KEY: Hashable>`](Sources/StoreFlowable/FlowableDataStateManager.swift) needs to be used in Singleton pattern.  
 
-### 2. Create StoreFlowableCallback class
+### 2. Create StoreFlowableFactory class
 
-Next, create a class that implements [`StoreFlowableCallback`](Sources/StoreFlowable/StoreFlowableCallback.swift).
+Next, create a class that implements [`StoreFlowableFactory`](Sources/StoreFlowable/StoreFlowableFactory.swift).
 Put the type you want to use as a Data in `DATA` associatedtype.  
 
 An example is shown below.  
 
 ```swift
-struct UserFlowableCallback : StoreFlowableCallback {
+struct UserFlowableFactory : StoreFlowableFactory {
 
     typealias KEY = UserId
     typealias DATA = UserData
@@ -123,19 +123,19 @@ In this case, `UserApi` and `UserCache` classes.
 
 ### 3. Create Repository class
 
-After that, you can get the [`AnyStoreFlowable<KEY: Hashable, DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class from the [`StoreFlowableCallback.create()`](Sources/StoreFlowable/StoreFlowableExtension.swift) method, and use it to build the Repository class.  
+After that, you can get the [`AnyStoreFlowable<KEY: Hashable, DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class from the [`StoreFlowableFactory.create()`](Sources/StoreFlowable/StoreFlowableExtension.swift) method, and use it to build the Repository class.  
 Be sure to go through the created [`AnyStoreFlowable<KEY: Hashable, DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class when getting / updating data.  
 
 ```swift
 struct UserRepository {
 
     func followUserData(userId: UserId) -> StatePublisher<UserData> {
-        let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableCallback(userId: userId).create()
+        let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableFactory(userId: userId).create()
         return userFlowable.publish()
     }
 
     func updateUserData(userData: UserData) -> AnyPublisher<Void, Never> {
-        let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableCallback(userId: userId).create()
+        let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableFactory(userId: userId).create()
         return userFlowable.update(newData: userData)
     }
 }
@@ -195,7 +195,7 @@ private func subscribe(userId: UserId) {
 ## Example
 
 Refer to the [**example project**](Example) for details. This module works as an iOS app.  
-See [GithubMetaFlowableCallback](Example/Example/Flowable/GithubMetaFlowableCallback.swift) and [GithubUserFlowableCallback](Example/Example/Flowable/GithubUserFlowableCallback.swift).
+See [GithubMetaFlowableFactory](Example/Example/Flowable/GithubMetaFlowableFactory.swift) and [GithubUserFlowableFactory](Example/Example/Flowable/GithubUserFlowableFactory.swift).
 
 This example accesses the [Github API](https://docs.github.com/en/free-pro-team@latest/rest).  
 
@@ -209,8 +209,8 @@ If you don't need value flow and [`State`](Sources/StoreFlowable/Core/State.swif
 
 ```swift
 public extension StoreFlowable {
-    func getData(from: GettingFrom = .mix) -> AnyPublisher<DATA?, Never>
-    func requireData(from: GettingFrom = .mix) -> AnyPublisher<DATA, Error>
+    func getData(from: GettingFrom = .both) -> AnyPublisher<DATA?, Never>
+    func requireData(from: GettingFrom = .both) -> AnyPublisher<DATA, Error>
 }
 ```
 
@@ -219,11 +219,11 @@ public extension StoreFlowable {
 ```swift
 public enum GettingFrom {
     // Gets a combination of valid cache and remote. (Default behavior)
-    case mix
+    case both
     // Gets only remotely.
-    case fromOrigin
+    case origin
     // Gets only locally.
-    case fromCache
+    case cache
 }
 ```
 
@@ -275,7 +275,7 @@ This library includes Pagination support.
 
 <img src="https://user-images.githubusercontent.com/7742104/103469914-7a833700-4dae-11eb-8ff8-98de478f20f8.gif" width="280"> <img src="https://user-images.githubusercontent.com/7742104/103469911-75be8300-4dae-11eb-924e-af509abd273a.gif" width="280">
 
-Inherit [`PagnatingStoreFlowableCallback<KEY: Hashable, DATA>`](Sources/StoreFlowable/Pagination/PaginatingStoreFlowableCallback.swift) instead of [`StoreFlowableCallback<KEY: Hashable, DATA>`](Sources/StoreFlowable/StoreFlowableCallback.swift).
+Inherit [`PagnatingStoreFlowableFactory<KEY: Hashable, DATA>`](Sources/StoreFlowable/Pagination/PaginatingStoreFlowableFactory.swift) instead of [`StoreFlowableFactory<KEY: Hashable, DATA>`](Sources/StoreFlowable/StoreFlowableFactory.swift).
 
 An example is shown below.  
 
@@ -286,7 +286,7 @@ class UserListStateManager: FlowableDataStateManager<UnitHash> {
 }
 ```
 ```swift
-struct UserListFlowableCallback : PaginatingStoreFlowableCallback {
+struct UserListFlowableFactory : PaginatingStoreFlowableFactory {
 
     typealias KEY = UnitHash
     typealias DATA = [UserData]
@@ -329,7 +329,7 @@ struct UserListFlowableCallback : PaginatingStoreFlowableCallback {
 You need to additionally implements `saveAdditionalDataToCache()` and `fetchAdditionalDataFromOrigin()`.  
 When saving the data, combine the cached data and the new data before saving.  
 
-The [GithubOrgsFlowableCallback](Example/Example/Flowable/GithubOrgsFlowableCallback.swift) and [GithubReposFlowableCallback](Example/Example/Flowable/GithubReposFlowableCallback.swift) classes in [**example project**](Example) implement pagination.
+The [GithubOrgsFlowableFactory](Example/Example/Flowable/GithubOrgsFlowableFactory.swift) and [GithubReposFlowableFactory](Example/Example/Flowable/GithubReposFlowableFactory.swift) classes in [**example project**](Example) implement pagination.
 
 ### Request additional data
 

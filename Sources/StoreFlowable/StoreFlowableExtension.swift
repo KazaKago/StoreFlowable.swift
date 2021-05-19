@@ -8,26 +8,38 @@
 import Foundation
 import Combine
 
-public extension StoreFlowableCallback {
+public extension StoreFlowableFactory {
 
     /**
-     * Create `StoreFlowable` class from `StoreFlowableCallback`.
+     * Create `StoreFlowable` class from `StoreFlowableFactory`.
      *
      * - returns: Created StateFlowable.
      */
     func create() -> AnyStoreFlowable<KEY, DATA> {
-        AnyStoreFlowable(StoreFlowableImpl(storeFlowableCallback: AnyStoreFlowableCallback(self)))
+        AnyStoreFlowable(StoreFlowableImpl(
+            key: key,
+            flowableDataStateManager: flowableDataStateManager,
+            cacheDataManager: AnyCacheDataManager(self),
+            originDataManager: AnyOriginDataManager(self),
+            needRefresh: { cachedData in needRefresh(cachedData: cachedData) }
+        ))
     }
 }
 
-public extension PaginatingStoreFlowableCallback {
+public extension PaginatingStoreFlowableFactory {
 
     /**
-     * Create `PaginatingStoreFlowable` class from `PaginatingStoreFlowableCallback`.
+     * Create `PaginatingStoreFlowable` class from `PaginatingStoreFlowableFactory`.
      *
      * - returns: Created PaginatingStoreFlowable.
      */
     func create() -> AnyPaginatingStoreFlowable<KEY, DATA> {
-        AnyPaginatingStoreFlowable(PaginatingStoreFlowableImpl(storeFlowableCallback: AnyPaginatingStoreFlowableCallback(self)))
+        AnyPaginatingStoreFlowable(PaginatingStoreFlowableImpl(
+            key: key,
+            flowableDataStateManager: flowableDataStateManager,
+            cacheDataManager: AnyPaginatingCacheDataManager(self),
+            originDataManager: AnyPaginatingOriginDataManager(self),
+            needRefresh: { cachedData in needRefresh(cachedData: cachedData) }
+        ))
     }
 }

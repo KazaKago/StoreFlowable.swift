@@ -1,5 +1,5 @@
 //
-//  GithubReposFlowableCallback.swift
+//  GithubReposFlowableFactory.swift
 //  Example
 //
 //  Created by Kensuke Tamura on 2020/12/29.
@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import StoreFlowable
 
-struct GithubReposFlowableCallback: PaginatingStoreFlowableCallback {
+struct GithubReposFlowableFactory: PaginatingStoreFlowableFactory {
 
     typealias KEY = String
     typealias DATA = [GithubRepo]
@@ -48,14 +48,14 @@ struct GithubReposFlowableCallback: PaginatingStoreFlowableCallback {
     }
 
     func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<[GithubRepo]>, Error> {
-        githubApi.getRepos(userName: key, page: 1, perPage: GithubReposFlowableCallback.PER_PAGE).map { newData in
+        githubApi.getRepos(userName: key, page: 1, perPage: GithubReposFlowableFactory.PER_PAGE).map { newData in
             FetchingResult(data: newData, noMoreAdditionalData: newData.isEmpty)
         }.eraseToAnyPublisher()
     }
 
     func fetchAdditionalDataFromOrigin(cachedData: [GithubRepo]?) -> AnyPublisher<FetchingResult<[GithubRepo]>, Error> {
-        let page = ((cachedData?.count ?? 0) / GithubReposFlowableCallback.PER_PAGE + 1)
-        return githubApi.getRepos(userName: key, page: page, perPage: GithubReposFlowableCallback.PER_PAGE).map { newData in
+        let page = ((cachedData?.count ?? 0) / GithubReposFlowableFactory.PER_PAGE + 1)
+        return githubApi.getRepos(userName: key, page: page, perPage: GithubReposFlowableFactory.PER_PAGE).map { newData in
             FetchingResult(data: newData, noMoreAdditionalData: newData.isEmpty)
         }.eraseToAnyPublisher()
     }
@@ -63,7 +63,7 @@ struct GithubReposFlowableCallback: PaginatingStoreFlowableCallback {
     func needRefresh(cachedData: [GithubRepo]) -> AnyPublisher<Bool, Never> {
         Future { promise in
             if let createdAt = GithubInMemoryCache.reposCacheCreatedAt[key] {
-                let expiredAt = createdAt + GithubReposFlowableCallback.EXPIRE_SECONDS
+                let expiredAt = createdAt + GithubReposFlowableFactory.EXPIRE_SECONDS
                 promise(.success(expiredAt < Date()))
             } else {
                 promise(.success(true))

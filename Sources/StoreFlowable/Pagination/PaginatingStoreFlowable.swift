@@ -11,7 +11,7 @@ import Combine
 /**
  * Provides input / output methods that abstract the data acquisition destination.
  *
- * This class is generated from `PaginatingStoreFlowableCallback.create`.
+ * This class is generated from `PaginatingStoreFlowableFactory.create`.
  */
 public protocol PaginatingStoreFlowable: StoreFlowable {
 
