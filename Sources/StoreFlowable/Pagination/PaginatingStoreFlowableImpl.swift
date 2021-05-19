@@ -14,24 +14,28 @@ struct PaginatingStoreFlowableImpl<KEY: Hashable, DATA>: PaginatingStoreFlowable
     typealias KEY = KEY
     typealias DATA = DATA
 
-    private let storeFlowableFactory: AnyPaginatingStoreFlowableFactory<KEY, DATA>
-    private var dataSelector: PaginatingDataSelector<KEY, DATA>
+    private let key: KEY
+    private let flowableDataStateManager: FlowableDataStateManager<KEY>
+    private let needRefresh: (_ cachedData: DATA) -> AnyPublisher<Bool, Never>
+    private let dataSelector: PaginatingDataSelector<KEY, DATA>
 
-    init(storeFlowableFactory: AnyPaginatingStoreFlowableFactory<KEY, DATA>) {
-        self.storeFlowableFactory = storeFlowableFactory
-        dataSelector = PaginatingDataSelector(
-            key: storeFlowableFactory.key,
-            dataStateManager: AnyDataStateManager(storeFlowableFactory.flowableDataStateManager),
-            cacheDataManager: AnyPaginatingCacheDataManager(storeFlowableFactory),
-            originDataManager: AnyPaginatingOriginDataManager(storeFlowableFactory),
-            needRefresh: { cachedData in storeFlowableFactory.needRefresh(cachedData: cachedData) }
+    init(key: KEY, flowableDataStateManager: FlowableDataStateManager<KEY>, cacheDataManager: AnyPaginatingCacheDataManager<DATA>, originDataManager: AnyPaginatingOriginDataManager<DATA>, needRefresh: @escaping (_ cachedData: DATA) -> AnyPublisher<Bool, Never>) {
+        self.key = key
+        self.flowableDataStateManager = flowableDataStateManager
+        self.needRefresh = needRefresh
+        self.dataSelector = PaginatingDataSelector(
+            key: key,
+            dataStateManager: AnyDataStateManager(flowableDataStateManager),
+            cacheDataManager: cacheDataManager,
+            originDataManager: originDataManager,
+            needRefresh: needRefresh
         )
     }
 
     func publish(forceRefresh: Bool) -> StatePublisher<DATA> {
         dataSelector.doStateAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: false, additionalRequest: false)
             .flatMap { _ in
-                storeFlowableFactory.flowableDataStateManager.getFlow(key: storeFlowableFactory.key)
+                flowableDataStateManager.getFlow(key: key)
             }
             .flatMap { dataState in
                 dataSelector.load().map { data in
@@ -67,7 +71,7 @@ struct PaginatingStoreFlowableImpl<KEY: Hashable, DATA>: PaginatingStoreFlowable
             }
         }
         .flatMap {
-            storeFlowableFactory.flowableDataStateManager.getFlow(key: storeFlowableFactory.key)
+            flowableDataStateManager.getFlow(key: key)
                 .setFailureType(to: Error.self) // Workaround for macOS10.15/iOS13.0/tvOS13.0/watchOS6.0 https://www.donnywals.com/configuring-error-types-when-using-flatmap-in-combine/
         }
         .flatMap { dataState in
@@ -80,7 +84,7 @@ struct PaginatingStoreFlowableImpl<KEY: Hashable, DATA>: PaginatingStoreFlowable
             async { yield in
                 switch dataState {
                 case .fixed:
-                    if (data != nil && !(try! `await`(storeFlowableFactory.needRefresh(cachedData: data!)))) {
+                    if (data != nil && !(try! `await`(needRefresh(data!)))) {
                         yield(data!)
                     } else {
                         throw NoSuchElementError()
@@ -89,7 +93,7 @@ struct PaginatingStoreFlowableImpl<KEY: Hashable, DATA>: PaginatingStoreFlowable
                     // do nothing.
                     break
                 case .error(let rawError):
-                    if (data != nil && !(try! `await`(storeFlowableFactory.needRefresh(cachedData: data!)))) {
+                    if (data != nil && !(try! `await`(needRefresh(data!)))) {
                         yield(data!)
                     } else {
                         throw rawError

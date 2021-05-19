@@ -16,7 +16,13 @@ public extension StoreFlowableFactory {
      * - returns: Created StateFlowable.
      */
     func create() -> AnyStoreFlowable<KEY, DATA> {
-        AnyStoreFlowable(StoreFlowableImpl(storeFlowableFactory: AnyStoreFlowableFactory(self)))
+        AnyStoreFlowable(StoreFlowableImpl(
+            key: key,
+            flowableDataStateManager: flowableDataStateManager,
+            cacheDataManager: AnyCacheDataManager(self),
+            originDataManager: AnyOriginDataManager(self),
+            needRefresh: { cachedData in needRefresh(cachedData: cachedData) }
+        ))
     }
 }
 
@@ -28,6 +34,12 @@ public extension PaginatingStoreFlowableFactory {
      * - returns: Created PaginatingStoreFlowable.
      */
     func create() -> AnyPaginatingStoreFlowable<KEY, DATA> {
-        AnyPaginatingStoreFlowable(PaginatingStoreFlowableImpl(storeFlowableFactory: AnyPaginatingStoreFlowableFactory(self)))
+        AnyPaginatingStoreFlowable(PaginatingStoreFlowableImpl(
+            key: key,
+            flowableDataStateManager: flowableDataStateManager,
+            cacheDataManager: AnyPaginatingCacheDataManager(self),
+            originDataManager: AnyPaginatingOriginDataManager(self),
+            needRefresh: { cachedData in needRefresh(cachedData: cachedData) }
+        ))
     }
 }
