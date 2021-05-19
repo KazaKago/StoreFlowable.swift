@@ -1,5 +1,5 @@
 //
-//  GithubUserFlowableCallback.swift
+//  GithubUserFlowableFactory.swift
 //  Example
 //
 //  Created by Kensuke Tamura on 2020/12/28.
@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import StoreFlowable
 
-struct GithubUserFlowableCallback: StoreFlowableCallback {
+struct GithubUserFlowableFactory: StoreFlowableFactory {
 
     typealias KEY = String
     typealias DATA = GithubUser
@@ -48,7 +48,7 @@ struct GithubUserFlowableCallback: StoreFlowableCallback {
     func needRefresh(cachedData: GithubUser) -> AnyPublisher<Bool, Never> {
         Future { promise in
             if let createdAt = GithubInMemoryCache.userCacheCreatedAt[key] {
-                let expiredAt = createdAt + GithubUserFlowableCallback.EXPIRE_SECONDS
+                let expiredAt = createdAt + GithubUserFlowableFactory.EXPIRE_SECONDS
                 promise(.success(expiredAt < Date()))
             } else {
                 promise(.success(true))

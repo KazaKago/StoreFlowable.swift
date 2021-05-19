@@ -19,7 +19,7 @@ final class StoreFlowableTests: XCTestCase {
         }
     }
 
-    private class TestFlowableCallback: StoreFlowableCallback {
+    private class TestFlowableFactory: StoreFlowableFactory {
 
         typealias KEY = String
         typealias DATA = TestData
@@ -61,7 +61,7 @@ final class StoreFlowableTests: XCTestCase {
         }
     }
 
-    private class SucceedTestFlowableCallback: TestFlowableCallback {
+    private class SucceedTestFlowableFactory: TestFlowableFactory {
 
         init(initialData: TestData?) {
             let fetchingData = Future<TestData, Error> { promise in
@@ -71,7 +71,7 @@ final class StoreFlowableTests: XCTestCase {
         }
     }
 
-    private class FailedTestFlowableCallback: TestFlowableCallback {
+    private class FailedTestFlowableFactory: TestFlowableFactory {
 
         init(initialData: TestData?) {
             let fetchingData = Future<TestData, Error> { promise in
@@ -84,7 +84,7 @@ final class StoreFlowableTests: XCTestCase {
 // TODO: Fixed `CurrentValueSubject` related UnitTest not passing on CI.
 //
 //    func testFlowWithNoCache() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: nil).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: nil).create()
 //        let recorder = storeFlowable.publish().record()
 //        let elements = try wait(for: recorder.availableElements, timeout: 1)
 //        XCTAssertEqual(elements.count, 2)
@@ -119,7 +119,7 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testFlowWithValidCache() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: .validData).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: .validData).create()
 //        let recorder = storeFlowable.publish().record()
 //        let elements = try wait(for: recorder.availableElements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
@@ -140,7 +140,7 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testFlowWithInvalidCache() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: .invalidData).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: .invalidData).create()
 //        let recorder = storeFlowable.publish().record()
 //        let elements = try wait(for: recorder.availableElements, timeout: 1)
 //        XCTAssertEqual(elements.count, 2)
@@ -175,7 +175,7 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testFlowFailedWithNoCache() throws {
-//        let storeFlowable = FailedTestFlowableCallback(initialData: nil).create()
+//        let storeFlowable = FailedTestFlowableFactory(initialData: nil).create()
 //        let recorder = storeFlowable.publish().record()
 //        let elements = try wait(for: recorder.availableElements, timeout: 1)
 //        XCTAssertEqual(elements.count, 2)
@@ -210,7 +210,7 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testFlowFailedWithValidCache() throws {
-//        let storeFlowable = FailedTestFlowableCallback(initialData: .validData).create()
+//        let storeFlowable = FailedTestFlowableFactory(initialData: .validData).create()
 //        let recorder = storeFlowable.publish().record()
 //        let elements = try wait(for: recorder.availableElements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
@@ -231,7 +231,7 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testFlowFailedWithInvalidCache() throws {
-//        let storeFlowable = FailedTestFlowableCallback(initialData: .invalidData).create()
+//        let storeFlowable = FailedTestFlowableFactory(initialData: .invalidData).create()
 //        let recorder = storeFlowable.publish().record()
 //        let elements = try wait(for: recorder.availableElements, timeout: 1)
 //        XCTAssertEqual(elements.count, 2)
@@ -266,7 +266,7 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testGetFromBothWithNoCache() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: nil).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: nil).create()
 //        let recorder = storeFlowable.requireData(type: .both).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
@@ -281,7 +281,7 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testGetFromBothWithValidCache() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: .validData).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: .validData).create()
 //        let recorder = storeFlowable.requireData(type: .both).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
@@ -296,7 +296,7 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testGetFromBothWithInvalidCache() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: .invalidData).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: .invalidData).create()
 //        let recorder = storeFlowable.requireData(type: .both).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
@@ -311,13 +311,13 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testGetFromCacheWithNoCache() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: nil).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: nil).create()
 //        let recorder = storeFlowable.requireData(type: .cache).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFromCacheWithValidCache() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: .validData).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: .validData).create()
 //        let recorder = storeFlowable.requireData(type: .cache).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
@@ -332,13 +332,13 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testGetFromCacheWithInvalidCache() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: .invalidData).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: .invalidData).create()
 //        let recorder = storeFlowable.requireData(type: .cache).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFromOriginWithNoCache() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: nil).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: nil).create()
 //        let recorder = storeFlowable.requireData(type: .origin).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
@@ -353,7 +353,7 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testGetFromOriginWithValidCache() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: nil).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: nil).create()
 //        let recorder = storeFlowable.requireData(type: .origin).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
@@ -368,7 +368,7 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testGetFromOriginWithInvalidCache() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: nil).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: nil).create()
 //        let recorder = storeFlowable.requireData(type: .origin).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
@@ -383,13 +383,13 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testGetFailedFromBothWithNoCache() throws {
-//        let storeFlowable = FailedTestFlowableCallback(initialData: nil).create()
+//        let storeFlowable = FailedTestFlowableFactory(initialData: nil).create()
 //        let recorder = storeFlowable.requireData(type: .both).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFailedFromBothWithValidCache() throws {
-//        let storeFlowable = FailedTestFlowableCallback(initialData: .validData).create()
+//        let storeFlowable = FailedTestFlowableFactory(initialData: .validData).create()
 //        let recorder = storeFlowable.requireData(type: .both).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
@@ -404,19 +404,19 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testGetFailedFromBothWithInvalidCache() throws {
-//        let storeFlowable = FailedTestFlowableCallback(initialData: .invalidData).create()
+//        let storeFlowable = FailedTestFlowableFactory(initialData: .invalidData).create()
 //        let recorder = storeFlowable.requireData(type: .both).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFailedFromCacheWithNoCache() throws {
-//        let storeFlowable = FailedTestFlowableCallback(initialData: nil).create()
+//        let storeFlowable = FailedTestFlowableFactory(initialData: nil).create()
 //        let recorder = storeFlowable.requireData(type: .cache).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFailedFromCacheWithValidCache() throws {
-//        let storeFlowable = FailedTestFlowableCallback(initialData: .validData).create()
+//        let storeFlowable = FailedTestFlowableFactory(initialData: .validData).create()
 //        let recorder = storeFlowable.requireData(type: .cache).record()
 //        let elements = try wait(for: recorder.elements, timeout: 1)
 //        XCTAssertEqual(elements.count, 1)
@@ -431,31 +431,31 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testGetFailedFromCacheWithInvalidCache() throws {
-//        let storeFlowable = FailedTestFlowableCallback(initialData: .invalidData).create()
+//        let storeFlowable = FailedTestFlowableFactory(initialData: .invalidData).create()
 //        let recorder = storeFlowable.requireData(type: .cache).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFailedFromOriginWithNoCache() throws {
-//        let storeFlowable = FailedTestFlowableCallback(initialData: nil).create()
+//        let storeFlowable = FailedTestFlowableFactory(initialData: nil).create()
 //        let recorder = storeFlowable.requireData(type: .origin).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFailedFromOriginWithValidCache() throws {
-//        let storeFlowable = FailedTestFlowableCallback(initialData: .validData).create()
+//        let storeFlowable = FailedTestFlowableFactory(initialData: .validData).create()
 //        let recorder = storeFlowable.requireData(type: .origin).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 //
 //    func testGetFailedFromOriginWithInvalidCache() throws {
-//        let storeFlowable = FailedTestFlowableCallback(initialData: nil).create()
+//        let storeFlowable = FailedTestFlowableFactory(initialData: nil).create()
 //        let recorder = storeFlowable.requireData(type: .origin).record()
 //        XCTAssertThrowsError(try wait(for: recorder.finished, timeout: 1))
 //    }
 
     func testUpdateData() throws {
-        let storeFlowable = SucceedTestFlowableCallback(initialData: .validData).create()
+        let storeFlowable = SucceedTestFlowableFactory(initialData: .validData).create()
         let publishRecorder = storeFlowable.publish().record()
         _ = try wait(for: publishRecorder.next(), timeout: 1)
         let updateRecorder = storeFlowable.update(newData: .validData).record()
@@ -478,7 +478,7 @@ final class StoreFlowableTests: XCTestCase {
     }
 
     func testUpdateNil() throws {
-        let storeFlowable = SucceedTestFlowableCallback(initialData: .validData).create()
+        let storeFlowable = SucceedTestFlowableFactoryk(initialData: .validData).create()
         let publishRecorder = storeFlowable.publish().record()
         _ = try wait(for: publishRecorder.next(), timeout: 1)
         _ = storeFlowable.update(newData: nil).record()
@@ -502,7 +502,7 @@ final class StoreFlowableTests: XCTestCase {
 // TODO: Fixed `CurrentValueSubject` related UnitTest not passing on CI.
 //
 //    func testValidateWithNoCache() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: .validData).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: .validData).create()
 //        let recorder = storeFlowable.publish().record()
 //        _ = try wait(for: recorder.next(), timeout: 1)
 //        _ = storeFlowable.update(newData: nil).record()
@@ -513,7 +513,7 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testValidateWithValidData() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: .validData).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: .validData).create()
 //        let recorder = storeFlowable.publish().record()
 //        _ = try wait(for: recorder.next(), timeout: 1)
 //        _ = storeFlowable.update(newData: .validData).record()
@@ -524,7 +524,7 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testValidateWithInvalidData() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: .validData).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: .validData).create()
 //        let recorder = storeFlowable.publish().record()
 //        _ = try wait(for: recorder.next(), timeout: 1)
 //        _ = storeFlowable.update(newData: .invalidData).record()
@@ -535,7 +535,7 @@ final class StoreFlowableTests: XCTestCase {
 //    }
 //
 //    func testRefresh() throws {
-//        let storeFlowable = SucceedTestFlowableCallback(initialData: .validData).create()
+//        let storeFlowable = SucceedTestFlowableFactory(initialData: .validData).create()
 //        let recorder = storeFlowable.publish().record()
 //        _ = try wait(for: recorder.next(), timeout: 1)
 //        _ = storeFlowable.refresh().record()

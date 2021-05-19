@@ -1,5 +1,5 @@
 //
-//  AnyPaginatingStoreFlowableCallback.swift
+//  AnyPaginatingStoreFlowableFactory.swift
 //  StoreFlowable
 //
 //  Created by Kensuke Tamura on 2020/12/24.
@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-struct AnyPaginatingStoreFlowableCallback<KEY: Hashable, DATA>: PaginatingStoreFlowableCallback {
+struct AnyPaginatingStoreFlowableFactory<KEY: Hashable, DATA>: PaginatingStoreFlowableFactory {
 
     typealias KEY = KEY
     typealias DATA = DATA
@@ -22,7 +22,7 @@ struct AnyPaginatingStoreFlowableCallback<KEY: Hashable, DATA>: PaginatingStoreF
     private let _fetchAdditionalDataFromOrigin: (_ cachedData: DATA?) -> AnyPublisher<FetchingResult<DATA>, Error>
     private let _needRefresh: (_ cachedData: DATA) -> AnyPublisher<Bool, Never>
 
-    init<INNER: PaginatingStoreFlowableCallback>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
+    init<INNER: PaginatingStoreFlowableFactory>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
         _key = {
             inner.key
         }

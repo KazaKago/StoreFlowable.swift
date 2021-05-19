@@ -1,5 +1,5 @@
 //
-//  AnyStoreFlowableCallback.swift
+//  AnyStoreFlowableFactory.swift
 //  StoreFlowable
 //
 //  Created by Kensuke Tamura on 2020/12/11.
@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-struct AnyStoreFlowableCallback<KEY: Hashable, DATA>: StoreFlowableCallback {
+struct AnyStoreFlowableFactory<KEY: Hashable, DATA>: StoreFlowableFactory {
 
     typealias KEY = KEY
     typealias DATA = DATA
@@ -20,7 +20,7 @@ struct AnyStoreFlowableCallback<KEY: Hashable, DATA>: StoreFlowableCallback {
     private let _fetchDataFromOrigin: () -> AnyPublisher<FetchingResult<DATA>, Error>
     private let _needRefresh: (_ cachedData: DATA) -> AnyPublisher<Bool, Never>
 
-    init<INNER: StoreFlowableCallback>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
+    init<INNER: StoreFlowableFactory>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
         _key = {
             inner.key
         }

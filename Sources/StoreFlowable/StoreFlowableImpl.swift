@@ -14,24 +14,24 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
     typealias KEY = KEY
     typealias DATA = DATA
 
-    private let storeFlowableCallback: AnyStoreFlowableCallback<KEY, DATA>
+    private let storeFlowableFactory: AnyStoreFlowableFactory<KEY, DATA>
     private var dataSelector: DataSelector<KEY, DATA>
 
-    init(storeFlowableCallback: AnyStoreFlowableCallback<KEY, DATA>) {
-        self.storeFlowableCallback = storeFlowableCallback
+    init(storeFlowableFactory: AnyStoreFlowableFactory<KEY, DATA>) {
+        self.storeFlowableFactory = storeFlowableFactory
         dataSelector = DataSelector(
-            key: storeFlowableCallback.key,
-            dataStateManager: AnyDataStateManager(storeFlowableCallback.flowableDataStateManager),
-            cacheDataManager: AnyCacheDataManager(storeFlowableCallback),
-            originDataManager: AnyOriginDataManager(storeFlowableCallback),
-            needRefresh: { cachedData in storeFlowableCallback.needRefresh(cachedData: cachedData) }
+            key: storeFlowableFactory.key,
+            dataStateManager: AnyDataStateManager(storeFlowableFactory.flowableDataStateManager),
+            cacheDataManager: AnyCacheDataManager(storeFlowableFactory),
+            originDataManager: AnyOriginDataManager(storeFlowableFactory),
+            needRefresh: { cachedData in storeFlowableFactory.needRefresh(cachedData: cachedData) }
         )
     }
 
     func publish(forceRefresh: Bool) -> StatePublisher<DATA> {
         dataSelector.doStateAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: false)
             .flatMap { _ in
-                storeFlowableCallback.flowableDataStateManager.getFlow(key: storeFlowableCallback.key)
+                storeFlowableFactory.flowableDataStateManager.getFlow(key: storeFlowableFactory.key)
             }
             .flatMap { dataState in
                 dataSelector.load().map { data in
@@ -67,7 +67,7 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
             }
         }
         .flatMap {
-            storeFlowableCallback.flowableDataStateManager.getFlow(key: storeFlowableCallback.key)
+            storeFlowableFactory.flowableDataStateManager.getFlow(key: storeFlowableFactory.key)
                 .setFailureType(to: Error.self) // Workaround for macOS10.15/iOS13.0/tvOS13.0/watchOS6.0 https://www.donnywals.com/configuring-error-types-when-using-flatmap-in-combine/
         }
         .flatMap { dataState in
@@ -80,7 +80,7 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
             async { yield in
                 switch dataState {
                 case .fixed:
-                    if data != nil && !(try! `await`(storeFlowableCallback.needRefresh(cachedData: data!))) {
+                    if data != nil && !(try! `await`(storeFlowableFactory.needRefresh(cachedData: data!))) {
                         yield(data!)
                     } else {
                         throw NoSuchElementError()
@@ -89,7 +89,7 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable {
                     // do nothing.
                     break
                 case .error(let rawError):
-                    if data != nil && !(try! `await`(storeFlowableCallback.needRefresh(cachedData: data!))) {
+                    if data != nil && !(try! `await`(storeFlowableFactory.needRefresh(cachedData: data!))) {
                         yield(data!)
                     } else {
                         throw rawError

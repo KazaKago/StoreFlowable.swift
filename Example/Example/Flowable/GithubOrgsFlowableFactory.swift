@@ -1,5 +1,5 @@
 //
-//  GithubOrgsFlowableCallback.swift
+//  GithubOrgsFlowableFactory.swift
 //  Example
 //
 //  Created by Kensuke Tamura on 2020/12/25.
@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import StoreFlowable
 
-struct GithubOrgsFlowableCallback: PaginatingStoreFlowableCallback {
+struct GithubOrgsFlowableFactory: PaginatingStoreFlowableFactory {
 
     typealias KEY = UnitHash
     typealias DATA = [GithubOrg]
@@ -44,14 +44,14 @@ struct GithubOrgsFlowableCallback: PaginatingStoreFlowableCallback {
     }
 
     func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<[GithubOrg]>, Error> {
-        githubApi.getOrgs(since: nil, perPage: GithubOrgsFlowableCallback.PER_PAGE).map { data in
+        githubApi.getOrgs(since: nil, perPage: GithubOrgsFlowableFactory.PER_PAGE).map { data in
             FetchingResult(data: data, noMoreAdditionalData: data.isEmpty)
         }.eraseToAnyPublisher()
     }
 
     func fetchAdditionalDataFromOrigin(cachedData: [GithubOrg]?) -> AnyPublisher<FetchingResult<[GithubOrg]>, Error> {
         let since = cachedData?.last?.id ?? nil
-        return githubApi.getOrgs(since: since, perPage: GithubOrgsFlowableCallback.PER_PAGE).map { data in
+        return githubApi.getOrgs(since: since, perPage: GithubOrgsFlowableFactory.PER_PAGE).map { data in
             FetchingResult(data: data, noMoreAdditionalData: data.isEmpty)
         }.eraseToAnyPublisher()
     }
@@ -59,7 +59,7 @@ struct GithubOrgsFlowableCallback: PaginatingStoreFlowableCallback {
     func needRefresh(cachedData: [GithubOrg]) -> AnyPublisher<Bool, Never> {
         Future { promise in
             if let createdAt = GithubInMemoryCache.orgsCacheCreatedAt {
-                let expiredAt = createdAt + GithubOrgsFlowableCallback.EXPIRE_SECONDS
+                let expiredAt = createdAt + GithubOrgsFlowableFactory.EXPIRE_SECONDS
                 promise(.success(expiredAt < Date()))
             } else {
                 promise(.success(true))

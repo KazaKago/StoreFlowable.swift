@@ -11,7 +11,7 @@ import Combine
 /**
  * Provides input / output methods that abstract the data acquisition destination.
  *
- * This class is generated from `StoreFlowableCallback.create`.
+ * This class is generated from `StoreFlowableFactory.create`.
  */
 public protocol StoreFlowable {
 
