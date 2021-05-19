@@ -478,7 +478,7 @@ final class StoreFlowableTests: XCTestCase {
     }
 
     func testUpdateNil() throws {
-        let storeFlowable = SucceedTestFlowableFactoryk(initialData: .validData).create()
+        let storeFlowable = SucceedTestFlowableFactory(initialData: .validData).create()
         let publishRecorder = storeFlowable.publish().record()
         _ = try wait(for: publishRecorder.next(), timeout: 1)
         _ = storeFlowable.update(newData: nil).record()
