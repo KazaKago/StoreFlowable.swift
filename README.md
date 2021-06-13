@@ -158,34 +158,21 @@ private func subscribe(userId: UserId) {
         .sink { state in
             state.doAction(
                 onFixed: {
-                    state.content.doAction(
-                        onExist: { value in
-                            ...
-                        },
-                        onNotExist: {
-                            ...
-                        }
-                    )
+                    ...
                 },
                 onLoading: {
-                    state.content.doAction(
-                        onExist: { value in
-                            ...
-                        },
-                        onNotExist: {
-                            ...
-                        }
-                    )
+                    ...
                 },
                 onError: { error in
-                    state.content.doAction(
-                        onExist: { value in
-                            ...
-                        },
-                        onNotExist: {
-                            ...
-                        }
-                    )
+                    ...
+                }
+            )
+            state.content.doAction(
+                onExist: { value in
+                    ...
+                },
+                onNotExist: {
+                    ...
                 }
             )
         }
