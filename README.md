@@ -295,7 +295,7 @@ struct UserListFlowableFactory : PaginatingStoreFlowableFactory {
         userListCache.save(data: newData)
     }
 
-    func saveDataToCache(cachedData: [UserData]?, newData: [UserData]) -> AnyPublisher<Void, Never> {
+    func saveAdditionalDataToCache(cachedData: [UserData]?, newData: [UserData]) -> AnyPublisher<Void, Never> {
         let mergedData = (cachedData ?? []) + newData
         return userListCache.save(data: mergedData).map { data in
             FetchingResult(data: data, noMoreAdditionalData: data.isEmpty)
