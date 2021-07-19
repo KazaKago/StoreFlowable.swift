@@ -108,7 +108,9 @@ struct UserFlowableFactory : StoreFlowableFactory {
 
     // Get data from remote server.
     func fetchDataFromOrigin() -> AnyPublisher<UserData, Error> {
-        userApi.fetch(userId: key)
+        userApi.fetch(userId: key).map { data in
+            FetchingResult(data: data)
+        }.eraseToAnyPublisher()
     }
 
     // Whether the cache is valid.
@@ -156,34 +158,21 @@ private func subscribe(userId: UserId) {
         .sink { state in
             state.doAction(
                 onFixed: {
-                    state.content.doAction(
-                        onExist: { value in
-                            ...
-                        },
-                        onNotExist: {
-                            ...
-                        }
-                    )
+                    ...
                 },
                 onLoading: {
-                    state.content.doAction(
-                        onExist: { value in
-                            ...
-                        },
-                        onNotExist: {
-                            ...
-                        }
-                    )
+                    ...
                 },
                 onError: { error in
-                    state.content.doAction(
-                        onExist: { value in
-                            ...
-                        },
-                        onNotExist: {
-                            ...
-                        }
-                    )
+                    ...
+                }
+            )
+            state.content.doAction(
+                onExist: { value in
+                    ...
+                },
+                onNotExist: {
+                    ...
                 }
             )
         }
@@ -306,9 +295,11 @@ struct UserListFlowableFactory : PaginatingStoreFlowableFactory {
         userListCache.save(data: newData)
     }
 
-    func saveDataToCache(cachedData: [UserData]?, newData: [UserData]) -> AnyPublisher<Void, Never> {
+    func saveAdditionalDataToCache(cachedData: [UserData]?, newData: [UserData]) -> AnyPublisher<Void, Never> {
         let mergedData = (cachedData ?? []) + newData
-        return userListCache.save(data: mergedData)
+        return userListCache.save(data: mergedData).map { data in
+            FetchingResult(data: data, noMoreAdditionalData: data.isEmpty)
+        }.eraseToAnyPublisher()
     }
 
     func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<[UserData]>, Error> {
@@ -317,7 +308,9 @@ struct UserListFlowableFactory : PaginatingStoreFlowableFactory {
 
     func fetchAdditionalDataFromOrigin(cachedData: [UserData]?) -> AnyPublisher<FetchingResult<[UserData]>, Error> {
         let page = ((cachedData?.count ?? 0) / 10 + 1)
-        return userListApi.fetch(page: page)
+        return userListApi.fetch(page: page).map { data in
+            FetchingResult(data: data, noMoreAdditionalData: data.isEmpty)
+        }.eraseToAnyPublisher()
     }
 
     func needRefresh(cachedData: [UserData]) -> AnyPublisher<Bool, Never> {
