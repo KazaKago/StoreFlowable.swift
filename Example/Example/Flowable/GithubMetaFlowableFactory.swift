@@ -35,10 +35,8 @@ struct GithubMetaFlowableFactory: StoreFlowableFactory {
         }.eraseToAnyPublisher()
     }
 
-    func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<GithubMeta>, Error> {
-        githubApi.getMeta().map { data in
-            FetchingResult(data: data)
-        }.eraseToAnyPublisher()
+    func fetchDataFromOrigin() -> AnyPublisher<GithubMeta, Error> {
+        githubApi.getMeta()
     }
 
     func needRefresh(cachedData: GithubMeta) -> AnyPublisher<Bool, Never> {

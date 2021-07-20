@@ -45,47 +45,20 @@ final class GithubUserViewModel : ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { state in
                 state.doAction(
-                    onFixed: {
-                        state.content.doAction(
-                            onExist: { value in
-                                self.githubUser = value
-                                self.isLoading = false
-                                self.error = nil
-                            },
-                            onNotExist: {
-                                self.githubUser = nil
-                                self.isLoading = false
-                                self.error = nil
-                            }
-                        )
+                    onLoading: { _ in
+                        self.githubUser = nil
+                        self.isLoading = true
+                        self.error = nil
                     },
-                    onLoading: {
-                        state.content.doAction(
-                            onExist: { value in
-                                self.githubUser = value
-                                self.isLoading = true
-                                self.error = nil
-                            },
-                            onNotExist: {
-                                self.githubUser = nil
-                                self.isLoading = true
-                                self.error = nil
-                            }
-                        )
+                    onCompleted: { githubUser, _, _ in
+                        self.githubUser = githubUser
+                        self.isLoading = false
+                        self.error = nil
                     },
                     onError: { error in
-                        state.content.doAction(
-                            onExist: { value in
-                                self.githubUser = value
-                                self.isLoading = false
-                                self.error = nil
-                            },
-                            onNotExist: {
-                                self.githubUser = nil
-                                self.isLoading = false
-                                self.error = error
-                            }
-                        )
+                        self.githubUser = nil
+                        self.isLoading = false
+                        self.error = error
                     }
                 )
             }

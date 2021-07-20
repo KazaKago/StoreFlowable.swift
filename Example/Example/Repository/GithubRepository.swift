@@ -11,7 +11,7 @@ import StoreFlowable
 
 struct GithubRepository {
 
-    func followMeta() -> StatePublisher<GithubMeta> {
+    func followMeta() -> LoadingStatePublisher<GithubMeta> {
         let githubMetaFlowable = GithubMetaFlowableFactory().create()
         return githubMetaFlowable.publish()
     }
@@ -21,7 +21,7 @@ struct GithubRepository {
         return githubMetaFlowable.refresh()
     }
 
-    func followOrgs() -> StatePublisher<[GithubOrg]> {
+    func followOrgs() -> LoadingStatePublisher<[GithubOrg]> {
         let githubOrgsFlowable = GithubOrgsFlowableFactory().create()
         return githubOrgsFlowable.publish()
     }
@@ -31,12 +31,12 @@ struct GithubRepository {
         return githubOrgsFlowable.refresh()
     }
 
-    func requestAdditionalOrgs(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+    func requestNextOrgs(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
         let githubOrgsFlowable = GithubOrgsFlowableFactory().create()
-        return githubOrgsFlowable.requestAdditionalData(continueWhenError: continueWhenError)
+        return githubOrgsFlowable.requestNextData(continueWhenError: continueWhenError)
     }
 
-    func followUser(userName: String) -> StatePublisher<GithubUser> {
+    func followUser(userName: String) -> LoadingStatePublisher<GithubUser> {
         let githubUserFlowable = GithubUserFlowableFactory(userName: userName).create()
         return githubUserFlowable.publish()
     }
@@ -46,7 +46,7 @@ struct GithubRepository {
         return githubUserFlowable.refresh()
     }
 
-    func followRepos(userName: String) -> StatePublisher<[GithubRepo]> {
+    func followRepos(userName: String) -> LoadingStatePublisher<[GithubRepo]> {
         let githubReposFlowable = GithubReposFlowableFactory(userName: userName).create()
         return githubReposFlowable.publish()
     }
@@ -56,8 +56,8 @@ struct GithubRepository {
         return githubReposFlowable.refresh()
     }
 
-    func requestAdditionalRepos(userName: String, continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+    func requestNextRepos(userName: String, continueWhenError: Bool) -> AnyPublisher<Void, Never> {
         let githubReposFlowable = GithubReposFlowableFactory(userName: userName).create()
-        return githubReposFlowable.requestAdditionalData(continueWhenError: continueWhenError)
+        return githubReposFlowable.requestNextData(continueWhenError: continueWhenError)
     }
 }

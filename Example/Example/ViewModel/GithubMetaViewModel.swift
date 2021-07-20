@@ -40,47 +40,20 @@ final class GithubMetaViewModel : ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { state in
                 state.doAction(
-                    onFixed: {
-                        state.content.doAction(
-                            onExist: { value in
-                                self.githubMeta = value
-                                self.isLoading = false
-                                self.error = nil
-                            },
-                            onNotExist: {
-                                self.githubMeta = nil
-                                self.isLoading = false
-                                self.error = nil
-                            }
-                        )
+                    onLoading: { _ in
+                        self.githubMeta = nil
+                        self.isLoading = true
+                        self.error = nil
                     },
-                    onLoading: {
-                        state.content.doAction(
-                            onExist: { value in
-                                self.githubMeta = value
-                                self.isLoading = true
-                                self.error = nil
-                            },
-                            onNotExist: {
-                                self.githubMeta = nil
-                                self.isLoading = true
-                                self.error = nil
-                            }
-                        )
+                    onCompleted: { githubMeta, _, _ in
+                        self.githubMeta = githubMeta
+                        self.isLoading = false
+                        self.error = nil
                     },
                     onError: { error in
-                        state.content.doAction(
-                            onExist: { value in
-                                self.githubMeta = value
-                                self.isLoading = false
-                                self.error = nil
-                            },
-                            onNotExist: {
-                                self.githubMeta = nil
-                                self.isLoading = false
-                                self.error = error
-                            }
-                        )
+                        self.githubMeta = nil
+                        self.isLoading = false
+                        self.error = error
                     }
                 )
             }

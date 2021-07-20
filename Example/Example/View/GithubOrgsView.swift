@@ -19,16 +19,16 @@ struct GithubOrgsView: View {
                         GithubOrgItem(githubOrg: githubOrg)
                             .onAppear {
                                 if githubOrg == githubOrgsViewModel.githubOrgs.last {
-                                    githubOrgsViewModel.requestAdditional()
+                                    githubOrgsViewModel.requestNext()
                                 }
                             }
                     }
-                    if githubOrgsViewModel.isAdditionalLoading {
+                    if githubOrgsViewModel.isNextLoading {
                         LoadingItem()
                     }
-                    if let error = githubOrgsViewModel.additionalError {
+                    if let error = githubOrgsViewModel.nextError {
                         ErrorItem(error: error) {
-                            githubOrgsViewModel.retryAdditional()
+                            githubOrgsViewModel.retryNext()
                         }
                     }
                 }
@@ -51,7 +51,7 @@ struct GithubOrgsView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    if githubOrgsViewModel.isMainLoading || githubOrgsViewModel.isAdditionalLoading {
+                    if githubOrgsViewModel.isMainLoading || githubOrgsViewModel.isNextLoading || githubOrgsViewModel.isRefreshing {
                         ProgressView()
                     } else {
                         Button("Refresh") {

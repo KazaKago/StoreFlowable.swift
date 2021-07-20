@@ -1,22 +1,21 @@
 //
-//  StoreFlowableExtension.swift
+//  PaginationStoreFlowableExtension.swift
 //  StoreFlowable
 //
-//  Created by Kensuke Tamura on 2020/12/11.
+//  Created by tamura_k on 2021/07/20.
 //
 
 import Foundation
-import Combine
 
-public extension StoreFlowableFactory {
+public extension PaginationStoreFlowableFactory {
 
     /**
-     * Create `StoreFlowable` class from `StoreFlowableFactory`.
+     * Create `PaginationStoreFlowable` class from `PaginationStoreFlowableFactory`.
      *
-     * - returns: Created StateFlowable.
+     * - returns: Created PaginationStoreFlowable.
      */
-    func create() -> AnyStoreFlowable<KEY, DATA> {
-        AnyStoreFlowable(StoreFlowableImpl(
+    func create() -> AnyPaginationStoreFlowable<KEY, DATA> {
+        AnyPaginationStoreFlowable(StoreFlowableImpl(
             key: key,
             flowableDataStateManager: flowableDataStateManager,
             cacheDataManager: AnyCacheDataManager<DATA>(
@@ -27,7 +26,7 @@ public extension StoreFlowableFactory {
                     saveDataToCache(newData: newData)
                 },
                 saveNext: { cachedData, newData in
-                    fatalError()
+                    saveNextDataToCache(cachedData: cachedData, newData: newData)
                 },
                 savePrev: { cachedData, newData in
                     fatalError()
@@ -35,12 +34,14 @@ public extension StoreFlowableFactory {
             ),
             originDataManager: AnyOriginDataManager<DATA>(
                 fetch: {
-                    fetchDataFromOrigin().map { data in
-                        InternalFetched(data: data, nextKey: nil, prevKey: nil)
+                    fetchDataFromOrigin().map { result in
+                        InternalFetched(data: result.data, nextKey: result.nextKey, prevKey: nil)
                     }.eraseToAnyPublisher()
                 },
                 fetchNext: { nextKey in
-                    fatalError()
+                    fetchNextDataFromOrigin(nextKey: nextKey).map { result in
+                        InternalFetched(data: result.data, nextKey: result.nextKey, prevKey: nil)
+                    }.eraseToAnyPublisher()
                 },
                 fetchPrev: { prevKey in
                     fatalError()

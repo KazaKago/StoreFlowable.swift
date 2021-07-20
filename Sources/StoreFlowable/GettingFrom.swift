@@ -24,19 +24,4 @@ public enum GettingFrom {
      * Always try to get data from cache.
      */
     case cache
-    /**
-     * Use `both`,
-     */
-    @available(*, deprecated, renamed: "both")
-    case mix
-    /**
-     * Use `origin`,
-     */
-    @available(*, deprecated, renamed: "origin")
-    case fromOrigin
-    /**
-     * Use `cache`,
-     */
-    @available(*, deprecated, renamed: "cache")
-    case fromCache
 }

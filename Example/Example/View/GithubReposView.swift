@@ -23,16 +23,16 @@ struct GithubReposView: View {
                         GithubRepoItem(githubRepo: githubRepo)
                             .onAppear {
                                 if githubRepo == githubReposViewModel.githubRepos.last {
-                                    githubReposViewModel.requestAdditional()
+                                    githubReposViewModel.requestNext()
                                 }
                             }
                     }
-                    if githubReposViewModel.isAdditionalLoading {
+                    if githubReposViewModel.isNextLoading {
                         LoadingItem()
                     }
-                    if let error = githubReposViewModel.additionalError {
+                    if let error = githubReposViewModel.nextError {
                         ErrorItem(error: error) {
-                            githubReposViewModel.retryAdditional()
+                            githubReposViewModel.retryNext()
                         }
                     }
                 }
@@ -55,7 +55,7 @@ struct GithubReposView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    if githubReposViewModel.isMainLoading || githubReposViewModel.isAdditionalLoading {
+                    if githubReposViewModel.isMainLoading || githubReposViewModel.isNextLoading || githubReposViewModel.isRefreshing {
                         ProgressView()
                     } else {
                         Button("Refresh") {

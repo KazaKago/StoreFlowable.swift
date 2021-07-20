@@ -39,10 +39,8 @@ struct GithubUserFlowableFactory: StoreFlowableFactory {
         }.eraseToAnyPublisher()
     }
 
-    func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<GithubUser>, Error> {
-        githubApi.getUser(userName: key).map { data in
-            FetchingResult(data: data)
-        }.eraseToAnyPublisher()
+    func fetchDataFromOrigin() -> AnyPublisher<GithubUser, Error> {
+        githubApi.getUser(userName: key)
     }
 
     func needRefresh(cachedData: GithubUser) -> AnyPublisher<Bool, Never> {

@@ -1,17 +1,17 @@
 //
-//  AnyStoreFlowable.swift
+//  AnyPaginationStoreFlowable.swift
 //  StoreFlowable
 //
-//  Created by Kensuke Tamura on 2020/12/12.
+//  Created by Kensuke Tamura on 2020/12/24.
 //
 
 import Foundation
 import Combine
 
 /**
- * Type erasure of `StoreFlowable`.
+ * Type erasure of `PaginationStoreFlowable`.
  */
-public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
+public struct AnyPaginationStoreFlowable<KEY: Hashable, DATA>: PaginationStoreFlowable {
 
     public typealias KEY = KEY
     public typealias DATA = DATA
@@ -21,9 +21,11 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
     private let _requireData: (_ from: GettingFrom) -> AnyPublisher<DATA, Error>
     private let _validate: () -> AnyPublisher<Void, Never>
     private let _refresh: () -> AnyPublisher<Void, Never>
-    private let _update: (_ newData: DATA?) -> AnyPublisher<Void, Never>
+    private let _requestNextData: (_ continueWhenError: Bool) -> AnyPublisher<Void, Never>
+    private let _update1: (_ newData: DATA?) -> AnyPublisher<Void, Never>
+    private let _update2: (_ newData: DATA?, _ nextKey: String?) -> AnyPublisher<Void, Never>
 
-    init<INNER: StoreFlowable>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
+    init<INNER: PaginationStoreFlowable>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
         _publish = { forceRefresh in
             inner.publish(forceRefresh: forceRefresh)
         }
@@ -39,8 +41,14 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
         _refresh = {
             inner.refresh()
         }
-        _update = { newData in
+        _requestNextData = { continueWhenError in
+            inner.requestNextData(continueWhenError: continueWhenError)
+        }
+        _update1 = { newData in
             inner.update(newData: newData)
+        }
+        _update2 = { newData, nextKey in
+            inner.update(newData: newData, nextKey: nextKey)
         }
     }
 
@@ -64,7 +72,15 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
         _refresh()
     }
 
+    public func requestNextData(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+        _requestNextData(continueWhenError)
+    }
+
     public func update(newData: DATA?) -> AnyPublisher<Void, Never> {
-        _update(newData)
+        _update1(newData)
+    }
+
+    public func update(newData: DATA?, nextKey: String?) -> AnyPublisher<Void, Never> {
+        _update2(newData, nextKey)
     }
 }
