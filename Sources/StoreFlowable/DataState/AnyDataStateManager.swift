@@ -23,6 +23,11 @@ struct AnyDataStateManager<KEY>: DataStateManager {
         }
     }
 
+    init(load: @escaping (_ key: KEY) -> DataState, save: @escaping (_ key: KEY, DataState) -> Void) {
+        _load = load
+        _save = save
+    }
+
     func load(key: KEY) -> DataState {
         _load(key)
     }
