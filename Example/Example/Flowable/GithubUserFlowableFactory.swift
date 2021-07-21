@@ -14,7 +14,7 @@ struct GithubUserFlowableFactory: StoreFlowableFactory {
     typealias KEY = String
     typealias DATA = GithubUser
 
-    private static let EXPIRE_SECONDS = TimeInterval(30)
+    private static let EXPIRE_SECONDS = TimeInterval(60)
     private let githubApi = GithubApi()
 
     init(userName: String) {

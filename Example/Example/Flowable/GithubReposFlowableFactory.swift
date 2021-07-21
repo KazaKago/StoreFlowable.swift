@@ -14,7 +14,7 @@ struct GithubReposFlowableFactory: PaginationStoreFlowableFactory {
     typealias KEY = String
     typealias DATA = [GithubRepo]
 
-    private static let EXPIRE_SECONDS = TimeInterval(30)
+    private static let EXPIRE_SECONDS = TimeInterval(60)
     private static let PER_PAGE = 20
     private let githubApi = GithubApi()
 
@@ -49,14 +49,20 @@ struct GithubReposFlowableFactory: PaginationStoreFlowableFactory {
 
     func fetchDataFromOrigin() -> AnyPublisher<Fetched<[GithubRepo]>, Error> {
         githubApi.getRepos(userName: key, page: 1, perPage: GithubReposFlowableFactory.PER_PAGE).map { newData in
-            Fetched(data: newData, nextKey: 2.description)
+            Fetched(
+                data: newData,
+                nextKey: 2.description
+            )
         }.eraseToAnyPublisher()
     }
 
     func fetchNextDataFromOrigin(nextKey: String) -> AnyPublisher<Fetched<[GithubRepo]>, Error> {
         let nextPage = Int(nextKey)!
         return githubApi.getRepos(userName: key, page: nextPage, perPage: GithubReposFlowableFactory.PER_PAGE).map { newData in
-            Fetched(data: newData, nextKey: newData.isEmpty ? nil : (nextPage + 1).description)
+            Fetched(
+                data: newData,
+                nextKey: newData.isEmpty ? nil : (nextPage + 1).description
+            )
         }.eraseToAnyPublisher()
     }
 

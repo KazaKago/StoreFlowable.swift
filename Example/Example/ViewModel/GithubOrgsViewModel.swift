@@ -16,7 +16,7 @@ final class GithubOrgsViewModel : ObservableObject {
     @Published var isRefreshing: Bool = false
     @Published var mainError: Error?
     @Published var nextError: Error?
-    private let githubRepository = GithubRepository()
+    private let githubOrgsRepository = GithubOrgsRepository()
     private var cancellableSet = Set<AnyCancellable>()
 
     func initialize() {
@@ -25,35 +25,35 @@ final class GithubOrgsViewModel : ObservableObject {
     }
 
     func refresh() {
-        githubRepository.refreshOrgs()
+        githubOrgsRepository.refresh()
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     func retry() {
-        githubRepository.refreshOrgs()
+        githubOrgsRepository.refresh()
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     func requestNext() {
-        githubRepository.requestNextOrgs(continueWhenError: false)
+        githubOrgsRepository.requestNext(continueWhenError: false)
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     func retryNext() {
-        githubRepository.requestNextOrgs(continueWhenError: true)
+        githubOrgsRepository.requestNext(continueWhenError: true)
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     private func subscribe() {
-        githubRepository.followOrgs()
+        githubOrgsRepository.follow()
             .receive(on: DispatchQueue.main)
             .sink { state in
                 state.doAction(

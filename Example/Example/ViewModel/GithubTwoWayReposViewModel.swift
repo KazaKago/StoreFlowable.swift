@@ -1,28 +1,26 @@
 //
-//  GithubReposViewModel.swift
+//  GithubTwoWayReposViewModel.swift
 //  Example
 //
-//  Created by Kensuke Tamura on 2020/12/29.
+//  Created by tamura_k on 2021/07/21.
 //
 
 import Foundation
 import Combine
 
-final class GithubReposViewModel : ObservableObject {
+final class GithubTwoWayReposViewModel : ObservableObject {
 
     @Published var githubRepos: [GithubRepo] = []
     @Published var isMainLoading: Bool = false
     @Published var isNextLoading: Bool = false
+    @Published var isPrevLoading: Bool = false
     @Published var isRefreshing: Bool = false
     @Published var mainError: Error?
     @Published var nextError: Error?
-    private let userName: String
-    private let githubReposRepository = GithubReposRepository()
+    @Published var prevError: Error?
+    private let githubTwoWayReposRepository = GithubTwoWayReposRepository()
     private var cancellableSet = Set<AnyCancellable>()
-
-    init(userName: String) {
-        self.userName = userName
-    }
+    var firstLoad = true
 
     func initialize() {
         cancellableSet.removeAll()
@@ -30,35 +28,49 @@ final class GithubReposViewModel : ObservableObject {
     }
 
     func refresh() {
-        githubReposRepository.refresh(userName: userName)
+        githubTwoWayReposRepository.refresh()
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     func retry() {
-        githubReposRepository.refresh(userName: userName)
+        githubTwoWayReposRepository.refresh()
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     func requestNext() {
-        githubReposRepository.requestNext(userName: userName, continueWhenError: false)
+        githubTwoWayReposRepository.requestNext(continueWhenError: false)
+            .receive(on: DispatchQueue.main)
+            .sink {}
+            .store(in: &cancellableSet)
+    }
+
+    func requestPrev() {
+        githubTwoWayReposRepository.requestPrev(continueWhenError: false)
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     func retryNext() {
-        githubReposRepository.requestNext(userName: userName, continueWhenError: true)
+        githubTwoWayReposRepository.requestNext(continueWhenError: true)
+            .receive(on: DispatchQueue.main)
+            .sink {}
+            .store(in: &cancellableSet)
+    }
+
+    func retryPrev() {
+        githubTwoWayReposRepository.requestPrev(continueWhenError: true)
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     private func subscribe() {
-        githubReposRepository.follow(userName: userName)
+        githubTwoWayReposRepository.follow()
             .receive(on: DispatchQueue.main)
             .sink { state in
                 state.doAction(
@@ -73,10 +85,13 @@ final class GithubReposViewModel : ObservableObject {
                             self.isRefreshing = false
                         }
                         self.isNextLoading = false
+                        self.isPrevLoading = false
                         self.mainError = nil
                         self.nextError = nil
+                        self.prevError = nil
                     },
-                    onCompleted: { githubRepos, next, _ in
+                    onCompleted: { githubRepos, next, prev in
+                        self.githubRepos = githubRepos
                         next.doAction(
                             onFixed: { _ in
                                 self.isNextLoading = false
@@ -91,7 +106,20 @@ final class GithubReposViewModel : ObservableObject {
                                 self.nextError = error
                             }
                         )
-                        self.githubRepos = githubRepos
+                        prev.doAction(
+                            onFixed: { _ in
+                                self.isPrevLoading = false
+                                self.prevError = nil
+                            },
+                            onLoading: {
+                                self.isPrevLoading = true
+                                self.prevError = nil
+                            },
+                            onError: { error in
+                                self.isPrevLoading = false
+                                self.prevError = error
+                            }
+                        )
                         self.isMainLoading = false
                         self.isRefreshing = false
                         self.mainError = nil
@@ -100,9 +128,11 @@ final class GithubReposViewModel : ObservableObject {
                         self.githubRepos = []
                         self.isMainLoading = false
                         self.isNextLoading = false
+                        self.isPrevLoading = false
                         self.isRefreshing = false
                         self.mainError = error
                         self.nextError = nil
+                        self.prevError = nil
                     }
                 )
             }

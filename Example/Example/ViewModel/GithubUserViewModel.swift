@@ -14,7 +14,7 @@ final class GithubUserViewModel : ObservableObject {
     @Published var isLoading: Bool = false
     @Published var error: Error?
     private let userName: String
-    private let githubRepository = GithubRepository()
+    private let githubUserRepository = GithubUserRepository()
     private var cancellableSet = Set<AnyCancellable>()
 
     init(userName: String) {
@@ -27,21 +27,21 @@ final class GithubUserViewModel : ObservableObject {
     }
 
     func refresh() {
-        githubRepository.refreshUser(userName: userName)
+        githubUserRepository.refresh(userName: userName)
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     func retry() {
-        githubRepository.refreshUser(userName: userName)
+        githubUserRepository.refresh(userName: userName)
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     private func subscribe() {
-        githubRepository.followUser(userName: userName)
+        githubUserRepository.follow(userName: userName)
             .receive(on: DispatchQueue.main)
             .sink { state in
                 state.doAction(

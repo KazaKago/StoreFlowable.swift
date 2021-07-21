@@ -14,7 +14,7 @@ struct GithubMetaFlowableFactory: StoreFlowableFactory {
     typealias KEY = UnitHash
     typealias DATA = GithubMeta
 
-    private static let EXPIRE_SECONDS = TimeInterval(30)
+    private static let EXPIRE_SECONDS = TimeInterval(60)
     private let githubApi = GithubApi()
 
     let key: UnitHash = UnitHash()
