@@ -254,7 +254,7 @@ This library includes Pagination support.
 
 <img src="https://user-images.githubusercontent.com/7742104/103469914-7a833700-4dae-11eb-8ff8-98de478f20f8.gif" width="280"> <img src="https://user-images.githubusercontent.com/7742104/103469911-75be8300-4dae-11eb-924e-af509abd273a.gif" width="280">
 
-Inherit [`PagnatingStoreFlowableFactory<KEY: Hashable, DATA>`](Sources/StoreFlowable/Pagination/PaginatingStoreFlowableFactory.swift) instead of [`StoreFlowableFactory<KEY: Hashable, DATA>`](Sources/StoreFlowable/StoreFlowableFactory.swift).  
+Inherit [`PagnationStoreFlowableFactory<KEY: Hashable, DATA>`](Sources/StoreFlowable/Pagination/OneWay/PaginationStoreFlowableFactory.swift) instead of [`StoreFlowableFactory<KEY: Hashable, DATA>`](Sources/StoreFlowable/StoreFlowableFactory.swift).  
 
 An example is shown below.  
 
@@ -290,13 +290,14 @@ struct UserListFlowableFactory : PaginationStoreFlowableFactory {
     }
 
     func fetchDataFromOrigin() -> AnyPublisher<Fetched<[UserData]>, Error> {
-        let fetchedData = userListApi.fetch(page: nil)
-        return Fetched(data: data, nextKey: fetchedData.nextToken)
+        userListApi.fetch(page: nil).map { data in
+            Fetched(data: data, nextKey: data.nextToken)
+        }.eraseToAnyPublisher()
     }
 
     func fetchNextDataFromOrigin(nextKey: String) -> AnyPublisher<Fetched<[UserData]>, Error> {
-        return userListApi.fetch(page: page).map { data in
-            FetchingResult(data: data, nextKey: fetchedData.nextToken)
+        userListApi.fetch(page: page).map { data in
+            Fetched(data: data, nextKey: data.nextToken)
         }.eraseToAnyPublisher()
     }
 
@@ -309,7 +310,39 @@ struct UserListFlowableFactory : PaginationStoreFlowableFactory {
 You need to additionally implements [`saveNextDataToCache()`](Sources/StoreFlowable/Pagination/OneWay/PaginationStoreFlowableFactory.swift) and [`fetchNextDataFromOrigin()`](Sources/StoreFlowable/Pagination/OneWay/PaginationStoreFlowable.swift).  
 When saving the data, combine the cached data and the new data before saving.  
 
-The [GithubOrgsFlowableFactory](Example/Example/Flowable/GithubOrgsFlowableFactory.swift) and [GithubReposFlowableFactory](Example/Example/Flowable/GithubReposFlowableFactory.swift) classes in [**example project**](Example) implement pagination.  
+And then, You can get the state of additional loading from the next parameter of onCompleted {}.
+
+```swift
+userRepository.followUserData(userId: userId)
+    .receive(on: DispatchQueue.main)
+    .sink { state in
+        state.doAction(
+            onLoading: { (content: UserData?) in
+                // Whole (Initial) data loading.
+            },
+            onCompleted: { (content: UserData, next: AdditionalLoadingState, _) in
+                // Whole (Initial) data loading completed.
+                next.doAction(
+                    onFixed: { (canRequestAdditionalData: Bool) in
+                        // No additional processing.
+                    },
+                    onLoading: {
+                        // Additional data loading.
+                    },
+                    onError: { (error: Error) in
+                        // Additional loading error.
+                    }
+                )
+            },
+            onError: { (error: Error) in
+                // Whole (Initial) data loading error.
+            }
+        )
+    }
+    .store(in: &cancellableSet)
+```
+
+To display in the [`UITableView`](https://developer.apple.com/documentation/uikit/uitableview), Please use the difference update function. See also [`UITableViewDiffableDataSource`](https://developer.apple.com/documentation/uikit/uitableviewdiffabledatasource).
 
 ### Request additional data
 
@@ -320,6 +353,10 @@ public extension PaginationStoreFlowable {
     func requestNextData(continueWhenError: Bool = true) -> AnyPublisher<Void, Never>
 }
 ```
+
+## Pagination Example
+
+The [GithubOrgsFlowableFactory](Example/Example/Flowable/GithubOrgsFlowableFactory.swift) and [GithubReposFlowableFactory](Example/Example/Flowable/GithubReposFlowableFactory.swift) classes in [**example project**](Example) implement pagination.  
 
 ## License
 
