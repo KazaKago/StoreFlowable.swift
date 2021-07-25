@@ -23,11 +23,11 @@ Created according to the following 5 policies.
 
 The following is the class structure of Repository pattern using this library.  
 
-![https://user-images.githubusercontent.com/7742104/103459433-bc7e8f80-4d52-11eb-8c3d-c885d76565fc.jpg](https://user-images.githubusercontent.com/7742104/103459433-bc7e8f80-4d52-11eb-8c3d-c885d76565fc.jpg)
+![https://user-images.githubusercontent.com/7742104/126891014-ce95b223-5b13-4290-8b58-faf1dcebf49e.jpg](https://user-images.githubusercontent.com/7742104/126891014-ce95b223-5b13-4290-8b58-faf1dcebf49e.jpg)
 
-The following is an example of screen display using [`State`](Sources/StoreFlowable/Core/State.swift).
+The following is an example of screen display using [`LoadingState`](Sources/StoreFlowable/Core/LoadingState.swift).  
 
-![https://user-images.githubusercontent.com/7742104/103459431-bab4cc00-4d52-11eb-983a-2087dd3100a0.jpg](https://user-images.githubusercontent.com/7742104/103459431-bab4cc00-4d52-11eb-983a-2087dd3100a0.jpg)
+![https://user-images.githubusercontent.com/7742104/125714730-381eee65-4126-4ee8-991a-7fc64dfb325c.jpg](https://user-images.githubusercontent.com/7742104/125714730-381eee65-4126-4ee8-991a-7fc64dfb325c.jpg)
 
 ## Requirement
 
@@ -38,7 +38,7 @@ The following is an example of screen display using [`State`](Sources/StoreFlowa
 
 ## Install
 
-Install as [Swift Package Manager](https://swift.org/package-manager/) exchanging x.x.x for the latest tag.
+Install as [Swift Package Manager](https://swift.org/package-manager/) exchanging x.x.x for the latest tag.  
 
 ```swift
 dependencies: [
@@ -72,7 +72,7 @@ class UserStateManager: FlowableDataStateManager<UserId> {
 
 ### 2. Create StoreFlowableFactory class
 
-Next, create a class that implements [`StoreFlowableFactory`](Sources/StoreFlowable/StoreFlowableFactory.swift).
+Next, create a class that implements [`StoreFlowableFactory`](Sources/StoreFlowable/StoreFlowableFactory.swift).  
 Put the type you want to use as a Data in `DATA` associatedtype.  
 
 An example is shown below.  
@@ -108,9 +108,7 @@ struct UserFlowableFactory : StoreFlowableFactory {
 
     // Get data from remote server.
     func fetchDataFromOrigin() -> AnyPublisher<UserData, Error> {
-        userApi.fetch(userId: key).map { data in
-            FetchingResult(data: data)
-        }.eraseToAnyPublisher()
+        userApi.fetch(userId: key)
     }
 
     // Whether the cache is valid.
@@ -131,7 +129,7 @@ Be sure to go through the created [`AnyStoreFlowable<KEY: Hashable, DATA>`](Sour
 ```swift
 struct UserRepository {
 
-    func followUserData(userId: UserId) -> StatePublisher<UserData> {
+    func followUserData(userId: UserId) -> LoadingStatePublisher<UserData> {
         let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableFactory(userId: userId).create()
         return userFlowable.publish()
     }
@@ -143,13 +141,13 @@ struct UserRepository {
 }
 ```
 
-You can get the data in the form of [`StatePublisher<DATA>`](Sources/StoreFlowable/Core/StatePublisher.swift) (Same as `AnyPublisher<State<DATA>, Never>`) by using the [`publish()`](Sources/StoreFlowable/StoreFlowable.swift) method.  
-[`State`](Sources/StoreFlowable/Core/State.swift) is a [enum](https://docs.swift.org/swift-book/LanguageGuide/Enumerations.html) that holds raw data.
+You can get the data in the form of [`LoadingStatePublisher<DATA>`](Sources/StoreFlowable/Core/LoadingStatePublisher.swift) (Same as `AnyPublisher<LoadingState<DATA>, Never>`) by using the [`publish()`](Sources/StoreFlowable/StoreFlowable.swift) method.  
+[`LoadingState`](Sources/StoreFlowable/Core/LoadingState.swift) is a [enum](https://docs.swift.org/swift-book/LanguageGuide/Enumerations.html) that holds raw data.  
 
 ### 4. Use Repository class
 
 You can observe the data by sink [`AnyPublisher`](https://developer.apple.com/documentation/combine).  
-and branch the data state with `doAction()` method or `switch` statement.  
+and branch the data state with [`doAction()`](Sources/StoreFlowable/Core/LoadingState.swift) method or `switch` statement.  
 
 ```swift
 private func subscribe(userId: UserId) {
@@ -157,21 +155,13 @@ private func subscribe(userId: UserId) {
         .receive(on: DispatchQueue.main)
         .sink { state in
             state.doAction(
-                onFixed: {
+                onLoading: { (content: UserData?) in
                     ...
                 },
-                onLoading: {
+                onCompleted: { (content: UserData, _, _) in
                     ...
                 },
-                onError: { error in
-                    ...
-                }
-            )
-            state.content.doAction(
-                onExist: { value in
-                    ...
-                },
-                onNotExist: {
+                onError: { (error: Error) in
                     ...
                 }
             )
@@ -184,15 +174,15 @@ private func subscribe(userId: UserId) {
 ## Example
 
 Refer to the [**example project**](Example) for details. This module works as an iOS app.  
-See [GithubMetaFlowableFactory](Example/Example/Flowable/GithubMetaFlowableFactory.swift) and [GithubUserFlowableFactory](Example/Example/Flowable/GithubUserFlowableFactory.swift).
+See [GithubMetaFlowableFactory](Example/Example/Flowable/GithubMetaFlowableFactory.swift) and [GithubUserFlowableFactory](Example/Example/Flowable/GithubUserFlowableFactory.swift).  
 
 This example accesses the [Github API](https://docs.github.com/en/free-pro-team@latest/rest).  
 
 ## Advanced Usage
 
-### Get data without [State](Sources/StoreFlowable/Core/State.swift) enum
+### Get data without [LoadingState](Sources/StoreFlowable/Core/LoadingState.swift) enum
 
-If you don't need value flow and [`State`](Sources/StoreFlowable/Core/State.swift) enum, you can use [`requireData()`](Sources/StoreFlowable/StoreFlowable.swift) or [`getData()`](Sources/StoreFlowable/StoreFlowable.swift).  
+If you don't need value flow and [`LoadingState`](Sources/StoreFlowable/Core/LoadingState.swift) enum, you can use [`requireData()`](Sources/StoreFlowable/StoreFlowable.swift) or [`getData()`](Sources/StoreFlowable/StoreFlowable.swift).  
 [`requireData()`](Sources/StoreFlowable/StoreFlowable.swift) throws an Error if there is no valid cache and fails to get new data.  
 [`getData()`](Sources/StoreFlowable/StoreFlowable.swift) returns nil instead of Error.  
 
@@ -224,15 +214,15 @@ If you want to ignore the cache and get new data, add `forceRefresh` parameter t
 
 ```swift
 public extension StoreFlowable {
-    func publish(forceRefresh: Bool = false) -> StatePublisher<DATA>
+    func publish(forceRefresh: Bool = false) -> LoadingStatePublisher<DATA>
 }
 ```
 
 Or you can use [`refresh()`](Sources/StoreFlowable/StoreFlowable.swift) if you are already observing the `Publisher`.  
 
 ```swift
-public extension StoreFlowable {
-    func refresh(clearCacheWhenFetchFails: Bool = true, continueWhenError: Bool = true) -> AnyPublisher<Void, Never>
+public protocol StoreFlowable {
+    func refresh() -> AnyPublisher<Void, Never>
 }
 ```
 
@@ -264,7 +254,7 @@ This library includes Pagination support.
 
 <img src="https://user-images.githubusercontent.com/7742104/103469914-7a833700-4dae-11eb-8ff8-98de478f20f8.gif" width="280"> <img src="https://user-images.githubusercontent.com/7742104/103469911-75be8300-4dae-11eb-924e-af509abd273a.gif" width="280">
 
-Inherit [`PagnatingStoreFlowableFactory<KEY: Hashable, DATA>`](Sources/StoreFlowable/Pagination/PaginatingStoreFlowableFactory.swift) instead of [`StoreFlowableFactory<KEY: Hashable, DATA>`](Sources/StoreFlowable/StoreFlowableFactory.swift).
+Inherit [`PagnationStoreFlowableFactory<KEY: Hashable, DATA>`](Sources/StoreFlowable/Pagination/OneWay/PaginationStoreFlowableFactory.swift) instead of [`StoreFlowableFactory<KEY: Hashable, DATA>`](Sources/StoreFlowable/StoreFlowableFactory.swift).  
 
 An example is shown below.  
 
@@ -275,7 +265,7 @@ class UserListStateManager: FlowableDataStateManager<UnitHash> {
 }
 ```
 ```swift
-struct UserListFlowableFactory : PaginatingStoreFlowableFactory {
+struct UserListFlowableFactory : PaginationStoreFlowableFactory {
 
     typealias KEY = UnitHash
     typealias DATA = [UserData]
@@ -295,21 +285,19 @@ struct UserListFlowableFactory : PaginatingStoreFlowableFactory {
         userListCache.save(data: newData)
     }
 
-    func saveAdditionalDataToCache(cachedData: [UserData]?, newData: [UserData]) -> AnyPublisher<Void, Never> {
-        let mergedData = (cachedData ?? []) + newData
-        return userListCache.save(data: mergedData).map { data in
-            FetchingResult(data: data, noMoreAdditionalData: data.isEmpty)
+    func saveNextDataToCache(cachedData: [UserData], newData: [UserData]) -> AnyPublisher<Void, Never> {
+        userListCache.save(data: cachedData + newData)
+    }
+
+    func fetchDataFromOrigin() -> AnyPublisher<Fetched<[UserData]>, Error> {
+        userListApi.fetch(page: nil).map { data in
+            Fetched(data: data, nextKey: data.nextToken)
         }.eraseToAnyPublisher()
     }
 
-    func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<[UserData]>, Error> {
-        userListApi.fetch(page: 1)
-    }
-
-    func fetchAdditionalDataFromOrigin(cachedData: [UserData]?) -> AnyPublisher<FetchingResult<[UserData]>, Error> {
-        let page = ((cachedData?.count ?? 0) / 10 + 1)
-        return userListApi.fetch(page: page).map { data in
-            FetchingResult(data: data, noMoreAdditionalData: data.isEmpty)
+    func fetchNextDataFromOrigin(nextKey: String) -> AnyPublisher<Fetched<[UserData]>, Error> {
+        userListApi.fetch(page: page).map { data in
+            Fetched(data: data, nextKey: data.nextToken)
         }.eraseToAnyPublisher()
     }
 
@@ -319,20 +307,57 @@ struct UserListFlowableFactory : PaginatingStoreFlowableFactory {
 }
 ```
 
-You need to additionally implements `saveAdditionalDataToCache()` and `fetchAdditionalDataFromOrigin()`.  
+You need to additionally implements [`saveNextDataToCache()`](Sources/StoreFlowable/Pagination/OneWay/PaginationStoreFlowableFactory.swift) and [`fetchNextDataFromOrigin()`](Sources/StoreFlowable/Pagination/OneWay/PaginationStoreFlowable.swift).  
 When saving the data, combine the cached data and the new data before saving.  
 
-The [GithubOrgsFlowableFactory](Example/Example/Flowable/GithubOrgsFlowableFactory.swift) and [GithubReposFlowableFactory](Example/Example/Flowable/GithubReposFlowableFactory.swift) classes in [**example project**](Example) implement pagination.
+And then, You can get the state of additional loading from the `next` parameter of `onCompleted {}`.
+
+```swift
+let userFlowable = UserFlowableFactory(userId: userId).create()
+userFlowable.publish()
+    .receive(on: DispatchQueue.main)
+    .sink { state in
+        state.doAction(
+            onLoading: { (content: UserData?) in
+                // Whole (Initial) data loading.
+            },
+            onCompleted: { (content: UserData, next: AdditionalLoadingState, _) in
+                // Whole (Initial) data loading completed.
+                next.doAction(
+                    onFixed: { (canRequestAdditionalData: Bool) in
+                        // No additional processing.
+                    },
+                    onLoading: {
+                        // Additional data loading.
+                    },
+                    onError: { (error: Error) in
+                        // Additional loading error.
+                    }
+                )
+            },
+            onError: { (error: Error) in
+                // Whole (Initial) data loading error.
+            }
+        )
+    }
+    .store(in: &cancellableSet)
+```
+
+To display in the [`UITableView`](https://developer.apple.com/documentation/uikit/uitableview), Please use the difference update function. See also [`UITableViewDiffableDataSource`](https://developer.apple.com/documentation/uikit/uitableviewdiffabledatasource).
 
 ### Request additional data
 
-You can request additional data for paginating using the [`requestAdditionalData()`](Sources/StoreFlowable/Pagination/PaginatingStoreFlowable.swift) method.
+You can request additional data for paginating using the [`requestNextData()`](Sources/StoreFlowable/Pagination/OneWay/PaginationStoreFlowable.swift) method.  
 
 ```swift
-public extension PaginatingStoreFlowable {
-    func requestAdditionalData(continueWhenError: Bool = true) -> AnyPublisher<Void, Never>
+public extension PaginationStoreFlowable {
+    func requestNextData(continueWhenError: Bool = true) -> AnyPublisher<Void, Never>
 }
 ```
+
+## Pagination Example
+
+The [GithubOrgsFlowableFactory](Example/Example/Flowable/GithubOrgsFlowableFactory.swift) and [GithubReposFlowableFactory](Example/Example/Flowable/GithubReposFlowableFactory.swift) classes in [**example project**](Example) implement pagination.  
 
 ## License
 

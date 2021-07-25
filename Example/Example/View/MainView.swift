@@ -9,52 +9,74 @@ import SwiftUI
 
 struct MainView: View {
 
-    @State private var githubName = ""
+    @State private var nonPagenationGithubName = "github"
+    @State private var oneWayPagenationGithubName = "github"
 
     var body: some View {
         NavigationView {
-            VStack {
-                Text("Simple example")
-                Spacer()
-                    .frame(height: 10)
-                HStack {
-                    NavigationLink(destination: GithubMetaView()) {
-                        Text("Github Meta info\n(Single cache)")
-                            .font(.system(size: 15))
-                            .multilineTextAlignment(.center)
+            ScrollView {
+                VStack(alignment: .leading) {
+                    Text("This example accesses the Github API.\nThe valid time of these fetched data is 1 minute.")
+                        .font(.caption)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                        .frame(height: 20)
+                    Group {
+                        Text("Non pagination example")
+                            .font(.title2)
+                            .bold()
+                        Spacer()
+                            .frame(height: 20)
+                        NavigationLink(destination: GithubMetaView()) {
+                            Text("Single cache")
+                        }
+                        Spacer()
+                            .frame(height: 20)
+                        NavigationLink(destination: GithubUserView(userName: nonPagenationGithubName)) {
+                            Text("Per user cache")
+                        }
+                        Spacer()
+                            .frame(height: 10)
+                        TextField("Input any Github username", text: $nonPagenationGithubName)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
                     }
                     Spacer()
-                        .frame(width: 20)
-                    NavigationLink(destination: GithubOrgsView()) {
-                        Text("Github Orgs\n(Paginating cache)")
-                            .font(.system(size: 15))
-                            .multilineTextAlignment(.center)
+                        .frame(height: 30)
+                    Group {
+                        Text("One-way pagination example")
+                            .font(.title2)
+                            .bold()
+                        Spacer()
+                            .frame(height: 20)
+                        NavigationLink(destination: GithubOrgsView()) {
+                            Text("Single one-way pagination")
+                        }
+                        Spacer()
+                            .frame(height: 20)
+                        NavigationLink(destination: GithubReposView(userName: oneWayPagenationGithubName)) {
+                            Text("Per user one-way patination")
+                        }
+                        Spacer()
+                            .frame(height: 10)
+                        TextField("Input any Github username", text: $oneWayPagenationGithubName)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
                     }
+//                    Spacer()
+//                        .frame(height: 30)
+//                    Group {
+//                        Text("Two-way pagination example")
+//                            .font(.title2)
+//                            .bold()
+//                        Spacer()
+//                            .frame(height: 20)
+//                        NavigationLink(destination: GithubTwoWayReposView()) {
+//                            Text("Single two-way pagination")
+//                        }
+//                    }
                 }
-                Spacer()
-                    .frame(height: 30)
-                Text("Per user example")
-                TextField("Input any Github username", text: $githubName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(EdgeInsets.init(top: 0, leading: 20, bottom: 0, trailing: 20))
-                Spacer()
-                    .frame(height: 10)
-                HStack {
-                    NavigationLink(destination: GithubUserView(userName: githubName)) {
-                        Text("Github User's info\n(Single cache)")
-                            .font(.system(size: 15))
-                            .multilineTextAlignment(.center)
-                    }
-                    Spacer()
-                        .frame(width: 20)
-                    NavigationLink(destination: GithubReposView(userName: githubName)) {
-                        Text("Github User's repos\n(Paginating cache)")
-                            .font(.system(size: 15))
-                            .multilineTextAlignment(.center)
-                    }
-                }
+                .padding()
             }
-            .padding()
             .navigationBarTitle("StoreFlowable Example")
             .navigationBarTitleDisplayMode(.inline)
         }

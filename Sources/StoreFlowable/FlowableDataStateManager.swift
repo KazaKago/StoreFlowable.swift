@@ -41,7 +41,7 @@ open class FlowableDataStateManager<KEY: Hashable>: FlowAccessor, DataStateManag
      * - parameter key: Key to get the specified data.
      * - returns: State of saved data.
      */
-    func loadState(key: KEY) -> DataState {
+    func load(key: KEY) -> DataState {
         dataState.getOrCreate(key).value
     }
 
@@ -51,7 +51,7 @@ open class FlowableDataStateManager<KEY: Hashable>: FlowAccessor, DataStateManag
      * - parameter key: Key to get the specified data.
      * - parameter state: State of saved data.
      */
-    func saveState(key: KEY, state: DataState) {
+    func save(key: KEY, state: DataState) {
         dataState.getOrCreate(key).value = state
     }
 
@@ -66,7 +66,7 @@ open class FlowableDataStateManager<KEY: Hashable>: FlowAccessor, DataStateManag
 private extension Dictionary where Key: Hashable, Value == CurrentValueSubject<DataState, Never> {
     mutating func getOrCreate(_ key: Key) -> CurrentValueSubject<DataState, Never> {
         getOrPut(key) {
-            CurrentValueSubject<DataState, Never>(DataState.fixed())
+            CurrentValueSubject<DataState, Never>(DataState.fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData))
         }
     }
 }

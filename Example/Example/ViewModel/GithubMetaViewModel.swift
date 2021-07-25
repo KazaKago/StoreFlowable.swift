@@ -13,7 +13,7 @@ final class GithubMetaViewModel : ObservableObject {
     @Published var githubMeta: GithubMeta?
     @Published var isLoading: Bool = false
     @Published var error: Error?
-    private let githubRepository = GithubRepository()
+    private let githubMetaRepository = GithubMetaRepository()
     private var cancellableSet = Set<AnyCancellable>()
 
     func initialize() {
@@ -22,65 +22,38 @@ final class GithubMetaViewModel : ObservableObject {
     }
 
     func refresh() {
-        githubRepository.refreshMeta()
+        githubMetaRepository.refresh()
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     func retry() {
-        githubRepository.refreshMeta()
+        githubMetaRepository.refresh()
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     private func subscribe() {
-        githubRepository.followMeta()
+        githubMetaRepository.follow()
             .receive(on: DispatchQueue.main)
             .sink { state in
                 state.doAction(
-                    onFixed: {
-                        state.content.doAction(
-                            onExist: { value in
-                                self.githubMeta = value
-                                self.isLoading = false
-                                self.error = nil
-                            },
-                            onNotExist: {
-                                self.githubMeta = nil
-                                self.isLoading = false
-                                self.error = nil
-                            }
-                        )
+                    onLoading: { _ in
+                        self.githubMeta = nil
+                        self.isLoading = true
+                        self.error = nil
                     },
-                    onLoading: {
-                        state.content.doAction(
-                            onExist: { value in
-                                self.githubMeta = value
-                                self.isLoading = true
-                                self.error = nil
-                            },
-                            onNotExist: {
-                                self.githubMeta = nil
-                                self.isLoading = true
-                                self.error = nil
-                            }
-                        )
+                    onCompleted: { githubMeta, _, _ in
+                        self.githubMeta = githubMeta
+                        self.isLoading = false
+                        self.error = nil
                     },
                     onError: { error in
-                        state.content.doAction(
-                            onExist: { value in
-                                self.githubMeta = value
-                                self.isLoading = false
-                                self.error = nil
-                            },
-                            onNotExist: {
-                                self.githubMeta = nil
-                                self.isLoading = false
-                                self.error = error
-                            }
-                        )
+                        self.githubMeta = nil
+                        self.isLoading = false
+                        self.error = error
                     }
                 )
             }

@@ -16,11 +16,11 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
     public typealias KEY = KEY
     public typealias DATA = DATA
 
-    private let _publish: (_ forceRefresh: Bool) -> StatePublisher<DATA>
+    private let _publish: (_ forceRefresh: Bool) -> LoadingStatePublisher<DATA>
     private let _getData: (_ from: GettingFrom) -> AnyPublisher<DATA?, Never>
     private let _requireData: (_ from: GettingFrom) -> AnyPublisher<DATA, Error>
     private let _validate: () -> AnyPublisher<Void, Never>
-    private let _refresh: (_ clearCacheWhenFetchFails: Bool, _ continueWhenError: Bool) -> AnyPublisher<Void, Never>
+    private let _refresh: () -> AnyPublisher<Void, Never>
     private let _update: (_ newData: DATA?) -> AnyPublisher<Void, Never>
 
     init<INNER: StoreFlowable>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
@@ -36,15 +36,15 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
         _validate = {
             inner.validate()
         }
-        _refresh = { (clearCacheWhenFetchFails, continueWhenError) in
-            inner.refresh(clearCacheWhenFetchFails: clearCacheWhenFetchFails, continueWhenError: continueWhenError)
+        _refresh = {
+            inner.refresh()
         }
         _update = { newData in
             inner.update(newData: newData)
         }
     }
 
-    public func publish(forceRefresh: Bool) -> StatePublisher<DATA> {
+    public func publish(forceRefresh: Bool) -> LoadingStatePublisher<DATA> {
         _publish(forceRefresh)
     }
 
@@ -60,8 +60,8 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
         _validate()
     }
 
-    public func refresh(clearCacheWhenFetchFails: Bool, continueWhenError: Bool) -> AnyPublisher<Void, Never> {
-        _refresh(clearCacheWhenFetchFails, continueWhenError)
+    public func refresh() -> AnyPublisher<Void, Never> {
+        _refresh()
     }
 
     public func update(newData: DATA?) -> AnyPublisher<Void, Never> {

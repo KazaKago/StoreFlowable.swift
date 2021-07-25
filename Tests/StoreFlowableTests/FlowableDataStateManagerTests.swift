@@ -21,7 +21,7 @@ final class FlowableDataStateManagerTests: XCTestCase {
         case .error:
             XCTFail()
         }
-        flowableDataStateManager.saveState(key: "hoge", state: .loading)
+        flowableDataStateManager.save(key: "hoge", state: .loading)
         switch try wait(for: recorder.next(), timeout: 1) {
         case .fixed:
             XCTFail()
@@ -30,7 +30,7 @@ final class FlowableDataStateManagerTests: XCTestCase {
         case .error:
             XCTFail()
         }
-        flowableDataStateManager.saveState(key: "hoge", state: .error(rawError: NoSuchElementError()))
+        flowableDataStateManager.save(key: "hoge", state: .error(rawError: NoSuchElementError()))
         switch try wait(for: recorder.next(), timeout: 1) {
         case .fixed:
             XCTFail()
@@ -45,8 +45,8 @@ final class FlowableDataStateManagerTests: XCTestCase {
 
     func testFlowDifferentKeyEvent() throws {
         let recorder = flowableDataStateManager.getFlow(key: "hoge").record()
-        flowableDataStateManager.saveState(key: "hogehoge", state: .loading)
-        flowableDataStateManager.saveState(key: "hugahuga", state: .error(rawError: NoSuchElementError()))
+        flowableDataStateManager.save(key: "hogehoge", state: .loading)
+        flowableDataStateManager.save(key: "hugahuga", state: .error(rawError: NoSuchElementError()))
         let elements = try wait(for: recorder.availableElements, timeout: 1)
         XCTAssertEqual(elements.count, 1)
         switch elements.first! {

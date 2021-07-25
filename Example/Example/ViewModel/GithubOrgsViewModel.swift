@@ -12,10 +12,11 @@ final class GithubOrgsViewModel : ObservableObject {
 
     @Published var githubOrgs: [GithubOrg] = []
     @Published var isMainLoading: Bool = false
-    @Published var isAdditionalLoading: Bool = false
+    @Published var isNextLoading: Bool = false
+    @Published var isRefreshing: Bool = false
     @Published var mainError: Error?
-    @Published var additionalError: Error?
-    private let githubRepository = GithubRepository()
+    @Published var nextError: Error?
+    private let githubOrgsRepository = GithubOrgsRepository()
     private var cancellableSet = Set<AnyCancellable>()
 
     func initialize() {
@@ -24,91 +25,79 @@ final class GithubOrgsViewModel : ObservableObject {
     }
 
     func refresh() {
-        githubRepository.refreshOrgs()
+        githubOrgsRepository.refresh()
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     func retry() {
-        githubRepository.refreshOrgs()
+        githubOrgsRepository.refresh()
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
-    func requestAdditional() {
-        githubRepository.requestAdditionalOrgs(continueWhenError: false)
+    func requestNext() {
+        githubOrgsRepository.requestNext(continueWhenError: false)
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
-    func retryAdditional() {
-        githubRepository.requestAdditionalOrgs(continueWhenError: true)
+    func retryNext() {
+        githubOrgsRepository.requestNext(continueWhenError: true)
             .receive(on: DispatchQueue.main)
             .sink {}
             .store(in: &cancellableSet)
     }
 
     private func subscribe() {
-        githubRepository.followOrgs()
+        githubOrgsRepository.follow()
             .receive(on: DispatchQueue.main)
             .sink { state in
                 state.doAction(
-                    onFixed: {
-                        state.content.doAction(
-                            onExist: { value in
-                                self.githubOrgs = value
-                                self.isMainLoading = false
-                                self.isAdditionalLoading = false
-                                self.mainError = nil
-                                self.additionalError = nil
-                            },
-                            onNotExist: {
-                                self.githubOrgs = []
-                                self.isMainLoading = true
-                                self.isAdditionalLoading = false
-                                self.mainError = nil
-                                self.additionalError = nil
-                            }
-                        )
+                    onLoading: { githubOrgs in
+                        if let githubOrgs = githubOrgs {
+                            self.githubOrgs = githubOrgs
+                            self.isMainLoading = false
+                            self.isRefreshing = true
+                        } else {
+                            self.githubOrgs = []
+                            self.isMainLoading = true
+                            self.isRefreshing = true
+                        }
+                        self.isNextLoading = false
+                        self.mainError = nil
+                        self.nextError = nil
                     },
-                    onLoading: {
-                        state.content.doAction(
-                            onExist: { value in
-                                self.githubOrgs = value
-                                self.isMainLoading = false
-                                self.isAdditionalLoading = true
-                                self.mainError = nil
-                                self.additionalError = nil
+                    onCompleted: { githubOrgs, next, _ in
+                        next.doAction(
+                            onFixed: { _ in
+                                self.isNextLoading = false
+                                self.nextError = nil
                             },
-                            onNotExist: {
-                                self.githubOrgs = []
-                                self.isMainLoading = true
-                                self.isAdditionalLoading = false
-                                self.mainError = nil
-                                self.additionalError = nil
+                            onLoading: {
+                                self.isNextLoading = true
+                                self.nextError = nil
+                            },
+                            onError: { error in
+                                self.isNextLoading = false
+                                self.nextError = error
                             }
                         )
+                        self.githubOrgs = githubOrgs
+                        self.isMainLoading = false
+                        self.isRefreshing = false
+                        self.mainError = nil
                     },
                     onError: { error in
-                        state.content.doAction(
-                            onExist: { value in
-                                self.githubOrgs = value
-                                self.isMainLoading = false
-                                self.isAdditionalLoading = false
-                                self.mainError = nil
-                                self.additionalError = error
-                            },
-                            onNotExist: {
-                                self.githubOrgs = []
-                                self.isMainLoading = false
-                                self.isAdditionalLoading = false
-                                self.mainError = error
-                                self.additionalError = nil
-                            }
-                        )
+                        self.githubOrgs = []
+                        self.isMainLoading = false
+                        self.isNextLoading = false
+                        self.isRefreshing = false
+                        self.mainError = error
+                        self.nextError = nil
                     }
                 )
             }

@@ -25,17 +25,17 @@ public protocol StoreFlowable {
     associatedtype DATA
 
     /**
-     * Returns a `StatePublisher` that can continuously receive changes in the state of the data.
+     * Returns a `LoadingStatePublisher` that can continuously receive changes in the state of the data.
      *
      * If the data has not been acquired yet, new data will be automatically acquired when this `Publisher` is sinked.
      *
-     * The error when retrieving data is included in `State.error`.
+     * The error when retrieving data is included in `LoadingStatePublisher.error`.
      * and this method itself does not throw an `Error`.
      *
      * - parameter forceRefresh: Set to `true` if you want to forcibly retrieve data from origin when collecting. Default value is `false`.
      * - returns: Returns a `Publisher` containing the state of the data.
      */
-    func publish(forceRefresh: Bool) -> StatePublisher<DATA>
+    func publish(forceRefresh: Bool) -> LoadingStatePublisher<DATA>
 
     /**
      * Returns valid data only once.
@@ -73,11 +73,8 @@ public protocol StoreFlowable {
     /**
      * Forces a data refresh.
      * and the new data will be notified.
-     *
-     * - parameter clearCacheWhenFetchFails: Delete cache if data refresh fails. Default value is `true`.
-     * - parameter continueWhenError: Even if the data state is an `State.error` when `refresh` is called, the refresh will continue. Default value is `true`.
      */
-    func refresh(clearCacheWhenFetchFails: Bool, continueWhenError: Bool) -> AnyPublisher<Void, Never>
+    func refresh() -> AnyPublisher<Void, Never>
 
     /**
      * Treat the passed data as the latest acquired data.
@@ -92,7 +89,7 @@ public protocol StoreFlowable {
 
 public extension StoreFlowable {
 
-    func publish(forceRefresh: Bool = false) -> StatePublisher<DATA> {
+    func publish(forceRefresh: Bool = false) -> LoadingStatePublisher<DATA> {
         publish(forceRefresh: forceRefresh)
     }
 
@@ -102,9 +99,5 @@ public extension StoreFlowable {
 
     func requireData(from: GettingFrom = .both) -> AnyPublisher<DATA, Error> {
         requireData(from: from)
-    }
-
-    func refresh(clearCacheWhenFetchFails: Bool = true, continueWhenError: Bool = true) -> AnyPublisher<Void, Never> {
-        refresh(clearCacheWhenFetchFails: clearCacheWhenFetchFails, continueWhenError: continueWhenError)
     }
 }

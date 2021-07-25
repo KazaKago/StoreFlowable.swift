@@ -9,12 +9,12 @@ import Foundation
 import Combine
 import StoreFlowable
 
-struct GithubReposFlowableFactory: PaginatingStoreFlowableFactory {
+struct GithubReposFlowableFactory: PaginationStoreFlowableFactory {
 
     typealias KEY = String
     typealias DATA = [GithubRepo]
 
-    private static let EXPIRE_SECONDS = TimeInterval(30)
+    private static let EXPIRE_SECONDS = TimeInterval(60)
     private static let PER_PAGE = 20
     private let githubApi = GithubApi()
 
@@ -40,23 +40,29 @@ struct GithubReposFlowableFactory: PaginatingStoreFlowableFactory {
         }.eraseToAnyPublisher()
     }
 
-    func saveAdditionalDataToCache(cachedData: [GithubRepo]?, newData: [GithubRepo]) -> AnyPublisher<Void, Never> {
+    func saveNextDataToCache(cachedData: [GithubRepo], newData: [GithubRepo]) -> AnyPublisher<Void, Never> {
         Future { promise in
-            GithubInMemoryCache.reposCache[key] = (cachedData ?? []) + newData
+            GithubInMemoryCache.reposCache[key] = cachedData + newData
             promise(.success(()))
         }.eraseToAnyPublisher()
     }
 
-    func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<[GithubRepo]>, Error> {
+    func fetchDataFromOrigin() -> AnyPublisher<Fetched<[GithubRepo]>, Error> {
         githubApi.getRepos(userName: key, page: 1, perPage: GithubReposFlowableFactory.PER_PAGE).map { newData in
-            FetchingResult(data: newData, noMoreAdditionalData: newData.isEmpty)
+            Fetched(
+                data: newData,
+                nextKey: 2.description
+            )
         }.eraseToAnyPublisher()
     }
 
-    func fetchAdditionalDataFromOrigin(cachedData: [GithubRepo]?) -> AnyPublisher<FetchingResult<[GithubRepo]>, Error> {
-        let page = ((cachedData?.count ?? 0) / GithubReposFlowableFactory.PER_PAGE + 1)
-        return githubApi.getRepos(userName: key, page: page, perPage: GithubReposFlowableFactory.PER_PAGE).map { newData in
-            FetchingResult(data: newData, noMoreAdditionalData: newData.isEmpty)
+    func fetchNextDataFromOrigin(nextKey: String) -> AnyPublisher<Fetched<[GithubRepo]>, Error> {
+        let nextPage = Int(nextKey)!
+        return githubApi.getRepos(userName: key, page: nextPage, perPage: GithubReposFlowableFactory.PER_PAGE).map { newData in
+            Fetched(
+                data: newData,
+                nextKey: newData.isEmpty ? nil : (nextPage + 1).description
+            )
         }.eraseToAnyPublisher()
     }
 

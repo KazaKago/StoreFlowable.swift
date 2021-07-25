@@ -9,12 +9,12 @@ import Foundation
 import Combine
 import StoreFlowable
 
-struct GithubOrgsFlowableFactory: PaginatingStoreFlowableFactory {
+struct GithubOrgsFlowableFactory: PaginationStoreFlowableFactory {
 
     typealias KEY = UnitHash
     typealias DATA = [GithubOrg]
 
-    private static let EXPIRE_SECONDS = TimeInterval(30)
+    private static let EXPIRE_SECONDS = TimeInterval(60)
     private static let PER_PAGE = 20
     private let githubApi = GithubApi()
 
@@ -36,23 +36,28 @@ struct GithubOrgsFlowableFactory: PaginatingStoreFlowableFactory {
         }.eraseToAnyPublisher()
     }
 
-    func saveAdditionalDataToCache(cachedData: [GithubOrg]?, newData: [GithubOrg]) -> AnyPublisher<Void, Never> {
+    func saveNextDataToCache(cachedData: [GithubOrg], newData: [GithubOrg]) -> AnyPublisher<Void, Never> {
         Future { promise in
-            GithubInMemoryCache.orgsCache = (cachedData ?? []) + newData
+            GithubInMemoryCache.orgsCache = cachedData + newData
             promise(.success(()))
         }.eraseToAnyPublisher()
     }
 
-    func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<[GithubOrg]>, Error> {
+    func fetchDataFromOrigin() -> AnyPublisher<Fetched<[GithubOrg]>, Error> {
         githubApi.getOrgs(since: nil, perPage: GithubOrgsFlowableFactory.PER_PAGE).map { data in
-            FetchingResult(data: data, noMoreAdditionalData: data.isEmpty)
+            Fetched(
+                data: data,
+                nextKey: data.last?.id.description
+            )
         }.eraseToAnyPublisher()
     }
 
-    func fetchAdditionalDataFromOrigin(cachedData: [GithubOrg]?) -> AnyPublisher<FetchingResult<[GithubOrg]>, Error> {
-        let since = cachedData?.last?.id ?? nil
-        return githubApi.getOrgs(since: since, perPage: GithubOrgsFlowableFactory.PER_PAGE).map { data in
-            FetchingResult(data: data, noMoreAdditionalData: data.isEmpty)
+    func fetchNextDataFromOrigin(nextKey: String) -> AnyPublisher<Fetched<[GithubOrg]>, Error> {
+        return githubApi.getOrgs(since: Int(nextKey), perPage: GithubOrgsFlowableFactory.PER_PAGE).map { data in
+            Fetched(
+                data: data,
+                nextKey: data.last?.id.description
+            )
         }.eraseToAnyPublisher()
     }
 

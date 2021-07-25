@@ -14,7 +14,7 @@ struct GithubMetaFlowableFactory: StoreFlowableFactory {
     typealias KEY = UnitHash
     typealias DATA = GithubMeta
 
-    private static let EXPIRE_SECONDS = TimeInterval(30)
+    private static let EXPIRE_SECONDS = TimeInterval(60)
     private let githubApi = GithubApi()
 
     let key: UnitHash = UnitHash()
@@ -35,10 +35,8 @@ struct GithubMetaFlowableFactory: StoreFlowableFactory {
         }.eraseToAnyPublisher()
     }
 
-    func fetchDataFromOrigin() -> AnyPublisher<FetchingResult<GithubMeta>, Error> {
-        githubApi.getMeta().map { data in
-            FetchingResult(data: data)
-        }.eraseToAnyPublisher()
+    func fetchDataFromOrigin() -> AnyPublisher<GithubMeta, Error> {
+        githubApi.getMeta()
     }
 
     func needRefresh(cachedData: GithubMeta) -> AnyPublisher<Bool, Never> {

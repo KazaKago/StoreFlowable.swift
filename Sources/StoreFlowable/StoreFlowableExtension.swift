@@ -19,26 +19,33 @@ public extension StoreFlowableFactory {
         AnyStoreFlowable(StoreFlowableImpl(
             key: key,
             flowableDataStateManager: flowableDataStateManager,
-            cacheDataManager: AnyCacheDataManager(self),
-            originDataManager: AnyOriginDataManager(self),
-            needRefresh: { cachedData in needRefresh(cachedData: cachedData) }
-        ))
-    }
-}
-
-public extension PaginatingStoreFlowableFactory {
-
-    /**
-     * Create `PaginatingStoreFlowable` class from `PaginatingStoreFlowableFactory`.
-     *
-     * - returns: Created PaginatingStoreFlowable.
-     */
-    func create() -> AnyPaginatingStoreFlowable<KEY, DATA> {
-        AnyPaginatingStoreFlowable(PaginatingStoreFlowableImpl(
-            key: key,
-            flowableDataStateManager: flowableDataStateManager,
-            cacheDataManager: AnyPaginatingCacheDataManager(self),
-            originDataManager: AnyPaginatingOriginDataManager(self),
+            cacheDataManager: AnyCacheDataManager<DATA>(
+                load: {
+                    loadDataFromCache()
+                },
+                save: { newData in
+                    saveDataToCache(newData: newData)
+                },
+                saveNext: { cachedData, newData in
+                    fatalError()
+                },
+                savePrev: { cachedData, newData in
+                    fatalError()
+                }
+            ),
+            originDataManager: AnyOriginDataManager<DATA>(
+                fetch: {
+                    fetchDataFromOrigin().map { data in
+                        InternalFetched(data: data, nextKey: nil, prevKey: nil)
+                    }.eraseToAnyPublisher()
+                },
+                fetchNext: { nextKey in
+                    fatalError()
+                },
+                fetchPrev: { prevKey in
+                    fatalError()
+                }
+            ),
             needRefresh: { cachedData in needRefresh(cachedData: cachedData) }
         ))
     }
