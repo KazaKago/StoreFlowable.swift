@@ -290,14 +290,14 @@ struct UserListFlowableFactory : PaginationStoreFlowableFactory {
     }
 
     func fetchDataFromOrigin() -> AnyPublisher<Fetched<[UserData]>, Error> {
-        userListApi.fetch(page: nil).map { data in
-            Fetched(data: data, nextKey: data.nextToken)
+        userListApi.fetch(pageToken: nil).map { data in
+            Fetched(data: data, nextKey: data.nextPageToken)
         }.eraseToAnyPublisher()
     }
 
     func fetchNextDataFromOrigin(nextKey: String) -> AnyPublisher<Fetched<[UserData]>, Error> {
-        userListApi.fetch(page: page).map { data in
-            Fetched(data: data, nextKey: data.nextToken)
+        userListApi.fetch(pageToken: panextKeyge).map { data in
+            Fetched(data: data, nextKey: data.nextPageToken)
         }.eraseToAnyPublisher()
     }
 
