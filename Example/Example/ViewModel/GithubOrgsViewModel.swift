@@ -73,7 +73,7 @@ final class GithubOrgsViewModel : ObservableObject {
                     },
                     onCompleted: { githubOrgs, next, _ in
                         next.doAction(
-                            onFixed: {_ in
+                            onFixed: { _ in
                                 self.isNextLoading = false
                                 self.nextError = nil
                             },
