@@ -310,7 +310,7 @@ struct UserListFlowableFactory : PaginationStoreFlowableFactory {
 You need to additionally implements [`saveNextDataToCache()`](Sources/StoreFlowable/Pagination/OneWay/PaginationStoreFlowableFactory.swift) and [`fetchNextDataFromOrigin()`](Sources/StoreFlowable/Pagination/OneWay/PaginationStoreFlowable.swift).  
 When saving the data, combine the cached data and the new data before saving.  
 
-And then, You can get the state of additional loading from the next parameter of onCompleted {}.
+And then, You can get the state of additional loading from the `next` parameter of `onCompleted {}`.
 
 ```swift
 let userFlowable = UserFlowableFactory(userId: userId).create()
