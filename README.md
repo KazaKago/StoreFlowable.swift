@@ -313,7 +313,8 @@ When saving the data, combine the cached data and the new data before saving.
 And then, You can get the state of additional loading from the next parameter of onCompleted {}.
 
 ```swift
-userRepository.followUserData(userId: userId)
+let userFlowable = UserFlowableFactory(userId: userId).create()
+userFlowable.publish()
     .receive(on: DispatchQueue.main)
     .sink { state in
         state.doAction(
