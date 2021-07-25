@@ -62,18 +62,18 @@ struct MainView: View {
                         TextField("Input any Github username", text: $oneWayPagenationGithubName)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                     }
-                    Spacer()
-                        .frame(height: 30)
-                    Group {
-                        Text("Two-way pagination example")
-                            .font(.title2)
-                            .bold()
-                        Spacer()
-                            .frame(height: 20)
-                        NavigationLink(destination: GithubTwoWayReposView()) {
-                            Text("Single two-way pagination")
-                        }
-                    }
+//                    Spacer()
+//                        .frame(height: 30)
+//                    Group {
+//                        Text("Two-way pagination example")
+//                            .font(.title2)
+//                            .bold()
+//                        Spacer()
+//                            .frame(height: 20)
+//                        NavigationLink(destination: GithubTwoWayReposView()) {
+//                            Text("Single two-way pagination")
+//                        }
+//                    }
                 }
                 .padding()
             }
