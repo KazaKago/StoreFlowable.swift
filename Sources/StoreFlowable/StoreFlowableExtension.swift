@@ -15,9 +15,9 @@ public extension StoreFlowableFactory {
      *
      * - returns: Created StateFlowable.
      */
-    func create() -> AnyStoreFlowable<KEY, DATA> {
+    func create() -> AnyStoreFlowable<DATA> {
         AnyStoreFlowable(StoreFlowableImpl(
-            key: key,
+            param: param,
             flowableDataStateManager: flowableDataStateManager,
             cacheDataManager: AnyCacheDataManager<DATA>(
                 load: {

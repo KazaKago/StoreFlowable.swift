@@ -9,16 +9,16 @@ import Foundation
 import Combine
 import CombineAsync
 
-struct DataSelector<KEY, DATA> {
+struct DataSelector<PARAM, DATA> {
 
-    private let key: KEY
-    private let dataStateManager: AnyDataStateManager<KEY>
+    private let param: PARAM
+    private let dataStateManager: AnyDataStateManager<PARAM>
     private let cacheDataManager: AnyCacheDataManager<DATA>
     private let originDataManager: AnyOriginDataManager<DATA>
     private let needRefresh: (_ cachedData: DATA) -> AnyPublisher<Bool, Never>
 
-    init(key: KEY, dataStateManager: AnyDataStateManager<KEY>, cacheDataManager: AnyCacheDataManager<DATA>, originDataManager: AnyOriginDataManager<DATA>, needRefresh: @escaping (_ data: DATA) -> AnyPublisher<Bool, Never>) {
-        self.key = key
+    init(param: PARAM, dataStateManager: AnyDataStateManager<PARAM>, cacheDataManager: AnyCacheDataManager<DATA>, originDataManager: AnyOriginDataManager<DATA>, needRefresh: @escaping (_ data: DATA) -> AnyPublisher<Bool, Never>) {
+        self.param = param
         self.dataStateManager = dataStateManager
         self.cacheDataManager = cacheDataManager
         self.originDataManager = originDataManager
@@ -48,7 +48,7 @@ struct DataSelector<KEY, DATA> {
             if let nextKey = nextKey {
                 nextDataState = .fixed(additionalRequestKey: nextKey)
             } else {
-                let state = dataStateManager.load(key: key)
+                let state = dataStateManager.load(param: param)
                 if let nextKey = state.nextKeyOrNil() {
                     nextDataState = .fixed(additionalRequestKey: nextKey)
                 } else {
@@ -59,14 +59,14 @@ struct DataSelector<KEY, DATA> {
             if let prevKey = prevKey {
                 prevDataState = .fixed(additionalRequestKey: prevKey)
             } else {
-                let state = dataStateManager.load(key: key)
+                let state = dataStateManager.load(param: param)
                 if let prevKey = state.prevKeyOrNil() {
                     prevDataState = .fixed(additionalRequestKey: prevKey)
                 } else {
                     prevDataState = .fixedWithNoMoreAdditionalData
                 }
             }
-            dataStateManager.save(key: key, state: .fixed(nextDataState: nextDataState, prevDataState: prevDataState))
+            dataStateManager.save(param: param, state: .fixed(nextDataState: nextDataState, prevDataState: prevDataState))
         }
         .replaceError(with: ())
         .eraseToAnyPublisher()
@@ -98,7 +98,7 @@ struct DataSelector<KEY, DATA> {
 
     private func doStateAction(forceRefresh: Bool, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, continueWhenError: Bool, awaitFetching: Bool, requestType: RequestType) -> AnyPublisher<Void, Never> {
         async { _ in
-            switch dataStateManager.load(key: key) {
+            switch dataStateManager.load(param: param) {
             case .fixed(let nextDataState, let prevDataState):
                 switch requestType {
                 case .refresh:
@@ -135,7 +135,7 @@ struct DataSelector<KEY, DATA> {
                 case .refresh:
                     if continueWhenError { try `await`(doDataAction(forceRefresh: true, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: .refresh)) }
                 case .next, .prev:
-                    dataStateManager.save(key: key, state: .error(rawError: AdditionalRequestOnErrorStateException()))
+                    dataStateManager.save(param: param, state: .error(rawError: AdditionalRequestOnErrorStateException()))
                 }
             }
         }
@@ -155,7 +155,7 @@ struct DataSelector<KEY, DATA> {
                 if let _ = cachedData {
                     try `await`(prepareFetch(clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: requestType))
                 } else {
-                    dataStateManager.save(key: key, state: .error(rawError: AdditionalRequestOnNilException()))
+                    dataStateManager.save(param: param, state: .error(rawError: AdditionalRequestOnNilException()))
                 }
             }
         }
@@ -166,14 +166,14 @@ struct DataSelector<KEY, DATA> {
     private func prepareFetch(clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool, requestType: KeyedRequestType) -> AnyPublisher<Void, Never> {
         async { _ in
             if clearCacheBeforeFetching { try `await`(cacheDataManager.save(newData: nil)) }
-            let state = dataStateManager.load(key: key)
+            let state = dataStateManager.load(param: param)
             switch requestType {
             case .refresh:
-                dataStateManager.save(key: key, state: .loading)
+                dataStateManager.save(param: param, state: .loading)
             case .next(let requestKey):
-                dataStateManager.save(key: key, state: .fixed(nextDataState: .loading(additionalRequestKey: requestKey), prevDataState: state.prevDataStateOrNil()))
+                dataStateManager.save(param: param, state: .fixed(nextDataState: .loading(additionalRequestKey: requestKey), prevDataState: state.prevDataStateOrNil()))
             case .prev(let requestKey):
-                dataStateManager.save(key: key, state: .fixed(nextDataState: state.nextDataStateOrNil(), prevDataState: .loading(additionalRequestKey: requestKey)))
+                dataStateManager.save(param: param, state: .fixed(nextDataState: state.nextDataStateOrNil(), prevDataState: .loading(additionalRequestKey: requestKey)))
             }
             if awaitFetching {
                 try `await`(fetchNewData(clearCacheWhenFetchFails: clearCacheWhenFetchFails, requestType: requestType))
@@ -213,25 +213,25 @@ struct DataSelector<KEY, DATA> {
                         throw AdditionalRequestOnNilException()
                     }
                 }
-                let state = dataStateManager.load(key: key)
+                let state = dataStateManager.load(param: param)
                 switch (requestType) {
                 case .refresh:
-                    dataStateManager.save(key: key, state: .fixed(nextDataState: result.nextKey.isNilOrEmpty() ? .fixedWithNoMoreAdditionalData : .fixed(additionalRequestKey: result.nextKey!), prevDataState: result.prevKey.isNilOrEmpty() ? .fixedWithNoMoreAdditionalData : .fixed(additionalRequestKey: result.prevKey!)))
+                    dataStateManager.save(param: param, state: .fixed(nextDataState: result.nextKey.isNilOrEmpty() ? .fixedWithNoMoreAdditionalData : .fixed(additionalRequestKey: result.nextKey!), prevDataState: result.prevKey.isNilOrEmpty() ? .fixedWithNoMoreAdditionalData : .fixed(additionalRequestKey: result.prevKey!)))
                 case .next(_):
-                    dataStateManager.save(key: key, state: .fixed(nextDataState: result.nextKey.isNilOrEmpty() ? .fixedWithNoMoreAdditionalData : .fixed(additionalRequestKey: result.nextKey!), prevDataState: state.prevDataStateOrNil()))
+                    dataStateManager.save(param: param, state: .fixed(nextDataState: result.nextKey.isNilOrEmpty() ? .fixedWithNoMoreAdditionalData : .fixed(additionalRequestKey: result.nextKey!), prevDataState: state.prevDataStateOrNil()))
                 case .prev(_):
-                    dataStateManager.save(key: key, state: .fixed(nextDataState: state.nextDataStateOrNil(), prevDataState: result.prevKey.isNilOrEmpty() ? .fixedWithNoMoreAdditionalData : .fixed(additionalRequestKey: result.prevKey!)))
+                    dataStateManager.save(param: param, state: .fixed(nextDataState: state.nextDataStateOrNil(), prevDataState: result.prevKey.isNilOrEmpty() ? .fixedWithNoMoreAdditionalData : .fixed(additionalRequestKey: result.prevKey!)))
                 }
             } catch {
                 if clearCacheWhenFetchFails { try `await`(cacheDataManager.save(newData: nil)) }
-                let state = dataStateManager.load(key: key)
+                let state = dataStateManager.load(param: param)
                 switch (requestType) {
                 case .refresh:
-                    dataStateManager.save(key: key, state: .error(rawError: error))
+                    dataStateManager.save(param: param, state: .error(rawError: error))
                 case .next(let requestKey):
-                    dataStateManager.save(key: key, state: .fixed(nextDataState: .error(additionalRequestKey: requestKey, rawError: error), prevDataState: state.prevDataStateOrNil()))
+                    dataStateManager.save(param: param, state: .fixed(nextDataState: .error(additionalRequestKey: requestKey, rawError: error), prevDataState: state.prevDataStateOrNil()))
                 case .prev(let requestKey):
-                    dataStateManager.save(key: key, state: .fixed(nextDataState: state.nextDataStateOrNil(), prevDataState: .error(additionalRequestKey: requestKey, rawError: error)))
+                    dataStateManager.save(param: param, state: .fixed(nextDataState: state.nextDataStateOrNil(), prevDataState: .error(additionalRequestKey: requestKey, rawError: error)))
                 }
             }
         }

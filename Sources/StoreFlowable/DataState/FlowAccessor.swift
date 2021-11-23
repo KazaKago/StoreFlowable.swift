@@ -10,7 +10,7 @@ import Combine
 
 protocol FlowAccessor {
 
-    associatedtype KEY
+    associatedtype PARAM
 
-    func getFlow(key: KEY) -> AnyPublisher<DataState, Never>
+    func getFlow(param: PARAM) -> AnyPublisher<DataState, Never>
 }

@@ -16,7 +16,7 @@ public protocol BaseStoreFlowableFactory {
     /**
      * Specify the type that is the key to retrieve the data. If there is only one data to handle, specify the `UnitHash` type.
      */
-    associatedtype KEY: Hashable
+    associatedtype PARAM: Hashable
     /**
      * Specify the type of data to be handled.
      */
@@ -27,14 +27,14 @@ public protocol BaseStoreFlowableFactory {
      *
      * Please implement so that you can pass the key from the outside.
      */
-    var key: KEY { get }
+    var param: PARAM { get }
 
     /**
      * Used for data state management.
      *
      * Create a class that inherits `FlowableDataStateManager` and assign it.
      */
-    var flowableDataStateManager: FlowableDataStateManager<KEY> { get }
+    var flowableDataStateManager: FlowableDataStateManager<PARAM> { get }
 
     /**
      * The data loading process from cache.

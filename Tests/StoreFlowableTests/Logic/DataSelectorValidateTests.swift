@@ -19,13 +19,13 @@ final class DataSelectorValidateTests: XCTestCase {
         }
     }
 
-    private var dataSelector: DataSelector<String, TestData>!
+    private var dataSelector: DataSelector<UnitHash, TestData>!
     private var dataState: DataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData)
     private var dataCache: TestData? = nil
 
     override func setUp() {
         dataSelector = DataSelector(
-            key: "key",
+            param: UnitHash(),
             dataStateManager: AnyDataStateManager(
                 load: { key in
                     self.dataState

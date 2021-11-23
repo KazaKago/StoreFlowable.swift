@@ -21,7 +21,7 @@ final class StoreFlowableRequiredDataFailedTests: XCTestCase {
 
     private class TestFlowableFactory: StoreFlowableFactory {
 
-        typealias KEY = String
+        typealias PARAM = UnitHash
         typealias DATA = TestData
 
         private var dataCache: TestData?
@@ -30,9 +30,9 @@ final class StoreFlowableRequiredDataFailedTests: XCTestCase {
             self.dataCache = dataCache
         }
 
-        let key: String = "Key"
+        let param: UnitHash = UnitHash()
 
-        let flowableDataStateManager: FlowableDataStateManager<String> = FlowableDataStateManager<String>()
+        let flowableDataStateManager: FlowableDataStateManager<UnitHash> = FlowableDataStateManager<UnitHash>()
 
         func loadDataFromCache() -> AnyPublisher<TestData?, Never> {
             Just(dataCache).eraseToAnyPublisher()

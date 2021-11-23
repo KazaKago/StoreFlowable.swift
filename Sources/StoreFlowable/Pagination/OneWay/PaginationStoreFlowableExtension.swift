@@ -14,9 +14,9 @@ public extension PaginationStoreFlowableFactory {
      *
      * - returns: Created PaginationStoreFlowable.
      */
-    func create() -> AnyPaginationStoreFlowable<KEY, DATA> {
+    func create() -> AnyPaginationStoreFlowable<DATA> {
         AnyPaginationStoreFlowable(StoreFlowableImpl(
-            key: key,
+            param: param,
             flowableDataStateManager: flowableDataStateManager,
             cacheDataManager: AnyCacheDataManager<DATA>(
                 load: {

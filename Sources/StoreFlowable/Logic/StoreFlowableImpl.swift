@@ -9,22 +9,22 @@ import Foundation
 import Combine
 import CombineAsync
 
-struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable, PaginationStoreFlowable, TwoWayPaginationStoreFlowable {
+struct StoreFlowableImpl<PARAM: Hashable, DATA>: StoreFlowable, PaginationStoreFlowable, TwoWayPaginationStoreFlowable {
 
-    typealias KEY = KEY
+    typealias PARAM = PARAM
     typealias DATA = DATA
 
-    private let key: KEY
-    private let flowableDataStateManager: FlowableDataStateManager<KEY>
+    private let param: PARAM
+    private let flowableDataStateManager: FlowableDataStateManager<PARAM>
     private let cacheDataManager: AnyCacheDataManager<DATA>
-    private let dataSelector: DataSelector<KEY, DATA>
+    private let dataSelector: DataSelector<PARAM, DATA>
 
-    init(key: KEY, flowableDataStateManager: FlowableDataStateManager<KEY>, cacheDataManager: AnyCacheDataManager<DATA>, originDataManager: AnyOriginDataManager<DATA>, needRefresh: @escaping (_ cachedData: DATA) -> AnyPublisher<Bool, Never>) {
-        self.key = key
+    init(param: PARAM, flowableDataStateManager: FlowableDataStateManager<PARAM>, cacheDataManager: AnyCacheDataManager<DATA>, originDataManager: AnyOriginDataManager<DATA>, needRefresh: @escaping (_ cachedData: DATA) -> AnyPublisher<Bool, Never>) {
+        self.param = param
         self.flowableDataStateManager = flowableDataStateManager
         self.cacheDataManager = cacheDataManager
         self.dataSelector = DataSelector(
-            key: key,
+            param: param,
             dataStateManager: AnyDataStateManager(flowableDataStateManager),
             cacheDataManager: cacheDataManager,
             originDataManager: originDataManager,
@@ -42,7 +42,7 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable, PaginationStoreFlo
         }
         .replaceError(with: ())
         .flatMap { _ in
-            flowableDataStateManager.getFlow(key: key)
+            flowableDataStateManager.getFlow(param: param)
         }
         .flatMap { dataState in
             cacheDataManager.load().map { data in
@@ -76,7 +76,7 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable, PaginationStoreFlo
             }
         }
         .flatMap {
-            flowableDataStateManager.getFlow(key: key)
+            flowableDataStateManager.getFlow(param: param)
                 .setFailureType(to: Error.self) // Workaround for macOS10.15/iOS13.0/tvOS13.0/watchOS6.0 https://www.donnywals.com/configuring-error-types-when-using-flatmap-in-combine/
         }
         .flatMap { dataState in

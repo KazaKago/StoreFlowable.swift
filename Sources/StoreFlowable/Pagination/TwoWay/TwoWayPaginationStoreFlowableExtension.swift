@@ -15,9 +15,9 @@ public extension TwoWayPaginationStoreFlowableFactory {
      *
      * - returns: Created PaginationStoreFlowable.
      */
-    func create() -> AnyTwoWayPaginationStoreFlowable<KEY, DATA> {
+    func create() -> AnyTwoWayPaginationStoreFlowable<DATA> {
         AnyTwoWayPaginationStoreFlowable(StoreFlowableImpl(
-            key: key,
+            param: param,
             flowableDataStateManager: flowableDataStateManager,
             cacheDataManager: AnyCacheDataManager<DATA>(
                 load: {

@@ -11,9 +11,8 @@ import Combine
 /**
  * Type erasure of `PaginationStoreFlowable`.
  */
-public struct AnyPaginationStoreFlowable<KEY: Hashable, DATA>: PaginationStoreFlowable {
+public struct AnyPaginationStoreFlowable<DATA>: PaginationStoreFlowable {
 
-    public typealias KEY = KEY
     public typealias DATA = DATA
 
     private let _publish: (_ forceRefresh: Bool) -> LoadingStatePublisher<DATA>
@@ -25,7 +24,7 @@ public struct AnyPaginationStoreFlowable<KEY: Hashable, DATA>: PaginationStoreFl
     private let _update1: (_ newData: DATA?) -> AnyPublisher<Void, Never>
     private let _update2: (_ newData: DATA?, _ nextKey: String?) -> AnyPublisher<Void, Never>
 
-    init<INNER: PaginationStoreFlowable>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
+    init<INNER: PaginationStoreFlowable>(_ inner: INNER) where INNER.DATA == DATA {
         _publish = { forceRefresh in
             inner.publish(forceRefresh: forceRefresh)
         }
