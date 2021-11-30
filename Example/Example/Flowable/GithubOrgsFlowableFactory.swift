@@ -11,14 +11,14 @@ import StoreFlowable
 
 struct GithubOrgsFlowableFactory: PaginationStoreFlowableFactory {
 
-    typealias KEY = UnitHash
+    typealias PARAM = UnitHash
     typealias DATA = [GithubOrg]
 
     private static let EXPIRE_SECONDS = TimeInterval(60)
     private static let PER_PAGE = 20
     private let githubApi = GithubApi()
 
-    let key: UnitHash = UnitHash()
+    let param: UnitHash = UnitHash()
 
     let flowableDataStateManager: FlowableDataStateManager<UnitHash> = GithubOrgsStateManager.shared
 

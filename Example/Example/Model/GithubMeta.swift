@@ -23,6 +23,6 @@ struct SshKeyFingerprints: Codable, Equatable {
 
     enum CodingKeys: String, CodingKey {
         case sha256Rsa = "SHA256_RSA"
-        case sha256Dsa = "SHA256_DSA"
+        case sha256Dsa = "SHA256_ECDSA"
    }
 }

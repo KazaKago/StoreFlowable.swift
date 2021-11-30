@@ -11,13 +11,13 @@ import StoreFlowable
 
 struct GithubMetaFlowableFactory: StoreFlowableFactory {
 
-    typealias KEY = UnitHash
+    typealias PARAM = UnitHash
     typealias DATA = GithubMeta
 
     private static let EXPIRE_SECONDS = TimeInterval(60)
     private let githubApi = GithubApi()
 
-    let key: UnitHash = UnitHash()
+    let param: UnitHash = UnitHash()
 
     let flowableDataStateManager: FlowableDataStateManager<UnitHash> = GithubMetaStateManager.shared
 

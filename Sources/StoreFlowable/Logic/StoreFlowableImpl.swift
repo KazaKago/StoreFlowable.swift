@@ -33,31 +33,26 @@ struct StoreFlowableImpl<PARAM: Hashable, DATA>: StoreFlowable, PaginationStoreF
     }
 
     func publish(forceRefresh: Bool) -> LoadingStatePublisher<DATA> {
-        async { _ in
-            if forceRefresh {
-                try `await`(dataSelector.refreshAsync(clearCacheBeforeFetching: true))
-            } else {
-                try `await`(dataSelector.validateAsync())
+        if forceRefresh {
+            _ = dataSelector.refresh(clearCacheBeforeFetching: true).sink(receiveValue: {})
+        } else {
+            _ = dataSelector.validate().sink(receiveValue: {})
+        }
+        return flowableDataStateManager.getFlow(param: param)
+            .flatMap { dataState in
+                cacheDataManager.load().map { data in
+                    (dataState, data)
+                }
             }
-        }
-        .replaceError(with: ())
-        .flatMap { _ in
-            flowableDataStateManager.getFlow(param: param)
-        }
-        .flatMap { dataState in
-            cacheDataManager.load().map { data in
-                (dataState, data)
+            .compactMap { (dataState, data) in
+                dataState.toLoadingState(content: data)
             }
-        }
-        .map { (dataState, data) in
-            return dataState.toLoadingState(content: data)
-        }
-        .eraseToAnyPublisher()
+            .eraseToAnyPublisher()
     }
 
     func getData(from: GettingFrom) -> AnyPublisher<DATA?, Never> {
         requireData(from: from)
-            .tryMap { data -> DATA? in
+            .map { data -> DATA? in
                 data
             }
             .replaceError(with: nil)
@@ -85,16 +80,14 @@ struct StoreFlowableImpl<PARAM: Hashable, DATA>: StoreFlowable, PaginationStoreF
             }
             .setFailureType(to: Error.self) // Workaround for macOS10.15/iOS13.0/tvOS13.0/watchOS6.0 https://www.donnywals.com/configuring-error-types-when-using-flatmap-in-combine/
         }
-        .flatMap { (dataState, data) in
-            async { yield in
-                switch dataState {
-                case .fixed:
-                    if data != nil { yield(data!) } else { throw NoSuchElementError() }
-                case .loading:
-                    break
-                case .error(let rawError):
-                    if data != nil { yield(data!) } else { throw rawError }
-                }
+        .tryCompactMap { (dataState, data) in
+            switch dataState {
+            case .fixed:
+                if let data = data { return data } else { throw NoSuchElementError() }
+            case .loading:
+                return nil
+            case .error(let rawError):
+                if let data = data { return data } else { throw rawError }
             }
         }
         .first()

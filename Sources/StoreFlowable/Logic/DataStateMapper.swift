@@ -8,9 +8,9 @@
 import Foundation
 
 extension DataState {
-    func toLoadingState<DATA>(content: DATA?) -> LoadingState<DATA> {
+    func toLoadingState<DATA>(content: DATA?) -> LoadingState<DATA>? {
         switch self {
-        case .fixed(let nextDataState, let prevDataState):
+        case .fixed(let nextDataState, let prevDataState, let isInitial):
             if let content = content {
                 switch nextDataState {
                 case .fixed(_):
@@ -62,6 +62,8 @@ extension DataState {
                         return .completed(content: content, next: nextState, prev: .error(rawError: rawError))
                     }
                 }
+            } else if isInitial {
+                return nil
             } else {
                 return .loading(content: nil)
             }

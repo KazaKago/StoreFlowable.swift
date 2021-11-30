@@ -11,7 +11,7 @@ import StoreFlowable
 
 struct GithubReposFlowableFactory: PaginationStoreFlowableFactory {
 
-    typealias KEY = String
+    typealias PARAM = String
     typealias DATA = [GithubRepo]
 
     private static let EXPIRE_SECONDS = TimeInterval(60)
@@ -19,36 +19,36 @@ struct GithubReposFlowableFactory: PaginationStoreFlowableFactory {
     private let githubApi = GithubApi()
 
     init(userName: String) {
-        key = userName
+        param = userName
     }
 
-    let key: String
+    let param: String
 
     let flowableDataStateManager: FlowableDataStateManager<String> = GithubReposStateManager.shared
 
     func loadDataFromCache() -> AnyPublisher<[GithubRepo]?, Never> {
         Future { promise in
-            promise(.success(GithubInMemoryCache.reposCache[key]))
+            promise(.success(GithubInMemoryCache.reposCache[param]))
         }.eraseToAnyPublisher()
     }
 
     func saveDataToCache(newData: [GithubRepo]?) -> AnyPublisher<Void, Never> {
         Future { promise in
-            GithubInMemoryCache.reposCache[key] = newData
-            GithubInMemoryCache.reposCacheCreatedAt[key] = Date()
+            GithubInMemoryCache.reposCache[param] = newData
+            GithubInMemoryCache.reposCacheCreatedAt[param] = Date()
             promise(.success(()))
         }.eraseToAnyPublisher()
     }
 
     func saveNextDataToCache(cachedData: [GithubRepo], newData: [GithubRepo]) -> AnyPublisher<Void, Never> {
         Future { promise in
-            GithubInMemoryCache.reposCache[key] = cachedData + newData
+            GithubInMemoryCache.reposCache[param] = cachedData + newData
             promise(.success(()))
         }.eraseToAnyPublisher()
     }
 
     func fetchDataFromOrigin() -> AnyPublisher<Fetched<[GithubRepo]>, Error> {
-        githubApi.getRepos(userName: key, page: 1, perPage: GithubReposFlowableFactory.PER_PAGE).map { newData in
+        githubApi.getRepos(userName: param, page: 1, perPage: GithubReposFlowableFactory.PER_PAGE).map { newData in
             Fetched(
                 data: newData,
                 nextKey: 2.description
@@ -58,7 +58,7 @@ struct GithubReposFlowableFactory: PaginationStoreFlowableFactory {
 
     func fetchNextDataFromOrigin(nextKey: String) -> AnyPublisher<Fetched<[GithubRepo]>, Error> {
         let nextPage = Int(nextKey)!
-        return githubApi.getRepos(userName: key, page: nextPage, perPage: GithubReposFlowableFactory.PER_PAGE).map { newData in
+        return githubApi.getRepos(userName: param, page: nextPage, perPage: GithubReposFlowableFactory.PER_PAGE).map { newData in
             Fetched(
                 data: newData,
                 nextKey: newData.isEmpty ? nil : (nextPage + 1).description
@@ -68,7 +68,7 @@ struct GithubReposFlowableFactory: PaginationStoreFlowableFactory {
 
     func needRefresh(cachedData: [GithubRepo]) -> AnyPublisher<Bool, Never> {
         Future { promise in
-            if let createdAt = GithubInMemoryCache.reposCacheCreatedAt[key] {
+            if let createdAt = GithubInMemoryCache.reposCacheCreatedAt[param] {
                 let expiredAt = createdAt + GithubReposFlowableFactory.EXPIRE_SECONDS
                 promise(.success(expiredAt < Date()))
             } else {

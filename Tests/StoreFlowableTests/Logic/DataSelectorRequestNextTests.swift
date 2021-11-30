@@ -94,7 +94,7 @@ final class DataSelectorRequestNextTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -108,7 +108,7 @@ final class DataSelectorRequestNextTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -122,7 +122,7 @@ final class DataSelectorRequestNextTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -136,7 +136,7 @@ final class DataSelectorRequestNextTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -150,7 +150,7 @@ final class DataSelectorRequestNextTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -164,7 +164,7 @@ final class DataSelectorRequestNextTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .loading = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -178,7 +178,7 @@ final class DataSelectorRequestNextTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .loading = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -192,7 +192,7 @@ final class DataSelectorRequestNextTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .loading = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -220,7 +220,7 @@ final class DataSelectorRequestNextTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -234,7 +234,7 @@ final class DataSelectorRequestNextTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -320,7 +320,7 @@ final class DataSelectorRequestNextTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: false).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .error = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -334,7 +334,7 @@ final class DataSelectorRequestNextTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: false).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .error = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -348,7 +348,7 @@ final class DataSelectorRequestNextTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: false).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .error = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
