@@ -15,42 +15,42 @@ public extension TwoWayPaginationStoreFlowableFactory {
      *
      * - returns: Created PaginationStoreFlowable.
      */
-    func create() -> AnyTwoWayPaginationStoreFlowable<DATA> {
+    func create(_ param: PARAM) -> AnyTwoWayPaginationStoreFlowable<DATA> {
         AnyTwoWayPaginationStoreFlowable(StoreFlowableImpl(
             param: param,
             flowableDataStateManager: flowableDataStateManager,
             cacheDataManager: AnyCacheDataManager<DATA>(
                 load: {
-                    loadDataFromCache()
+                    loadDataFromCache(param: param)
                 },
                 save: { newData in
-                    saveDataToCache(newData: newData)
+                    saveDataToCache(newData: newData, param: param)
                 },
                 saveNext: { cachedData, newData in
-                    saveNextDataToCache(cachedData: cachedData, newData: newData)
+                    saveNextDataToCache(cachedData: cachedData, newData: newData, param: param)
                 },
                 savePrev: { cachedData, newData in
-                    savePrevDataToCache(cachedData: cachedData, newData: newData)
+                    savePrevDataToCache(cachedData: cachedData, newData: newData, param: param)
                 }
             ),
             originDataManager: AnyOriginDataManager<DATA>(
                 fetch: {
-                    fetchDataFromOrigin().map { result in
+                    fetchDataFromOrigin(param: param).map { result in
                         InternalFetched(data: result.data, nextKey: result.nextKey, prevKey: result.prevKey)
                     }.eraseToAnyPublisher()
                 },
                 fetchNext: { nextKey in
-                    fetchNextDataFromOrigin(nextKey: nextKey).map { result in
+                    fetchNextDataFromOrigin(nextKey: nextKey, param: param).map { result in
                         InternalFetched(data: result.data, nextKey: result.nextKey, prevKey: nil)
                     }.eraseToAnyPublisher()
                 },
                 fetchPrev: { prevKey in
-                    fetchPrevDataFromOrigin(prevKey: prevKey).map { result in
+                    fetchPrevDataFromOrigin(prevKey: prevKey, param: param).map { result in
                         InternalFetched(data: result.data, nextKey: nil, prevKey: result.prevKey)
                     }.eraseToAnyPublisher()
                 }
             ),
-            needRefresh: { cachedData in needRefresh(cachedData: cachedData) }
+            needRefresh: { cachedData in needRefresh(cachedData: cachedData, param: param) }
         ))
     }
 }

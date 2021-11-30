@@ -22,7 +22,7 @@ public protocol TwoWayPaginationStoreFlowableFactory: BaseStoreFlowableFactory {
      * - parameter cachedData: Currently cached data.
      * - parameter newData: Data to be saved.
      */
-    func saveNextDataToCache(cachedData: DATA, newData: DATA) -> AnyPublisher<Void, Never>
+    func saveNextDataToCache(cachedData: DATA, newData: DATA, param: PARAM) -> AnyPublisher<Void, Never>
 
     /**
      * The previous data saving process to cache.
@@ -31,14 +31,14 @@ public protocol TwoWayPaginationStoreFlowableFactory: BaseStoreFlowableFactory {
      * - parameter cachedData: Currently cached data.
      * - parameter newData: Data to be saved.
      */
-    func savePrevDataToCache(cachedData: DATA, newData: DATA) -> AnyPublisher<Void, Never>
+    func savePrevDataToCache(cachedData: DATA, newData: DATA, param: PARAM) -> AnyPublisher<Void, Never>
 
     /**
      * The latest data acquisition process from origin.
      *
      * - returns `Fetched` class including the acquired data.
      */
-    func fetchDataFromOrigin() -> AnyPublisher<FetchedInitial<DATA>, Error>
+    func fetchDataFromOrigin(param: PARAM) -> AnyPublisher<FetchedInitial<DATA>, Error>
 
     /**
      * Next data acquisition process from origin.
@@ -46,7 +46,7 @@ public protocol TwoWayPaginationStoreFlowableFactory: BaseStoreFlowableFactory {
      * - parameter nextKey: Key for next data request.
      * - returns `Fetched` class including the acquired data.
      */
-    func fetchNextDataFromOrigin(nextKey: String) -> AnyPublisher<FetchedNext<DATA>, Error>
+    func fetchNextDataFromOrigin(nextKey: String, param: PARAM) -> AnyPublisher<FetchedNext<DATA>, Error>
 
     /**
      * Previous data acquisition process from origin.
@@ -54,5 +54,5 @@ public protocol TwoWayPaginationStoreFlowableFactory: BaseStoreFlowableFactory {
      * - parameter prevKey: Key for previous data request.
      * - returns `Fetched` class including the acquired data.
      */
-    func fetchPrevDataFromOrigin(prevKey: String) -> AnyPublisher<FetchedPrev<DATA>, Error>
+    func fetchPrevDataFromOrigin(prevKey: String, param: PARAM) -> AnyPublisher<FetchedPrev<DATA>, Error>
 }
