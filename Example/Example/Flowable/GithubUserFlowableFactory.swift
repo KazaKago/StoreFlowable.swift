@@ -17,21 +17,15 @@ struct GithubUserFlowableFactory: StoreFlowableFactory {
     private static let EXPIRE_SECONDS = TimeInterval(60)
     private let githubApi = GithubApi()
 
-    init(userName: String) {
-        param = userName
-    }
-
-    let param: String
-
     let flowableDataStateManager: FlowableDataStateManager<String> = GithubUserStateManager.shared
 
-    func loadDataFromCache() -> AnyPublisher<GithubUser?, Never> {
+    func loadDataFromCache(param: String) -> AnyPublisher<GithubUser?, Never> {
         Future { promise in
             promise(.success(GithubInMemoryCache.userCache[param]))
         }.eraseToAnyPublisher()
     }
 
-    func saveDataToCache(newData: GithubUser?) -> AnyPublisher<Void, Never> {
+    func saveDataToCache(newData: GithubUser?, param: String) -> AnyPublisher<Void, Never> {
         Future { promise in
             GithubInMemoryCache.userCache[param] = newData
             GithubInMemoryCache.userCacheCreatedAt[param] = Date()
@@ -39,11 +33,11 @@ struct GithubUserFlowableFactory: StoreFlowableFactory {
         }.eraseToAnyPublisher()
     }
 
-    func fetchDataFromOrigin() -> AnyPublisher<GithubUser, Error> {
+    func fetchDataFromOrigin(param: String) -> AnyPublisher<GithubUser, Error> {
         githubApi.getUser(userName: param)
     }
 
-    func needRefresh(cachedData: GithubUser) -> AnyPublisher<Bool, Never> {
+    func needRefresh(cachedData: GithubUser, param: String) -> AnyPublisher<Bool, Never> {
         Future { promise in
             if let createdAt = GithubInMemoryCache.userCacheCreatedAt[param] {
                 let expiredAt = createdAt + GithubUserFlowableFactory.EXPIRE_SECONDS

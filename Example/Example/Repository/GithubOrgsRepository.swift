@@ -12,17 +12,17 @@ import StoreFlowable
 struct GithubOrgsRepository {
 
     func follow() -> LoadingStatePublisher<[GithubOrg]> {
-        let githubOrgsFlowable = GithubOrgsFlowableFactory().create()
+        let githubOrgsFlowable = GithubOrgsFlowableFactory().create(UnitHash())
         return githubOrgsFlowable.publish()
     }
 
     func refresh() -> AnyPublisher<Void, Never> {
-        let githubOrgsFlowable = GithubOrgsFlowableFactory().create()
+        let githubOrgsFlowable = GithubOrgsFlowableFactory().create(UnitHash())
         return githubOrgsFlowable.refresh()
     }
 
     func requestNext(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
-        let githubOrgsFlowable = GithubOrgsFlowableFactory().create()
+        let githubOrgsFlowable = GithubOrgsFlowableFactory().create(UnitHash())
         return githubOrgsFlowable.requestNextData(continueWhenError: continueWhenError)
     }
 }

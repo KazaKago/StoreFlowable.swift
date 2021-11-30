@@ -12,12 +12,12 @@ import StoreFlowable
 struct GithubUserRepository {
 
     func follow(userName: String) -> LoadingStatePublisher<GithubUser> {
-        let githubUserFlowable = GithubUserFlowableFactory(userName: userName).create()
+        let githubUserFlowable = GithubUserFlowableFactory().create(userName)
         return githubUserFlowable.publish()
     }
 
     func refresh(userName: String) -> AnyPublisher<Void, Never> {
-        let githubUserFlowable = GithubUserFlowableFactory(userName: userName).create()
+        let githubUserFlowable = GithubUserFlowableFactory().create(userName)
         return githubUserFlowable.refresh()
     }
 }

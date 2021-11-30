@@ -12,22 +12,22 @@ import StoreFlowable
 struct GithubTwoWayReposRepository {
 
     func follow() -> LoadingStatePublisher<[GithubRepo]> {
-        let githubReposFlowable = GithubTwoWayReposFlowableFactory().create()
+        let githubReposFlowable = GithubTwoWayReposFlowableFactory().create("github")
         return githubReposFlowable.publish()
     }
 
     func refresh() -> AnyPublisher<Void, Never> {
-        let githubReposFlowable = GithubTwoWayReposFlowableFactory().create()
+        let githubReposFlowable = GithubTwoWayReposFlowableFactory().create("github")
         return githubReposFlowable.refresh()
     }
 
     func requestNext(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
-        let githubReposFlowable = GithubTwoWayReposFlowableFactory().create()
+        let githubReposFlowable = GithubTwoWayReposFlowableFactory().create("github")
         return githubReposFlowable.requestNextData(continueWhenError: continueWhenError)
     }
 
     func requestPrev(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
-        let githubReposFlowable = GithubTwoWayReposFlowableFactory().create()
+        let githubReposFlowable = GithubTwoWayReposFlowableFactory().create("github")
         return githubReposFlowable.requestPrevData(continueWhenError: continueWhenError)
     }
 }
