@@ -9,9 +9,9 @@ import Foundation
 
 protocol DataStateManager {
 
-    associatedtype KEY
+    associatedtype PARAM
 
-    func load(key: KEY) -> DataState
+    func load(param: PARAM) -> DataState
 
-    func save(key: KEY, state: DataState)
+    func save(param: PARAM, state: DataState)
 }

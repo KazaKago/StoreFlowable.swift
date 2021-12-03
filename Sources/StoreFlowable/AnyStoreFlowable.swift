@@ -11,9 +11,8 @@ import Combine
 /**
  * Type erasure of `StoreFlowable`.
  */
-public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
+public struct AnyStoreFlowable<DATA>: StoreFlowable {
 
-    public typealias KEY = KEY
     public typealias DATA = DATA
 
     private let _publish: (_ forceRefresh: Bool) -> LoadingStatePublisher<DATA>
@@ -23,7 +22,7 @@ public struct AnyStoreFlowable<KEY: Hashable, DATA>: StoreFlowable {
     private let _refresh: () -> AnyPublisher<Void, Never>
     private let _update: (_ newData: DATA?) -> AnyPublisher<Void, Never>
 
-    init<INNER: StoreFlowable>(_ inner: INNER) where INNER.KEY == KEY, INNER.DATA == DATA {
+    init<INNER: StoreFlowable>(_ inner: INNER) where INNER.DATA == DATA {
         _publish = { forceRefresh in
             inner.publish(forceRefresh: forceRefresh)
         }

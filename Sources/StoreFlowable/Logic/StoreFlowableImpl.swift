@@ -9,22 +9,22 @@ import Foundation
 import Combine
 import CombineAsync
 
-struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable, PaginationStoreFlowable, TwoWayPaginationStoreFlowable {
+struct StoreFlowableImpl<PARAM: Hashable, DATA>: StoreFlowable, PaginationStoreFlowable, TwoWayPaginationStoreFlowable {
 
-    typealias KEY = KEY
+    typealias PARAM = PARAM
     typealias DATA = DATA
 
-    private let key: KEY
-    private let flowableDataStateManager: FlowableDataStateManager<KEY>
+    private let param: PARAM
+    private let flowableDataStateManager: FlowableDataStateManager<PARAM>
     private let cacheDataManager: AnyCacheDataManager<DATA>
-    private let dataSelector: DataSelector<KEY, DATA>
+    private let dataSelector: DataSelector<PARAM, DATA>
 
-    init(key: KEY, flowableDataStateManager: FlowableDataStateManager<KEY>, cacheDataManager: AnyCacheDataManager<DATA>, originDataManager: AnyOriginDataManager<DATA>, needRefresh: @escaping (_ cachedData: DATA) -> AnyPublisher<Bool, Never>) {
-        self.key = key
+    init(param: PARAM, flowableDataStateManager: FlowableDataStateManager<PARAM>, cacheDataManager: AnyCacheDataManager<DATA>, originDataManager: AnyOriginDataManager<DATA>, needRefresh: @escaping (_ cachedData: DATA) -> AnyPublisher<Bool, Never>) {
+        self.param = param
         self.flowableDataStateManager = flowableDataStateManager
         self.cacheDataManager = cacheDataManager
         self.dataSelector = DataSelector(
-            key: key,
+            param: param,
             dataStateManager: AnyDataStateManager(flowableDataStateManager),
             cacheDataManager: cacheDataManager,
             originDataManager: originDataManager,
@@ -33,31 +33,26 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable, PaginationStoreFlo
     }
 
     func publish(forceRefresh: Bool) -> LoadingStatePublisher<DATA> {
-        async { _ in
-            if forceRefresh {
-                try `await`(dataSelector.refreshAsync(clearCacheBeforeFetching: true))
-            } else {
-                try `await`(dataSelector.validateAsync())
+        if forceRefresh {
+            _ = dataSelector.refresh(clearCacheBeforeFetching: true).sink(receiveValue: {})
+        } else {
+            _ = dataSelector.validate().sink(receiveValue: {})
+        }
+        return flowableDataStateManager.getFlow(param: param)
+            .flatMap { dataState in
+                cacheDataManager.load().map { data in
+                    (dataState, data)
+                }
             }
-        }
-        .replaceError(with: ())
-        .flatMap { _ in
-            flowableDataStateManager.getFlow(key: key)
-        }
-        .flatMap { dataState in
-            cacheDataManager.load().map { data in
-                (dataState, data)
+            .compactMap { (dataState, data) in
+                dataState.toLoadingState(content: data)
             }
-        }
-        .map { (dataState, data) in
-            return dataState.toLoadingState(content: data)
-        }
-        .eraseToAnyPublisher()
+            .eraseToAnyPublisher()
     }
 
     func getData(from: GettingFrom) -> AnyPublisher<DATA?, Never> {
         requireData(from: from)
-            .tryMap { data -> DATA? in
+            .map { data -> DATA? in
                 data
             }
             .replaceError(with: nil)
@@ -76,7 +71,7 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable, PaginationStoreFlo
             }
         }
         .flatMap {
-            flowableDataStateManager.getFlow(key: key)
+            flowableDataStateManager.getFlow(param: param)
                 .setFailureType(to: Error.self) // Workaround for macOS10.15/iOS13.0/tvOS13.0/watchOS6.0 https://www.donnywals.com/configuring-error-types-when-using-flatmap-in-combine/
         }
         .flatMap { dataState in
@@ -85,16 +80,14 @@ struct StoreFlowableImpl<KEY: Hashable, DATA>: StoreFlowable, PaginationStoreFlo
             }
             .setFailureType(to: Error.self) // Workaround for macOS10.15/iOS13.0/tvOS13.0/watchOS6.0 https://www.donnywals.com/configuring-error-types-when-using-flatmap-in-combine/
         }
-        .flatMap { (dataState, data) in
-            async { yield in
-                switch dataState {
-                case .fixed:
-                    if data != nil { yield(data!) } else { throw NoSuchElementError() }
-                case .loading:
-                    break
-                case .error(let rawError):
-                    if data != nil { yield(data!) } else { throw rawError }
-                }
+        .tryCompactMap { (dataState, data) in
+            switch dataState {
+            case .fixed:
+                if let data = data { return data } else { throw NoSuchElementError() }
+            case .loading:
+                return nil
+            case .error(let rawError):
+                if let data = data { return data } else { throw rawError }
             }
         }
         .first()

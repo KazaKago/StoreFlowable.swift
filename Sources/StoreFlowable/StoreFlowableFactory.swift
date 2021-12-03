@@ -20,5 +20,5 @@ public protocol StoreFlowableFactory: BaseStoreFlowableFactory {
      *
      * - returns acquired data.
      */
-    func fetchDataFromOrigin() -> AnyPublisher<DATA, Error>
+    func fetchDataFromOrigin(param: PARAM) -> AnyPublisher<DATA, Error>
 }

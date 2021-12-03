@@ -21,13 +21,13 @@ final class DataSelectorRequestNextFailedTests: XCTestCase {
         }
     }
 
-    private var dataSelector: DataSelector<String, [TestData]>!
+    private var dataSelector: DataSelector<UnitHash, [TestData]>!
     private var dataState: DataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData)
     private var dataCache: [TestData]? = nil
 
     override func setUp() {
         dataSelector = DataSelector(
-            key: "key",
+            param: UnitHash(),
             dataStateManager: AnyDataStateManager(
                 load: { key in
                     self.dataState
@@ -92,7 +92,7 @@ final class DataSelectorRequestNextFailedTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .error = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -106,7 +106,7 @@ final class DataSelectorRequestNextFailedTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .error = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -120,7 +120,7 @@ final class DataSelectorRequestNextFailedTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -134,7 +134,7 @@ final class DataSelectorRequestNextFailedTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -148,7 +148,7 @@ final class DataSelectorRequestNextFailedTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -162,7 +162,7 @@ final class DataSelectorRequestNextFailedTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .loading = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -176,7 +176,7 @@ final class DataSelectorRequestNextFailedTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .loading = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -190,7 +190,7 @@ final class DataSelectorRequestNextFailedTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .loading = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -218,7 +218,7 @@ final class DataSelectorRequestNextFailedTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .error = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -232,7 +232,7 @@ final class DataSelectorRequestNextFailedTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: true).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .error = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -318,7 +318,7 @@ final class DataSelectorRequestNextFailedTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: false).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .error = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -332,7 +332,7 @@ final class DataSelectorRequestNextFailedTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: false).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .error = nextDataState else { return XCTFail() }
         } else {
             XCTFail()
@@ -346,7 +346,7 @@ final class DataSelectorRequestNextFailedTests: XCTestCase {
 
         let recorder = dataSelector.requestNextData(continueWhenError: false).record()
         _ = try wait(for: recorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, _) = self.dataState {
+        if case .fixed(let nextDataState, _, _) = self.dataState {
             guard case .error = nextDataState else { return XCTFail() }
         } else {
             XCTFail()

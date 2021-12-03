@@ -7,32 +7,32 @@
 
 import Foundation
 
-struct AnyDataStateManager<KEY>: DataStateManager {
+struct AnyDataStateManager<PARAM>: DataStateManager {
 
-    typealias KEY = KEY
+    typealias PARAM = PARAM
 
-    private let _load: (_ key: KEY) -> DataState
-    private let _save: (_ key: KEY, DataState) -> Void
+    private let _load: (_ param: PARAM) -> DataState
+    private let _save: (_ param: PARAM, DataState) -> Void
 
-    init<INNER: DataStateManager>(_ inner: INNER) where INNER.KEY == KEY {
-        _load = { key in
-            inner.load(key: key)
+    init<INNER: DataStateManager>(_ inner: INNER) where INNER.PARAM == PARAM {
+        _load = { param in
+            inner.load(param: param)
         }
-        _save = { key, state in
-            inner.save(key: key, state: state)
+        _save = { param, state in
+            inner.save(param: param, state: state)
         }
     }
 
-    init(load: @escaping (_ key: KEY) -> DataState, save: @escaping (_ key: KEY, DataState) -> Void) {
+    init(load: @escaping (_ param: PARAM) -> DataState, save: @escaping (_ param: PARAM, DataState) -> Void) {
         _load = load
         _save = save
     }
 
-    func load(key: KEY) -> DataState {
-        _load(key)
+    func load(param: PARAM) -> DataState {
+        _load(param)
     }
 
-    func save(key: KEY, state: DataState) {
-        return _save(key, state)
+    func save(param: PARAM, state: DataState) {
+        return _save(param, state)
     }
 }

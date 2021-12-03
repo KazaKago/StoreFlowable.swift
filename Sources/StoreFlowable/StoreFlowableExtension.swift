@@ -15,16 +15,16 @@ public extension StoreFlowableFactory {
      *
      * - returns: Created StateFlowable.
      */
-    func create() -> AnyStoreFlowable<KEY, DATA> {
+    func create(_ param: PARAM) -> AnyStoreFlowable<DATA> {
         AnyStoreFlowable(StoreFlowableImpl(
-            key: key,
+            param: param,
             flowableDataStateManager: flowableDataStateManager,
             cacheDataManager: AnyCacheDataManager<DATA>(
                 load: {
-                    loadDataFromCache()
+                    loadDataFromCache(param: param)
                 },
                 save: { newData in
-                    saveDataToCache(newData: newData)
+                    saveDataToCache(newData: newData, param: param)
                 },
                 saveNext: { cachedData, newData in
                     fatalError()
@@ -35,7 +35,7 @@ public extension StoreFlowableFactory {
             ),
             originDataManager: AnyOriginDataManager<DATA>(
                 fetch: {
-                    fetchDataFromOrigin().map { data in
+                    fetchDataFromOrigin(param: param).map { data in
                         InternalFetched(data: data, nextKey: nil, prevKey: nil)
                     }.eraseToAnyPublisher()
                 },
@@ -46,7 +46,7 @@ public extension StoreFlowableFactory {
                     fatalError()
                 }
             ),
-            needRefresh: { cachedData in needRefresh(cachedData: cachedData) }
+            needRefresh: { cachedData in needRefresh(cachedData: cachedData, param: param) }
         ))
     }
 }

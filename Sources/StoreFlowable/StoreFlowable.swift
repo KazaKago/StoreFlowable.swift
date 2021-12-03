@@ -16,10 +16,6 @@ import Combine
 public protocol StoreFlowable {
 
     /**
-     * Specify the type that is the key to retrieve the data. If there is only one data to handle, specify the `UnitHash` type.
-     */
-    associatedtype KEY: Hashable
-    /**
      * Specify the type of data to be handled.
      */
     associatedtype DATA

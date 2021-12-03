@@ -13,14 +13,14 @@ import Combine
  *
  * Does not handle the raw data in this class.
  */
-open class FlowableDataStateManager<KEY: Hashable>: FlowAccessor, DataStateManager {
+open class FlowableDataStateManager<PARAM: Hashable>: FlowAccessor, DataStateManager {
 
     /**
      * Specify the type that is the key to retrieve the data. If there is only one data to handle, specify the `UnitHash` type.
      */
-    typealias KEY = KEY
+    typealias PARAM = PARAM
 
-    private var dataState: [KEY: CurrentValueSubject<DataState, Never>] = [:]
+    private var dataState: [PARAM: CurrentValueSubject<DataState, Never>] = [:]
 
     public init() {
     }
@@ -31,8 +31,8 @@ open class FlowableDataStateManager<KEY: Hashable>: FlowAccessor, DataStateManag
      * - parameter key: Key to get the specified data.
      * - returns: Flow for getting data state changes.
      */
-    func getFlow(key: KEY) -> AnyPublisher<DataState, Never> {
-        dataState.getOrCreate(key).eraseToAnyPublisher()
+    func getFlow(param: PARAM) -> AnyPublisher<DataState, Never> {
+        dataState.getOrCreate(param).eraseToAnyPublisher()
     }
 
     /**
@@ -41,8 +41,8 @@ open class FlowableDataStateManager<KEY: Hashable>: FlowAccessor, DataStateManag
      * - parameter key: Key to get the specified data.
      * - returns: State of saved data.
      */
-    func load(key: KEY) -> DataState {
-        dataState.getOrCreate(key).value
+    func load(param: PARAM) -> DataState {
+        dataState.getOrCreate(param).value
     }
 
     /**
@@ -51,8 +51,8 @@ open class FlowableDataStateManager<KEY: Hashable>: FlowAccessor, DataStateManag
      * - parameter key: Key to get the specified data.
      * - parameter state: State of saved data.
      */
-    func save(key: KEY, state: DataState) {
-        dataState.getOrCreate(key).value = state
+    func save(param: PARAM, state: DataState) {
+        dataState.getOrCreate(param).value = state
     }
 
     /**
@@ -66,7 +66,7 @@ open class FlowableDataStateManager<KEY: Hashable>: FlowAccessor, DataStateManag
 private extension Dictionary where Key: Hashable, Value == CurrentValueSubject<DataState, Never> {
     mutating func getOrCreate(_ key: Key) -> CurrentValueSubject<DataState, Never> {
         getOrPut(key) {
-            CurrentValueSubject<DataState, Never>(DataState.fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData))
+            CurrentValueSubject<DataState, Never>(DataState.fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData, isInitial: true))
         }
     }
 }

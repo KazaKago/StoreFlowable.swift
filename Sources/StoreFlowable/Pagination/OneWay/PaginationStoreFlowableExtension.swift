@@ -14,19 +14,19 @@ public extension PaginationStoreFlowableFactory {
      *
      * - returns: Created PaginationStoreFlowable.
      */
-    func create() -> AnyPaginationStoreFlowable<KEY, DATA> {
+    func create(_ param: PARAM) -> AnyPaginationStoreFlowable<DATA> {
         AnyPaginationStoreFlowable(StoreFlowableImpl(
-            key: key,
+            param: param,
             flowableDataStateManager: flowableDataStateManager,
             cacheDataManager: AnyCacheDataManager<DATA>(
                 load: {
-                    loadDataFromCache()
+                    loadDataFromCache(param: param)
                 },
                 save: { newData in
-                    saveDataToCache(newData: newData)
+                    saveDataToCache(newData: newData, param: param)
                 },
                 saveNext: { cachedData, newData in
-                    saveNextDataToCache(cachedData: cachedData, newData: newData)
+                    saveNextDataToCache(cachedData: cachedData, newData: newData, param: param)
                 },
                 savePrev: { cachedData, newData in
                     fatalError()
@@ -34,12 +34,12 @@ public extension PaginationStoreFlowableFactory {
             ),
             originDataManager: AnyOriginDataManager<DATA>(
                 fetch: {
-                    fetchDataFromOrigin().map { result in
+                    fetchDataFromOrigin(param: param).map { result in
                         InternalFetched(data: result.data, nextKey: result.nextKey, prevKey: nil)
                     }.eraseToAnyPublisher()
                 },
                 fetchNext: { nextKey in
-                    fetchNextDataFromOrigin(nextKey: nextKey).map { result in
+                    fetchNextDataFromOrigin(nextKey: nextKey, param: param).map { result in
                         InternalFetched(data: result.data, nextKey: result.nextKey, prevKey: nil)
                     }.eraseToAnyPublisher()
                 },
@@ -47,7 +47,7 @@ public extension PaginationStoreFlowableFactory {
                     fatalError()
                 }
             ),
-            needRefresh: { cachedData in needRefresh(cachedData: cachedData) }
+            needRefresh: { cachedData in needRefresh(cachedData: cachedData, param: param) }
         ))
     }
 }

@@ -58,8 +58,8 @@ There are only 5 things you have to implement:
 
 ### 1. Create FlowableDataStateManager class
 
-First, create a class that inherits [`FlowableDataStateManager<KEY: Hashable>`](Sources/StoreFlowable/FlowableDataStateManager.swift).  
-Put the type you want to use as a key in `<KEY: Hashable>`. If you don't need the key, put in the [`UnitHash`](Sources/StoreFlowable/UnitHash.swift).  
+First, create a class that inherits [`FlowableDataStateManager<PARAM: Hashable>`](Sources/StoreFlowable/FlowableDataStateManager.swift).  
+Put the type you want to use as a param in `<PARAM: Hashable>`. If you don't need the param, put in the [`UnitHash`](Sources/StoreFlowable/UnitHash.swift).  
 
 ```swift
 class UserStateManager: FlowableDataStateManager<UserId> {
@@ -68,7 +68,7 @@ class UserStateManager: FlowableDataStateManager<UserId> {
 }
 ```
 
-[`FlowableDataStateManager<KEY: Hashable>`](Sources/StoreFlowable/FlowableDataStateManager.swift) needs to be used in Singleton pattern.  
+[`FlowableDataStateManager<PARAM: Hashable>`](Sources/StoreFlowable/FlowableDataStateManager.swift) needs to be used in Singleton pattern.  
 
 ### 2. Create StoreFlowableFactory class
 
@@ -80,39 +80,32 @@ An example is shown below.
 ```swift
 struct UserFlowableFactory : StoreFlowableFactory {
 
-    typealias KEY = UserId
+    typealias PARAM = UserId
     typealias DATA = UserData
 
     private let userApi = UserApi()
     private let userCache = UserCache()
 
-    init(userId: UserId) {
-        key = userId
-    }
-
-    // Set the key for input / output of data. If you don't need the key, put in the UnitHash.
-    let key: UserId
-
     // Create data state management class.
     let flowableDataStateManager: FlowableDataStateManager<UserId> = UserStateManager.shared
 
     // Get data from local cache.
-    func loadDataFromCache() -> AnyPublisher<UserData?, Never> {
-        userCache.load(userId: key)
+    func loadDataFromCache(param: UserId) -> AnyPublisher<UserData?, Never> {
+        userCache.load(userId: param)
     }
 
     // Save data to local cache.
-    func saveDataToCache(newData: UserData?) -> AnyPublisher<Void, Never> {
-        userCache.save(userId: key, data: newData)
+    func saveDataToCache(newData: UserData?, param: UserId) -> AnyPublisher<Void, Never> {
+        userCache.save(userId: param, data: newData)
     }
 
     // Get data from remote server.
-    func fetchDataFromOrigin() -> AnyPublisher<UserData, Error> {
-        userApi.fetch(userId: key)
+    func fetchDataFromOrigin(param: UserId) -> AnyPublisher<UserData, Error> {
+        userApi.fetch(userId: param)
     }
 
     // Whether the cache is valid.
-    func needRefresh(cachedData: UserData) -> AnyPublisher<Bool, Never> {
+    func needRefresh(cachedData: UserData, param: UserId) -> AnyPublisher<Bool, Never> {
         cachedData.isExpired()
     }
 }
@@ -123,19 +116,19 @@ In this case, `UserApi` and `UserCache` classes.
 
 ### 3. Create Repository class
 
-After that, you can get the [`AnyStoreFlowable<KEY: Hashable, DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class from the [`StoreFlowableFactory.create()`](Sources/StoreFlowable/StoreFlowableExtension.swift) method, and use it to build the Repository class.  
-Be sure to go through the created [`AnyStoreFlowable<KEY: Hashable, DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class when getting / updating data.  
+After that, you can get the [`AnyStoreFlowable<PARAM: Hashable, DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class from the [`StoreFlowableFactory.create()`](Sources/StoreFlowable/StoreFlowableExtension.swift) method, and use it to build the Repository class.  
+Be sure to go through the created [`AnyStoreFlowable<PARAM: Hashable, DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class when getting / updating data.  
 
 ```swift
 struct UserRepository {
 
     func followUserData(userId: UserId) -> LoadingStatePublisher<UserData> {
-        let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableFactory(userId: userId).create()
+        let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableFactory().create(userId)
         return userFlowable.publish()
     }
 
     func updateUserData(userData: UserData) -> AnyPublisher<Void, Never> {
-        let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableFactory(userId: userId).create()
+        let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableFactory().create(userId)
         return userFlowable.update(newData: userData)
     }
 }
@@ -254,7 +247,7 @@ This library includes Pagination support.
 
 <img src="https://user-images.githubusercontent.com/7742104/103469914-7a833700-4dae-11eb-8ff8-98de478f20f8.gif" width="280"> <img src="https://user-images.githubusercontent.com/7742104/103469911-75be8300-4dae-11eb-924e-af509abd273a.gif" width="280">
 
-Inherit [`PagnationStoreFlowableFactory<KEY: Hashable, DATA>`](Sources/StoreFlowable/Pagination/OneWay/PaginationStoreFlowableFactory.swift) instead of [`StoreFlowableFactory<KEY: Hashable, DATA>`](Sources/StoreFlowable/StoreFlowableFactory.swift).  
+Inherit [`PagnationStoreFlowableFactory<PARAM: Hashable, DATA>`](Sources/StoreFlowable/Pagination/OneWay/PaginationStoreFlowableFactory.swift) instead of [`StoreFlowableFactory<PARAM: Hashable, DATA>`](Sources/StoreFlowable/StoreFlowableFactory.swift).  
 
 An example is shown below.  
 
@@ -267,41 +260,39 @@ class UserListStateManager: FlowableDataStateManager<UnitHash> {
 ```swift
 struct UserListFlowableFactory : PaginationStoreFlowableFactory {
 
-    typealias KEY = UnitHash
+    typealias PARAM = UnitHash
     typealias DATA = [UserData]
 
     private let userListApi = UserListApi()
     private let userListCache = UserListCache()
 
-    let key: UnitHash = UnitHash()
-
     let flowableDataStateManager: FlowableDataStateManager<UnitHash> = UserListStateManager.shared
 
-    func loadDataFromCache() -> AnyPublisher<[UserData]?, Never> {
+    func loadDataFromCache(param: UnitHash) -> AnyPublisher<[UserData]?, Never> {
         userListCache.load()
     }
 
-    func saveDataToCache(newData: [UserData]?) -> AnyPublisher<Void, Never> {
+    func saveDataToCache(newData: [UserData]?, param: UnitHash) -> AnyPublisher<Void, Never> {
         userListCache.save(data: newData)
     }
 
-    func saveNextDataToCache(cachedData: [UserData], newData: [UserData]) -> AnyPublisher<Void, Never> {
+    func saveNextDataToCache(cachedData: [UserData], newData: [UserData], param: UnitHash) -> AnyPublisher<Void, Never> {
         userListCache.save(data: cachedData + newData)
     }
 
-    func fetchDataFromOrigin() -> AnyPublisher<Fetched<[UserData]>, Error> {
-        userListApi.fetch(page: nil).map { data in
-            Fetched(data: data, nextKey: data.nextToken)
+    func fetchDataFromOrigin(param: UnitHash) -> AnyPublisher<Fetched<[UserData]>, Error> {
+        userListApi.fetch(pageToken: nil).map { fetchedData in
+            Fetched(data: fetchedData, nextKey: fetchedData.nextPageToken)
         }.eraseToAnyPublisher()
     }
 
-    func fetchNextDataFromOrigin(nextKey: String) -> AnyPublisher<Fetched<[UserData]>, Error> {
-        userListApi.fetch(page: page).map { data in
-            Fetched(data: data, nextKey: data.nextToken)
+    func fetchNextDataFromOrigin(nextKey: String, param: UnitHash) -> AnyPublisher<Fetched<[UserData]>, Error> {
+        userListApi.fetch(pageToken: nextKey).map { fetchedData in
+            Fetched(data: fetchedData, nextKey: fetchedData.nextPageToken)
         }.eraseToAnyPublisher()
     }
 
-    func needRefresh(cachedData: [UserData]) -> AnyPublisher<Bool, Never> {
+    func needRefresh(cachedData: [UserData], param: UnitHash) -> AnyPublisher<Bool, Never> {
         cachedData.last.isExpired()
     }
 }
@@ -313,7 +304,7 @@ When saving the data, combine the cached data and the new data before saving.
 And then, You can get the state of additional loading from the `next` parameter of `onCompleted {}`.
 
 ```swift
-let userFlowable = UserFlowableFactory(userId: userId).create()
+let userFlowable = UserListFlowableFactory().create(UnitHash())
 userFlowable.publish()
     .receive(on: DispatchQueue.main)
     .sink { state in

@@ -11,23 +11,21 @@ import StoreFlowable
 
 struct GithubMetaFlowableFactory: StoreFlowableFactory {
 
-    typealias KEY = UnitHash
+    typealias PARAM = UnitHash
     typealias DATA = GithubMeta
 
     private static let EXPIRE_SECONDS = TimeInterval(60)
     private let githubApi = GithubApi()
 
-    let key: UnitHash = UnitHash()
-
     let flowableDataStateManager: FlowableDataStateManager<UnitHash> = GithubMetaStateManager.shared
 
-    func loadDataFromCache() -> AnyPublisher<GithubMeta?, Never> {
+    func loadDataFromCache(param: UnitHash) -> AnyPublisher<GithubMeta?, Never> {
         Future { promise in
             promise(.success(GithubInMemoryCache.metaCache))
         }.eraseToAnyPublisher()
     }
 
-    func saveDataToCache(newData: GithubMeta?) -> AnyPublisher<Void, Never> {
+    func saveDataToCache(newData: GithubMeta?, param: UnitHash) -> AnyPublisher<Void, Never> {
         Future { promise in
             GithubInMemoryCache.metaCache = newData
             GithubInMemoryCache.metaCacheCreatedAt = Date()
@@ -35,11 +33,11 @@ struct GithubMetaFlowableFactory: StoreFlowableFactory {
         }.eraseToAnyPublisher()
     }
 
-    func fetchDataFromOrigin() -> AnyPublisher<GithubMeta, Error> {
+    func fetchDataFromOrigin(param: UnitHash) -> AnyPublisher<GithubMeta, Error> {
         githubApi.getMeta()
     }
 
-    func needRefresh(cachedData: GithubMeta) -> AnyPublisher<Bool, Never> {
+    func needRefresh(cachedData: GithubMeta, param: UnitHash) -> AnyPublisher<Bool, Never> {
         Future { promise in
             if let createdAt = GithubInMemoryCache.metaCacheCreatedAt {
                 let expiredAt = createdAt + GithubMetaFlowableFactory.EXPIRE_SECONDS
