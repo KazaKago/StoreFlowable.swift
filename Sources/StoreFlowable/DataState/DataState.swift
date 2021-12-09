@@ -13,13 +13,13 @@ import Foundation
  * This state is only used inside this library.
  */
 public enum DataState {
-    case fixed(nextDataState: AdditionalDataState, prevDataState: AdditionalDataState, isInitial: Bool = false)
+    case fixed(nextDataState: AdditionalDataState, prevDataState: AdditionalDataState)
     case loading
     case error(rawError: Error)
     
     func nextDataStateOrNil() -> AdditionalDataState {
         switch self {
-        case .fixed(let nextDataState, _, _): return nextDataState
+        case .fixed(let nextDataState, _): return nextDataState
         case .loading: return .fixedWithNoMoreAdditionalData
         case .error(_): return .fixedWithNoMoreAdditionalData
         }
@@ -27,7 +27,7 @@ public enum DataState {
 
     func prevDataStateOrNil() -> AdditionalDataState {
         switch self {
-        case .fixed(_, let prevDataState, _): return prevDataState
+        case .fixed(_, let prevDataState): return prevDataState
         case .loading: return .fixedWithNoMoreAdditionalData
         case .error(_): return .fixedWithNoMoreAdditionalData
         }
@@ -35,7 +35,7 @@ public enum DataState {
 
     func nextKeyOrNil() -> String? {
         switch self {
-        case .fixed(let nextDataState, _, _): return nextDataState.additionalRequestKeyOrNil()
+        case .fixed(let nextDataState, _): return nextDataState.additionalRequestKeyOrNil()
         case .loading: return nil
         case .error(_): return nil
         }
@@ -43,7 +43,7 @@ public enum DataState {
 
     func prevKeyOrNil() -> String? {
         switch self {
-        case .fixed(_, let prevDataState, _): return prevDataState.additionalRequestKeyOrNil()
+        case .fixed(_, let prevDataState): return prevDataState.additionalRequestKeyOrNil()
         case .loading: return nil
         case .error(_): return nil
         }

@@ -33,21 +33,26 @@ struct StoreFlowableImpl<PARAM: Hashable, DATA>: StoreFlowable, PaginationStoreF
     }
 
     func publish(forceRefresh: Bool) -> LoadingStatePublisher<DATA> {
-        if forceRefresh {
-            _ = dataSelector.refresh(clearCacheBeforeFetching: true).sink(receiveValue: {})
-        } else {
-            _ = dataSelector.validate().sink(receiveValue: {})
+        async { _ in
+            if forceRefresh {
+                try `await`(dataSelector.refreshAsync(clearCacheBeforeFetching: true))
+            } else {
+                try `await`(dataSelector.validateAsync())
+            }
         }
-        return flowableDataStateManager.getFlow(param: param)
-            .flatMap { dataState in
-                cacheDataManager.load().map { data in
-                    (dataState, data)
-                }
+        .replaceError(with: ())
+        .flatMap { _ in
+            flowableDataStateManager.getFlow(param: param)
+        }
+        .flatMap { dataState in
+            cacheDataManager.load().map { data in
+                (dataState, data)
             }
-            .compactMap { (dataState, data) in
-                dataState.toLoadingState(content: data)
-            }
-            .eraseToAnyPublisher()
+        }
+        .map { (dataState, data) in
+            dataState.toLoadingState(content: data)
+        }
+        .eraseToAnyPublisher()
     }
 
     func getData(from: GettingFrom) -> AnyPublisher<DATA?, Never> {
