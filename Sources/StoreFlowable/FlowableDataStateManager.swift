@@ -66,7 +66,7 @@ open class FlowableDataStateManager<PARAM: Hashable>: FlowAccessor, DataStateMan
 private extension Dictionary where Key: Hashable, Value == CurrentValueSubject<DataState, Never> {
     mutating func getOrCreate(_ key: Key) -> CurrentValueSubject<DataState, Never> {
         getOrPut(key) {
-            CurrentValueSubject<DataState, Never>(DataState.fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData, isInitial: true))
+            CurrentValueSubject<DataState, Never>(DataState.fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData))
         }
     }
 }
