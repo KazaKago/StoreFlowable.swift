@@ -116,19 +116,19 @@ In this case, `UserApi` and `UserCache` classes.
 
 ### 3. Create Repository class
 
-After that, you can get the [`AnyStoreFlowable<PARAM: Hashable, DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class from the [`StoreFlowableFactory.create()`](Sources/StoreFlowable/StoreFlowableExtension.swift) method, and use it to build the Repository class.  
-Be sure to go through the created [`AnyStoreFlowable<PARAM: Hashable, DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class when getting / updating data.  
+After that, you can get the [`AnyStoreFlowable<DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class from the [`StoreFlowableFactory.create()`](Sources/StoreFlowable/StoreFlowableExtension.swift) method, and use it to build the Repository class.  
+Be sure to go through the created [`AnyStoreFlowable<DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class when getting / updating data.  
 
 ```swift
 struct UserRepository {
 
     func followUserData(userId: UserId) -> LoadingStatePublisher<UserData> {
-        let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableFactory().create(userId)
+        let userFlowable: AnyStoreFlowable<UserData> = UserFlowableFactory().create(userId)
         return userFlowable.publish()
     }
 
     func updateUserData(userData: UserData) -> AnyPublisher<Void, Never> {
-        let userFlowable: AnyStoreFlowable<UserId, UserData> = UserFlowableFactory().create(userId)
+        let userFlowable: AnyStoreFlowable<UserData> = UserFlowableFactory().create(userId)
         return userFlowable.update(newData: userData)
     }
 }
