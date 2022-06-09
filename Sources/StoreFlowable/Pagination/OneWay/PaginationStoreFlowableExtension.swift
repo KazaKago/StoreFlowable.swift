@@ -15,18 +15,35 @@ public extension PaginationStoreFlowableFactory {
      * - returns: Created PaginationStoreFlowable.
      */
     func create(_ param: PARAM) -> AnyPaginationStoreFlowable<DATA> {
-        AnyPaginationStoreFlowable(StoreFlowableImpl(
-            param: param,
-            flowableDataStateManager: flowableDataStateManager,
+        AnyPaginationStoreFlowable(StoreFlowableImpl<DATA>(
+            dataStateFlowAccessor: AnyDataStateFlowAccessor(
+                getFlow: {
+                    flowableDataStateManager.getFlow(param: param)
+                }
+            ),
+            requestKeyManager: AnyRequestKeyManager(
+                loadNext: {
+                    flowableDataStateManager.loadNext(param: param)
+                },
+                saveNext: { requestKey in
+                    flowableDataStateManager.saveNext(param: param, requestKey: requestKey)
+                },
+                loadPrev: {
+                    nil
+                },
+                savePrev: { requestKey in
+                    // do nothing.
+                }
+            ),
             cacheDataManager: AnyCacheDataManager<DATA>(
                 load: {
-                    loadDataFromCache(param: param)
+                    await loadDataFromCache(param: param)
                 },
                 save: { newData in
-                    saveDataToCache(newData: newData, param: param)
+                    await saveDataToCache(newData: newData, param: param)
                 },
                 saveNext: { cachedData, newData in
-                    saveNextDataToCache(cachedData: cachedData, newData: newData, param: param)
+                    await saveNextDataToCache(cachedData: cachedData, newData: newData, param: param)
                 },
                 savePrev: { cachedData, newData in
                     fatalError()
@@ -34,20 +51,28 @@ public extension PaginationStoreFlowableFactory {
             ),
             originDataManager: AnyOriginDataManager<DATA>(
                 fetch: {
-                    fetchDataFromOrigin(param: param).map { result in
-                        InternalFetched(data: result.data, nextKey: result.nextKey, prevKey: nil)
-                    }.eraseToAnyPublisher()
+                    let result = try await fetchDataFromOrigin(param: param)
+                    return InternalFetched(data: result.data, nextKey: result.nextKey, prevKey: nil)
                 },
                 fetchNext: { nextKey in
-                    fetchNextDataFromOrigin(nextKey: nextKey, param: param).map { result in
-                        InternalFetched(data: result.data, nextKey: result.nextKey, prevKey: nil)
-                    }.eraseToAnyPublisher()
+                    let result = try await fetchNextDataFromOrigin(nextKey: nextKey, param: param)
+                    return InternalFetched(data: result.data, nextKey: result.nextKey, prevKey: nil)
                 },
                 fetchPrev: { prevKey in
                     fatalError()
                 }
             ),
-            needRefresh: { cachedData in needRefresh(cachedData: cachedData, param: param) }
+            dataStateManager: AnyDataStateManager(
+                load: {
+                    flowableDataStateManager.load(param: param)
+                },
+                save: { state in
+                    flowableDataStateManager.save(param: param, state: state)
+                }
+            ),
+            needRefresh: { cachedData in
+                await needRefresh(cachedData: cachedData, param: param)
+            }
         ))
     }
 }

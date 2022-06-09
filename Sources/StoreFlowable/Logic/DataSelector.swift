@@ -6,236 +6,185 @@
 //
 
 import Foundation
-import Combine
-import CombineAsync
 
-struct DataSelector<PARAM, DATA> {
+struct DataSelector<DATA> {
 
-    private let param: PARAM
-    private let dataStateManager: AnyDataStateManager<PARAM>
+    private let requestKeyManager: RequestKeyManager
     private let cacheDataManager: AnyCacheDataManager<DATA>
     private let originDataManager: AnyOriginDataManager<DATA>
-    private let needRefresh: (_ cachedData: DATA) -> AnyPublisher<Bool, Never>
+    private let dataStateManager: DataStateManager
+    private let needRefresh: (_ cachedData: DATA) async -> Bool
 
-    init(param: PARAM, dataStateManager: AnyDataStateManager<PARAM>, cacheDataManager: AnyCacheDataManager<DATA>, originDataManager: AnyOriginDataManager<DATA>, needRefresh: @escaping (_ data: DATA) -> AnyPublisher<Bool, Never>) {
-        self.param = param
-        self.dataStateManager = dataStateManager
+    init(requestKeyManager: RequestKeyManager, cacheDataManager: AnyCacheDataManager<DATA>, originDataManager: AnyOriginDataManager<DATA>, dataStateManager: DataStateManager, needRefresh: @escaping (_ data: DATA) async -> Bool) {
+        self.requestKeyManager = requestKeyManager
         self.cacheDataManager = cacheDataManager
         self.originDataManager = originDataManager
+        self.dataStateManager = dataStateManager
         self.needRefresh = needRefresh
     }
 
-    func loadValidCacheOrNil() -> AnyPublisher<DATA?, Never> {
-        async { yield in
-            if let data = try `await`(cacheDataManager.load()) {
-                if !(try! `await`(needRefresh(data))) {
-                    yield(data)
-                } else {
-                    yield(nil)
+    func loadValidCacheOrNil() async -> DATA? {
+        guard let data = await cacheDataManager.load() else { return nil }
+        return !(await needRefresh(data)) ? data : nil
+    }
+
+    func update(newData: DATA?, nextKey: String?, prevKey: String?) async {
+        await cacheDataManager.save(newData: newData)
+        if let nextKey = nextKey { await requestKeyManager.saveNext(requestKey: nextKey) }
+        if let prevKey = prevKey { await requestKeyManager.savePrev(requestKey: prevKey) }
+        dataStateManager.save(state: .fixed(nextDataState: .fixed, prevDataState: .fixed))
+    }
+
+    func clear() async {
+        await cacheDataManager.save(newData: nil)
+        await requestKeyManager.saveNext(requestKey: nil)
+        await requestKeyManager.savePrev(requestKey: nil)
+        dataStateManager.save(state: .fixed(nextDataState: .fixed, prevDataState: .fixed))
+    }
+
+    func validate() async {
+        await doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, requestType: .refresh)
+    }
+
+    func validateAsync() async {
+        await doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: false, requestType: .refresh)
+    }
+
+    func refresh(clearCacheBeforeFetching: Bool) async {
+        await doStateAction(forceRefresh: true, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, requestType: .refresh)
+    }
+
+    func refreshAsync(clearCacheBeforeFetching: Bool) async {
+        await doStateAction(forceRefresh: true, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: false, requestType: .refresh)
+    }
+
+    func requestNextData(continueWhenError: Bool) async {
+        await doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: false, continueWhenError: continueWhenError, awaitFetching: true, requestType: .next)
+    }
+
+    func requestPrevData(continueWhenError: Bool) async {
+        await doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: false, continueWhenError: continueWhenError, awaitFetching: true, requestType: .prev)
+    }
+
+    private func doStateAction(forceRefresh: Bool, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, continueWhenError: Bool, awaitFetching: Bool, requestType: RequestType) async {
+        switch dataStateManager.load() {
+        case .fixed(let nextDataState, let prevDataState):
+            switch requestType {
+            case .refresh:
+                if case .loading = nextDataState, case .loading = prevDataState {} else {
+                    await doDataAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: .refresh)
                 }
-            } else {
-                yield(nil)
-            }
-        }
-        .replaceError(with: nil)
-        .eraseToAnyPublisher()
-    }
-
-    func update(newData: DATA?, nextKey: String?, prevKey: String?) -> AnyPublisher<Void, Never> {
-        async { _ in
-            try `await`(cacheDataManager.save(newData: newData))
-            let nextDataState: AdditionalDataState
-            if let nextKey = nextKey {
-                nextDataState = .fixed(additionalRequestKey: nextKey)
-            } else {
-                let state = dataStateManager.load(param: param)
-                if let nextKey = state.nextKeyOrNil() {
-                    nextDataState = .fixed(additionalRequestKey: nextKey)
-                } else {
-                    nextDataState = .fixedWithNoMoreAdditionalData
-                }
-            }
-            let prevDataState: AdditionalDataState
-            if let prevKey = prevKey {
-                prevDataState = .fixed(additionalRequestKey: prevKey)
-            } else {
-                let state = dataStateManager.load(param: param)
-                if let prevKey = state.prevKeyOrNil() {
-                    prevDataState = .fixed(additionalRequestKey: prevKey)
-                } else {
-                    prevDataState = .fixedWithNoMoreAdditionalData
-                }
-            }
-            dataStateManager.save(param: param, state: .fixed(nextDataState: nextDataState, prevDataState: prevDataState))
-        }
-        .replaceError(with: ())
-        .eraseToAnyPublisher()
-    }
-
-    func validate() -> AnyPublisher<Void, Never> {
-        return doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, requestType: .refresh)
-    }
-
-    func validateAsync() -> AnyPublisher<Void, Never> {
-        return doStateAction(forceRefresh: false, clearCacheBeforeFetching: true, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: false, requestType: .refresh)
-    }
-
-    func refresh(clearCacheBeforeFetching: Bool) -> AnyPublisher<Void, Never> {
-        return doStateAction(forceRefresh: true, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: true, requestType: .refresh)
-    }
-
-    func refreshAsync(clearCacheBeforeFetching: Bool) -> AnyPublisher<Void, Never> {
-        return doStateAction(forceRefresh: true, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: true, continueWhenError: true, awaitFetching: false, requestType: .refresh)
-    }
-
-    func requestNextData(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
-        return doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: false, continueWhenError: continueWhenError, awaitFetching: true, requestType: .next)
-    }
-
-    func requestPrevData(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
-        return doStateAction(forceRefresh: false, clearCacheBeforeFetching: false, clearCacheWhenFetchFails: false, continueWhenError: continueWhenError, awaitFetching: true, requestType: .prev)
-    }
-
-    private func doStateAction(forceRefresh: Bool, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, continueWhenError: Bool, awaitFetching: Bool, requestType: RequestType) -> AnyPublisher<Void, Never> {
-        async { _ in
-            switch dataStateManager.load(param: param) {
-            case .fixed(let nextDataState, let prevDataState):
-                switch requestType {
-                case .refresh:
-                    if case .loading = nextDataState, case .loading = prevDataState {} else {
-                        try `await`(doDataAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: .refresh))
-                    }
-                case .next:
+            case .next:
+                let nextKey = await requestKeyManager.loadNext()
+                if !nextKey.isNilOrEmpty() {
                     switch nextDataState {
-                    case .fixed(let additionalRequestKey):
-                        try `await`(doDataAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: .next(requestKey: additionalRequestKey)))
-                    case .fixedWithNoMoreAdditionalData:
+                    case .fixed:
+                        await doDataAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: .next(requestKey: nextKey!))
+                    case .loading:
                         break
-                    case .loading(_):
-                        break
-                    case .error(let additionalRequestKey, _):
-                        if continueWhenError { try `await`(doDataAction(forceRefresh: true, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: .next(requestKey: additionalRequestKey))) }
+                    case .error(_):
+                        if continueWhenError { await doDataAction(forceRefresh: true, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: .next(requestKey: nextKey!)) }
                     }
-                case .prev:
+                }
+            case .prev:
+                let prevKey = await requestKeyManager.loadPrev()
+                if !prevKey.isNilOrEmpty() {
                     switch prevDataState {
-                    case .fixed(let additionalRequestKey):
-                        try `await`(doDataAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: .prev(requestKey: additionalRequestKey)))
-                    case .fixedWithNoMoreAdditionalData:
+                    case .fixed:
+                        await doDataAction(forceRefresh: forceRefresh, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: .prev(requestKey: prevKey!))
+                    case .loading:
                         break
-                    case .loading(_):
-                        break
-                    case .error(let additionalRequestKey, _):
-                        if continueWhenError { try `await`(doDataAction(forceRefresh: true, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: .prev(requestKey: additionalRequestKey))) }
+                    case .error(_):
+                        if continueWhenError { await doDataAction(forceRefresh: true, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: .prev(requestKey: prevKey!)) }
                     }
                 }
-            case .loading:
-                break
-            case .error(_):
-                switch requestType {
-                case .refresh:
-                    if continueWhenError { try `await`(doDataAction(forceRefresh: true, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: .refresh)) }
-                case .next, .prev:
-                    dataStateManager.save(param: param, state: .error(rawError: AdditionalRequestOnErrorStateException()))
-                }
             }
-        }
-        .replaceError(with: ())
-        .eraseToAnyPublisher()
-    }
-
-    private func doDataAction(forceRefresh: Bool, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool, requestType: KeyedRequestType) -> AnyPublisher<Void, Never> {
-        async { _ in
-            let cachedData = try `await`(cacheDataManager.load())
+        case .loading:
+            break
+        case .error:
             switch requestType {
             case .refresh:
-                if cachedData == nil || forceRefresh || (try! `await`(needRefresh(cachedData!))) {
-                    try `await`(prepareFetch(clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: requestType))
-                }
-            case .next(_), .prev(_):
-                if let _ = cachedData {
-                    try `await`(prepareFetch(clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: requestType))
-                } else {
-                    dataStateManager.save(param: param, state: .error(rawError: AdditionalRequestOnNilException()))
-                }
+                if continueWhenError { await doDataAction(forceRefresh: true, clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: .refresh) }
+            case .next, .prev:
+                dataStateManager.save(state: .error(rawError: AdditionalRequestOnErrorStateException()))
             }
         }
-        .replaceError(with: ())
-        .eraseToAnyPublisher()
     }
 
-    private func prepareFetch(clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool, requestType: KeyedRequestType) -> AnyPublisher<Void, Never> {
-        async { _ in
-            if clearCacheBeforeFetching { try `await`(cacheDataManager.save(newData: nil)) }
-            let state = dataStateManager.load(param: param)
-            switch requestType {
-            case .refresh:
-                dataStateManager.save(param: param, state: .loading)
-            case .next(let requestKey):
-                dataStateManager.save(param: param, state: .fixed(nextDataState: .loading(additionalRequestKey: requestKey), prevDataState: state.prevDataStateOrNil()))
-            case .prev(let requestKey):
-                dataStateManager.save(param: param, state: .fixed(nextDataState: state.nextDataStateOrNil(), prevDataState: .loading(additionalRequestKey: requestKey)))
-            }
-            if awaitFetching {
-                try `await`(fetchNewData(clearCacheWhenFetchFails: clearCacheWhenFetchFails, requestType: requestType))
+    private func doDataAction(forceRefresh: Bool, clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool, requestType: KeyedRequestType) async {
+        let cachedData = await cacheDataManager.load()
+        switch requestType {
+        case .refresh:
+            if cachedData == nil || forceRefresh {
+                await prepareFetch(clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: requestType)
             } else {
-                _ = fetchNewData(clearCacheWhenFetchFails: clearCacheWhenFetchFails, requestType: requestType).sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+                let needRefresh = await needRefresh(cachedData!)
+                if needRefresh {
+                    await prepareFetch(clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: requestType)
+                }
+            }
+        case .next(_), .prev(_):
+            if let _ = cachedData {
+                await prepareFetch(clearCacheBeforeFetching: clearCacheBeforeFetching, clearCacheWhenFetchFails: clearCacheWhenFetchFails, awaitFetching: awaitFetching, requestType: requestType)
+            } else {
+                dataStateManager.save(state: .error(rawError: AdditionalRequestOnNilException()))
             }
         }
-        .replaceError(with: ())
-        .eraseToAnyPublisher()
     }
 
-    private func fetchNewData(clearCacheWhenFetchFails: Bool, requestType: KeyedRequestType) -> AnyPublisher<Void, Never> {
-        async { _ in
-            do {
-                let result: InternalFetched<DATA>
-                switch requestType {
-                case .refresh:
-                    result = try `await`(originDataManager.fetch())
-                case .next(let requestKey):
-                    result = try `await`(originDataManager.fetchNext(nextKey: requestKey))
-                case .prev(let requestKey):
-                    result = try `await`(originDataManager.fetchPrev(prevKey: requestKey))
-                }
-                switch requestType {
-                case .refresh:
-                    try `await`(cacheDataManager.save(newData: result.data))
-                case .next(_):
-                    if let cachedData = try `await`(cacheDataManager.load()) {
-                        try `await`(cacheDataManager.saveNext(cachedData: cachedData, newData: result.data))
-                    } else {
-                        throw AdditionalRequestOnNilException()
-                    }
-                case .prev(_):
-                    if let cachedData = try `await`(cacheDataManager.load()) {
-                        try `await`(cacheDataManager.savePrev(cachedData: cachedData, newData: result.data))
-                    } else {
-                        throw AdditionalRequestOnNilException()
-                    }
-                }
-                let state = dataStateManager.load(param: param)
-                switch (requestType) {
-                case .refresh:
-                    dataStateManager.save(param: param, state: .fixed(nextDataState: result.nextKey.isNilOrEmpty() ? .fixedWithNoMoreAdditionalData : .fixed(additionalRequestKey: result.nextKey!), prevDataState: result.prevKey.isNilOrEmpty() ? .fixedWithNoMoreAdditionalData : .fixed(additionalRequestKey: result.prevKey!)))
-                case .next(_):
-                    dataStateManager.save(param: param, state: .fixed(nextDataState: result.nextKey.isNilOrEmpty() ? .fixedWithNoMoreAdditionalData : .fixed(additionalRequestKey: result.nextKey!), prevDataState: state.prevDataStateOrNil()))
-                case .prev(_):
-                    dataStateManager.save(param: param, state: .fixed(nextDataState: state.nextDataStateOrNil(), prevDataState: result.prevKey.isNilOrEmpty() ? .fixedWithNoMoreAdditionalData : .fixed(additionalRequestKey: result.prevKey!)))
-                }
-            } catch {
-                if clearCacheWhenFetchFails { try `await`(cacheDataManager.save(newData: nil)) }
-                let state = dataStateManager.load(param: param)
-                switch (requestType) {
-                case .refresh:
-                    dataStateManager.save(param: param, state: .error(rawError: error))
-                case .next(let requestKey):
-                    dataStateManager.save(param: param, state: .fixed(nextDataState: .error(additionalRequestKey: requestKey, rawError: error), prevDataState: state.prevDataStateOrNil()))
-                case .prev(let requestKey):
-                    dataStateManager.save(param: param, state: .fixed(nextDataState: state.nextDataStateOrNil(), prevDataState: .error(additionalRequestKey: requestKey, rawError: error)))
-                }
+    private func prepareFetch(clearCacheBeforeFetching: Bool, clearCacheWhenFetchFails: Bool, awaitFetching: Bool, requestType: KeyedRequestType) async {
+        if clearCacheBeforeFetching { await cacheDataManager.save(newData: nil) }
+        let state = dataStateManager.load()
+        switch requestType {
+        case .refresh:
+            dataStateManager.save(state: .loading())
+        case .next(_):
+            dataStateManager.save(state: .fixed(nextDataState: .loading, prevDataState: state.prevDataState()))
+        case .prev(_):
+            dataStateManager.save(state: .fixed(nextDataState: state.nextDataState(), prevDataState: .loading))
+        }
+        if awaitFetching {
+            await fetchNewData(clearCacheWhenFetchFails: clearCacheWhenFetchFails, requestType: requestType)
+        } else {
+            Task { await fetchNewData(clearCacheWhenFetchFails: clearCacheWhenFetchFails, requestType: requestType) }
+        }
+    }
+
+    private func fetchNewData(clearCacheWhenFetchFails: Bool, requestType: KeyedRequestType) async {
+        do {
+            switch requestType {
+            case .refresh:
+                let result = try await originDataManager.fetch()
+                await cacheDataManager.save(newData: result.data)
+                await requestKeyManager.saveNext(requestKey: result.nextKey)
+                await requestKeyManager.savePrev(requestKey: result.prevKey)
+                dataStateManager.save(state: .fixed(nextDataState: .fixed, prevDataState: .fixed))
+            case .next(let requestKey):
+                let result = try await originDataManager.fetchNext(nextKey: requestKey)
+                guard let cachedData = await cacheDataManager.load() else { throw AdditionalRequestOnNilException() }
+                await cacheDataManager.saveNext(cachedData: cachedData, newData: result.data)
+                await requestKeyManager.saveNext(requestKey: result.nextKey)
+                let state = dataStateManager.load()
+                dataStateManager.save(state: .fixed(nextDataState: .fixed, prevDataState: state.nextDataState()))
+            case .prev(let requestKey):
+                let result = try await originDataManager.fetchPrev(prevKey: requestKey)
+                guard let cachedData = await cacheDataManager.load() else { throw AdditionalRequestOnNilException() }
+                await cacheDataManager.savePrev(cachedData: cachedData, newData: result.data)
+                await requestKeyManager.savePrev(requestKey: result.prevKey)
+                let state = dataStateManager.load()
+                dataStateManager.save(state: .fixed(nextDataState: state.nextDataState(), prevDataState: .fixed))
+            }
+        } catch {
+            if clearCacheWhenFetchFails { await cacheDataManager.save(newData: nil) }
+            let state = dataStateManager.load()
+            switch (requestType) {
+            case .refresh:
+                dataStateManager.save(state: .error(rawError: error))
+            case .next:
+                dataStateManager.save(state: .fixed(nextDataState: .error(rawError: error), prevDataState: state.prevDataState()))
+            case .prev:
+                dataStateManager.save(state: .fixed(nextDataState: state.nextDataState(), prevDataState: .error(rawError: error)))
             }
         }
-        .replaceError(with: ())
-        .eraseToAnyPublisher()
     }
 }

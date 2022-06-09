@@ -16,18 +16,18 @@ struct GithubTwoWayReposRepository {
         return githubReposFlowable.publish()
     }
 
-    func refresh() -> AnyPublisher<Void, Never> {
+    func refresh() async {
         let githubReposFlowable = GithubTwoWayReposFlowableFactory().create("github")
-        return githubReposFlowable.refresh()
+        await githubReposFlowable.refresh()
     }
 
-    func requestNext(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+    func requestNext(continueWhenError: Bool) async {
         let githubReposFlowable = GithubTwoWayReposFlowableFactory().create("github")
-        return githubReposFlowable.requestNextData(continueWhenError: continueWhenError)
+        await githubReposFlowable.requestNextData(continueWhenError: continueWhenError)
     }
 
-    func requestPrev(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+    func requestPrev(continueWhenError: Bool) async {
         let githubReposFlowable = GithubTwoWayReposFlowableFactory().create("github")
-        return githubReposFlowable.requestPrevData(continueWhenError: continueWhenError)
+        await githubReposFlowable.requestPrevData(continueWhenError: continueWhenError)
     }
 }

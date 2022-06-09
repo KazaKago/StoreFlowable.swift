@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 import StoreFlowable
 
 struct GithubUserFlowableFactory: StoreFlowableFactory {
@@ -19,32 +18,25 @@ struct GithubUserFlowableFactory: StoreFlowableFactory {
 
     let flowableDataStateManager: FlowableDataStateManager<String> = GithubUserStateManager.shared
 
-    func loadDataFromCache(param: String) -> AnyPublisher<GithubUser?, Never> {
-        Future { promise in
-            promise(.success(GithubInMemoryCache.userCache[param]))
-        }.eraseToAnyPublisher()
+    func loadDataFromCache(param: String) async -> GithubUser? {
+        GithubInMemoryCache.userCache[param]
     }
 
-    func saveDataToCache(newData: GithubUser?, param: String) -> AnyPublisher<Void, Never> {
-        Future { promise in
-            GithubInMemoryCache.userCache[param] = newData
-            GithubInMemoryCache.userCacheCreatedAt[param] = Date()
-            promise(.success(()))
-        }.eraseToAnyPublisher()
+    func saveDataToCache(newData: GithubUser?, param: String) async {
+        GithubInMemoryCache.userCache[param] = newData
+        GithubInMemoryCache.userCacheCreatedAt[param] = Date()
     }
 
-    func fetchDataFromOrigin(param: String) -> AnyPublisher<GithubUser, Error> {
-        githubApi.getUser(userName: param)
+    func fetchDataFromOrigin(param: String) async throws -> GithubUser {
+        try await githubApi.getUser(userName: param)
     }
 
-    func needRefresh(cachedData: GithubUser, param: String) -> AnyPublisher<Bool, Never> {
-        Future { promise in
-            if let createdAt = GithubInMemoryCache.userCacheCreatedAt[param] {
-                let expiredAt = createdAt + GithubUserFlowableFactory.EXPIRE_SECONDS
-                promise(.success(expiredAt < Date()))
-            } else {
-                promise(.success(true))
-            }
-        }.eraseToAnyPublisher()
+    func needRefresh(cachedData: GithubUser, param: String) async -> Bool {
+        if let createdAt = GithubInMemoryCache.userCacheCreatedAt[param] {
+            let expiredAt = createdAt + GithubUserFlowableFactory.EXPIRE_SECONDS
+            return expiredAt < Date()
+        } else {
+            return true
+        }
     }
 }

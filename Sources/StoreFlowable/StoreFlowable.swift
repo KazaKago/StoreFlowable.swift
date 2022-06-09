@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 
 /**
  * Provides input / output methods that abstract the data acquisition destination.
@@ -44,7 +43,7 @@ public protocol StoreFlowable {
      * - parameter from: Specifies where to get the data. Default value is `GettingFrom.both`
      * - returns: Returns the entity of the data.
      */
-    func getData(from: GettingFrom) -> AnyPublisher<DATA?, Never>
+    func getData(from: GettingFrom) async -> DATA?
 
     /**
      * Returns valid data only once.
@@ -56,7 +55,7 @@ public protocol StoreFlowable {
      * - parameter from: Specifies where to get the data. Default value is `GettingFrom.both`.
      * - returns: Returns the entity of the data.
      */
-    func requireData(from: GettingFrom) -> AnyPublisher<DATA, Error>
+    func requireData(from: GettingFrom) async throws -> DATA
 
     /**
      * Checks if the published data is valid.
@@ -64,13 +63,13 @@ public protocol StoreFlowable {
      * If it is invalid, it will be reacquired from origin.
      * and the new data will be notified.
      */
-    func validate() -> AnyPublisher<Void, Never>
+    func validate() async
 
     /**
      * Forces a data refresh.
      * and the new data will be notified.
      */
-    func refresh() -> AnyPublisher<Void, Never>
+    func refresh() async
 
     /**
      * Treat the passed data as the latest acquired data.
@@ -80,7 +79,13 @@ public protocol StoreFlowable {
      *
      * - parameter newData: Latest data.
      */
-    func update(newData: DATA?) -> AnyPublisher<Void, Never>
+    func update(newData: DATA?) async
+    
+    /**
+     * Clear data managed by StoreFlowable.
+     * and this event will be notified.
+     */
+    func clear() async
 }
 
 public extension StoreFlowable {
@@ -89,11 +94,11 @@ public extension StoreFlowable {
         publish(forceRefresh: forceRefresh)
     }
 
-    func getData(from: GettingFrom = .both) -> AnyPublisher<DATA?, Never> {
-        getData(from: from)
+    func getData(from: GettingFrom = .both) async -> DATA? {
+        await getData(from: from)
     }
 
-    func requireData(from: GettingFrom = .both) -> AnyPublisher<DATA, Error> {
-        requireData(from: from)
+    func requireData(from: GettingFrom = .both) async throws -> DATA {
+        try await requireData(from: from)
     }
 }

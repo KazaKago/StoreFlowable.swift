@@ -6,21 +6,23 @@
 //
 
 import Foundation
-import Combine
+import AsyncExtensions
 
 /**
  * This class that controls and holds the state of data.
  *
  * Does not handle the raw data in this class.
  */
-open class FlowableDataStateManager<PARAM: Hashable>: FlowAccessor, DataStateManager {
+open class FlowableDataStateManager<PARAM: Hashable> {
 
     /**
      * Specify the type that is the key to retrieve the data. If there is only one data to handle, specify the `UnitHash` type.
      */
     typealias PARAM = PARAM
 
-    private var dataState: [PARAM: CurrentValueSubject<DataState, Never>] = [:]
+    private var dataState: [PARAM: AsyncStreams.CurrentValue<DataState>] = [:]
+    private var nextKey: [PARAM: String] = [:]
+    private var prevKey: [PARAM: String] = [:]
 
     public init() {
     }
@@ -31,8 +33,8 @@ open class FlowableDataStateManager<PARAM: Hashable>: FlowAccessor, DataStateMan
      * - parameter key: Key to get the specified data.
      * - returns: Flow for getting data state changes.
      */
-    func getFlow(param: PARAM) -> AnyPublisher<DataState, Never> {
-        dataState.getOrCreate(param).eraseToAnyPublisher()
+    func getFlow(param: PARAM) -> AnyAsyncSequence<DataState> {
+        dataState.getOrCreate(param).eraseToAnyAsyncSequence()
     }
 
     /**
@@ -42,7 +44,7 @@ open class FlowableDataStateManager<PARAM: Hashable>: FlowAccessor, DataStateMan
      * - returns: State of saved data.
      */
     func load(param: PARAM) -> DataState {
-        dataState.getOrCreate(param).value
+        dataState.getOrCreate(param).element
     }
 
     /**
@@ -52,7 +54,7 @@ open class FlowableDataStateManager<PARAM: Hashable>: FlowAccessor, DataStateMan
      * - parameter state: State of saved data.
      */
     func save(param: PARAM, state: DataState) {
-        dataState.getOrCreate(param).value = state
+        dataState.getOrCreate(param).element = state
     }
 
     /**
@@ -61,12 +63,28 @@ open class FlowableDataStateManager<PARAM: Hashable>: FlowAccessor, DataStateMan
     func clearAll() {
         dataState = [:]
     }
+    
+    func loadNext(param: PARAM) -> String? {
+        nextKey[param]
+    }
+
+    func saveNext(param: PARAM, requestKey: String?) {
+        nextKey[param] = requestKey
+    }
+
+    func loadPrev(param: PARAM) -> String? {
+        prevKey[param]
+    }
+
+    func savePrev(param: PARAM, requestKey: String?) {
+        prevKey[param] = requestKey
+    }
 }
 
-private extension Dictionary where Key: Hashable, Value == CurrentValueSubject<DataState, Never> {
-    mutating func getOrCreate(_ key: Key) -> CurrentValueSubject<DataState, Never> {
+private extension Dictionary where Key: Hashable, Value == AsyncStreams.CurrentValue<DataState> {
+    mutating func getOrCreate(_ key: Key) -> AsyncStreams.CurrentValue<DataState> {
         getOrPut(key) {
-            CurrentValueSubject<DataState, Never>(DataState.fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData))
+            AsyncStreams.CurrentValue<DataState>(DataState.fixed(nextDataState: .fixed, prevDataState: .fixed))
         }
     }
 }

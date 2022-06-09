@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 
 /**
  * Provides input / output methods that abstract the data acquisition destination.
@@ -22,7 +21,7 @@ public protocol PaginationStoreFlowable: StoreFlowable {
      *
      * - parameter continueWhenError: Even if the data state is an `LoadingState.error` when `refresh` is called, the refresh will continue. Default value is `true`.
      */
-    func requestNextData(continueWhenError: Bool) -> AnyPublisher<Void, Never>
+    func requestNextData(continueWhenError: Bool) async
     
     /**
      * Treat the passed data as the latest acquired data.
@@ -33,16 +32,16 @@ public protocol PaginationStoreFlowable: StoreFlowable {
      * - parameter newData: Latest data.
      * - parameter nextKey: Key for next request. If null is set, the stored key will be used.
      */
-    func update(newData: DATA?, nextKey: String?) -> AnyPublisher<Void, Never>
+    func update(newData: DATA?, nextKey: String?) async
 }
 
 public extension PaginationStoreFlowable {
 
-    func requestNextData(continueWhenError: Bool = true) -> AnyPublisher<Void, Never> {
-        requestNextData(continueWhenError: continueWhenError)
+    func requestNextData(continueWhenError: Bool = true) async {
+        await requestNextData(continueWhenError: continueWhenError)
     }
 
-    func update(newData: DATA?, nextKey: String? = nil) -> AnyPublisher<Void, Never> {
-        update(newData: newData, nextKey: nextKey)
+    func update(newData: DATA?, nextKey: String? = nil) async {
+        await update(newData: newData, nextKey: nextKey)
     }
 }

@@ -16,13 +16,13 @@ struct GithubOrgsRepository {
         return githubOrgsFlowable.publish()
     }
 
-    func refresh() -> AnyPublisher<Void, Never> {
+    func refresh() async {
         let githubOrgsFlowable = GithubOrgsFlowableFactory().create(UnitHash())
-        return githubOrgsFlowable.refresh()
+        await githubOrgsFlowable.refresh()
     }
 
-    func requestNext(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+    func requestNext(continueWhenError: Bool) async {
         let githubOrgsFlowable = GithubOrgsFlowableFactory().create(UnitHash())
-        return githubOrgsFlowable.requestNextData(continueWhenError: continueWhenError)
+        await githubOrgsFlowable.requestNextData(continueWhenError: continueWhenError)
     }
 }

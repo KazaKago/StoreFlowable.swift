@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 
 /**
  * Type erasure of `StoreFlowable`.
@@ -16,30 +15,34 @@ public struct AnyStoreFlowable<DATA>: StoreFlowable {
     public typealias DATA = DATA
 
     private let _publish: (_ forceRefresh: Bool) -> LoadingStatePublisher<DATA>
-    private let _getData: (_ from: GettingFrom) -> AnyPublisher<DATA?, Never>
-    private let _requireData: (_ from: GettingFrom) -> AnyPublisher<DATA, Error>
-    private let _validate: () -> AnyPublisher<Void, Never>
-    private let _refresh: () -> AnyPublisher<Void, Never>
-    private let _update: (_ newData: DATA?) -> AnyPublisher<Void, Never>
+    private let _getData: (_ from: GettingFrom) async -> DATA?
+    private let _requireData: (_ from: GettingFrom) async throws -> DATA
+    private let _validate: () async -> ()
+    private let _refresh: () async -> ()
+    private let _update: (_ newData: DATA?) async -> ()
+    private let _clear: () async -> ()
 
     init<INNER: StoreFlowable>(_ inner: INNER) where INNER.DATA == DATA {
         _publish = { forceRefresh in
             inner.publish(forceRefresh: forceRefresh)
         }
         _getData = { from in
-            inner.getData(from: from)
+            await inner.getData(from: from)
         }
         _requireData = { from in
-            inner.requireData(from: from)
+            try await inner.requireData(from: from)
         }
         _validate = {
-            inner.validate()
+            await inner.validate()
         }
         _refresh = {
-            inner.refresh()
+            await inner.refresh()
         }
         _update = { newData in
-            inner.update(newData: newData)
+            await inner.update(newData: newData)
+        }
+        _clear = {
+            await inner.clear()
         }
     }
 
@@ -47,23 +50,27 @@ public struct AnyStoreFlowable<DATA>: StoreFlowable {
         _publish(forceRefresh)
     }
 
-    public func getData(from: GettingFrom) -> AnyPublisher<DATA?, Never> {
-        _getData(from)
+    public func getData(from: GettingFrom) async -> DATA? {
+        await _getData(from)
     }
 
-    public func requireData(from: GettingFrom) -> AnyPublisher<DATA, Error> {
-        _requireData(from)
+    public func requireData(from: GettingFrom) async throws -> DATA {
+        try await _requireData(from)
     }
 
-    public func validate() -> AnyPublisher<Void, Never> {
-        _validate()
+    public func validate() async {
+        await _validate()
     }
 
-    public func refresh() -> AnyPublisher<Void, Never> {
-        _refresh()
+    public func refresh() async {
+        await _refresh()
     }
 
-    public func update(newData: DATA?) -> AnyPublisher<Void, Never> {
-        _update(newData)
+    public func update(newData: DATA?) async {
+        await _update(newData)
+    }
+    
+    public func clear() async {
+        await _clear()
     }
 }

@@ -14,39 +14,22 @@ import Foundation
  */
 public enum DataState {
     case fixed(nextDataState: AdditionalDataState, prevDataState: AdditionalDataState)
-    case loading
-    case error(rawError: Error)
-    
-    func nextDataStateOrNil() -> AdditionalDataState {
+    case loading(nextDataState: AdditionalDataState = .fixed, prevDataState: AdditionalDataState = .fixed)
+    case error(nextDataState: AdditionalDataState = .fixed, prevDataState: AdditionalDataState = .fixed, rawError: Error)
+
+    func nextDataState() -> AdditionalDataState {
         switch self {
+        case .loading(let nextDataState, _): return nextDataState
         case .fixed(let nextDataState, _): return nextDataState
-        case .loading: return .fixedWithNoMoreAdditionalData
-        case .error(_): return .fixedWithNoMoreAdditionalData
+        case .error(let nextDataState, _, _): return nextDataState
         }
     }
 
-    func prevDataStateOrNil() -> AdditionalDataState {
+    func prevDataState() -> AdditionalDataState {
         switch self {
+        case .loading(_, let prevDataState): return prevDataState
         case .fixed(_, let prevDataState): return prevDataState
-        case .loading: return .fixedWithNoMoreAdditionalData
-        case .error(_): return .fixedWithNoMoreAdditionalData
+        case .error(_, let prevDataState, _): return prevDataState
         }
     }
-
-    func nextKeyOrNil() -> String? {
-        switch self {
-        case .fixed(let nextDataState, _): return nextDataState.additionalRequestKeyOrNil()
-        case .loading: return nil
-        case .error(_): return nil
-        }
-    }
-
-    func prevKeyOrNil() -> String? {
-        switch self {
-        case .fixed(_, let prevDataState): return prevDataState.additionalRequestKeyOrNil()
-        case .loading: return nil
-        case .error(_): return nil
-        }
-    }
-
 }

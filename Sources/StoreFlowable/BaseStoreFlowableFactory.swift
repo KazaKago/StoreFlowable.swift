@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 
 /**
  * Common function of `StoreFlowableFactory`, `PaginationStoreFlowableFactory`, `TwoWayPaginationStoreFlowableFactory` protocols.
@@ -34,14 +33,14 @@ public protocol BaseStoreFlowableFactory {
      *
      * - returns: The loaded data.
      */
-    func loadDataFromCache(param: PARAM) -> AnyPublisher<DATA?, Never>
+    func loadDataFromCache(param: PARAM) async -> DATA?
 
     /**
      * The data saving process to cache.
      *
      * - parameter newData: Data to be saved.
      */
-    func saveDataToCache(newData: DATA?, param: PARAM) -> AnyPublisher<Void, Never>
+    func saveDataToCache(newData: DATA?, param: PARAM) async
 
     /**
      * Determine if the cache is valid.
@@ -49,5 +48,5 @@ public protocol BaseStoreFlowableFactory {
      * - parameter cachedData: Current cache data.
      * - returns: Returns `true` if the cache is invalid and refresh is needed.
      */
-    func needRefresh(cachedData: DATA, param: PARAM) -> AnyPublisher<Bool, Never>
+    func needRefresh(cachedData: DATA, param: PARAM) async -> Bool
 }

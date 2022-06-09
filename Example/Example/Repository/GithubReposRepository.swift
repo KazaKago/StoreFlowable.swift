@@ -16,13 +16,13 @@ struct GithubReposRepository {
         return githubReposFlowable.publish()
     }
 
-    func refresh(userName: String) -> AnyPublisher<Void, Never> {
+    func refresh(userName: String) async {
         let githubReposFlowable = GithubReposFlowableFactory().create(userName)
-        return githubReposFlowable.refresh()
+        await githubReposFlowable.refresh()
     }
 
-    func requestNext(userName: String, continueWhenError: Bool) -> AnyPublisher<Void, Never> {
+    func requestNext(userName: String, continueWhenError: Bool) async {
         let githubReposFlowable = GithubReposFlowableFactory().create(userName)
-        return githubReposFlowable.requestNextData(continueWhenError: continueWhenError)
+        await githubReposFlowable.requestNextData(continueWhenError: continueWhenError)
     }
 }

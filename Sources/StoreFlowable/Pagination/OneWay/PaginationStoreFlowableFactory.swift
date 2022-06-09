@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 
 /**
  * Abstract factory class for `PaginationStoreFlowable` class.
@@ -22,14 +21,14 @@ public protocol PaginationStoreFlowableFactory: BaseStoreFlowableFactory {
      * - parameter cachedData: Currently cached data.
      * - parameter newData: Data to be saved.
      */
-    func saveNextDataToCache(cachedData: DATA, newData: DATA, param: PARAM) -> AnyPublisher<Void, Never>
+    func saveNextDataToCache(cachedData: DATA, newData: DATA, param: PARAM) async
 
     /**
      * The latest data acquisition process from origin.
      *
      * - returns `Fetched` class including the acquired data.
      */
-    func fetchDataFromOrigin(param: PARAM) -> AnyPublisher<Fetched<DATA>, Error>
+    func fetchDataFromOrigin(param: PARAM) async throws -> Fetched<DATA>
 
     /**
      * Next data acquisition process from origin.
@@ -37,5 +36,5 @@ public protocol PaginationStoreFlowableFactory: BaseStoreFlowableFactory {
      * - parameter nextKey: Key for next data request.
      * - returns `Fetched` class including the acquired data.
      */
-    func fetchNextDataFromOrigin(nextKey: String, param: PARAM) -> AnyPublisher<Fetched<DATA>, Error>
+    func fetchNextDataFromOrigin(nextKey: String, param: PARAM) async throws -> Fetched<DATA>
 }

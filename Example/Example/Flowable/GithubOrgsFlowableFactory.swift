@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 import StoreFlowable
 
 struct GithubOrgsFlowableFactory: PaginationStoreFlowableFactory {
@@ -20,53 +19,41 @@ struct GithubOrgsFlowableFactory: PaginationStoreFlowableFactory {
 
     let flowableDataStateManager: FlowableDataStateManager<UnitHash> = GithubOrgsStateManager.shared
 
-    func loadDataFromCache(param: UnitHash) -> AnyPublisher<[GithubOrg]?, Never> {
-        Future { promise in
-            promise(.success(GithubInMemoryCache.orgsCache))
-        }.eraseToAnyPublisher()
+    func loadDataFromCache(param: UnitHash) async -> [GithubOrg]? {
+        GithubInMemoryCache.orgsCache
     }
 
-    func saveDataToCache(newData: [GithubOrg]?, param: UnitHash) -> AnyPublisher<Void, Never> {
-        Future { promise in
-            GithubInMemoryCache.orgsCache = newData
-            GithubInMemoryCache.orgsCacheCreatedAt = Date()
-            promise(.success(()))
-        }.eraseToAnyPublisher()
+    func saveDataToCache(newData: [GithubOrg]?, param: UnitHash) async {
+        GithubInMemoryCache.orgsCache = newData
+        GithubInMemoryCache.orgsCacheCreatedAt = Date()
     }
 
-    func saveNextDataToCache(cachedData: [GithubOrg], newData: [GithubOrg], param: UnitHash) -> AnyPublisher<Void, Never> {
-        Future { promise in
-            GithubInMemoryCache.orgsCache = cachedData + newData
-            promise(.success(()))
-        }.eraseToAnyPublisher()
+    func saveNextDataToCache(cachedData: [GithubOrg], newData: [GithubOrg], param: UnitHash) async {
+        GithubInMemoryCache.orgsCache = cachedData + newData
     }
 
-    func fetchDataFromOrigin(param: UnitHash) -> AnyPublisher<Fetched<[GithubOrg]>, Error> {
-        githubApi.getOrgs(since: nil, perPage: GithubOrgsFlowableFactory.PER_PAGE).map { data in
-            Fetched(
-                data: data,
-                nextKey: data.last?.id.description
-            )
-        }.eraseToAnyPublisher()
+    func fetchDataFromOrigin(param: UnitHash) async throws -> Fetched<[GithubOrg]> {
+        let data = try await githubApi.getOrgs(since: nil, perPage: GithubOrgsFlowableFactory.PER_PAGE)
+        return Fetched(
+            data: data,
+            nextKey: data.last?.id.description
+        )
     }
 
-    func fetchNextDataFromOrigin(nextKey: String, param: UnitHash) -> AnyPublisher<Fetched<[GithubOrg]>, Error> {
-        return githubApi.getOrgs(since: Int(nextKey), perPage: GithubOrgsFlowableFactory.PER_PAGE).map { data in
-            Fetched(
-                data: data,
-                nextKey: data.last?.id.description
-            )
-        }.eraseToAnyPublisher()
+    func fetchNextDataFromOrigin(nextKey: String, param: UnitHash) async throws -> Fetched<[GithubOrg]> {
+        let data = try await githubApi.getOrgs(since: Int(nextKey), perPage: GithubOrgsFlowableFactory.PER_PAGE)
+        return Fetched(
+            data: data,
+            nextKey: data.last?.id.description
+        )
     }
 
-    func needRefresh(cachedData: [GithubOrg], param: UnitHash) -> AnyPublisher<Bool, Never> {
-        Future { promise in
-            if let createdAt = GithubInMemoryCache.orgsCacheCreatedAt {
-                let expiredAt = createdAt + GithubOrgsFlowableFactory.EXPIRE_SECONDS
-                promise(.success(expiredAt < Date()))
-            } else {
-                promise(.success(true))
-            }
-        }.eraseToAnyPublisher()
+    func needRefresh(cachedData: [GithubOrg], param: UnitHash) async -> Bool {
+        if let createdAt = GithubInMemoryCache.orgsCacheCreatedAt {
+            let expiredAt = createdAt + GithubOrgsFlowableFactory.EXPIRE_SECONDS
+            return expiredAt < Date()
+        } else {
+            return true
+        }
     }
 }

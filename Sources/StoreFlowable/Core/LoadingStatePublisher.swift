@@ -6,9 +6,9 @@
 //
 
 import Foundation
-import Combine
+import AsyncExtensions
 
 /**
  * Type alias of `AnyPublisher<LoadingState<DATA>, Never>`.
  */
-public typealias LoadingStatePublisher<DATA> = AnyPublisher<LoadingState<DATA>, Never>
+public typealias LoadingStatePublisher<DATA> = AnyAsyncSequence<LoadingState<DATA>>

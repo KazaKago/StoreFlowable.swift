@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 import StoreFlowable
 
 struct GithubMetaFlowableFactory: StoreFlowableFactory {
@@ -19,32 +18,25 @@ struct GithubMetaFlowableFactory: StoreFlowableFactory {
 
     let flowableDataStateManager: FlowableDataStateManager<UnitHash> = GithubMetaStateManager.shared
 
-    func loadDataFromCache(param: UnitHash) -> AnyPublisher<GithubMeta?, Never> {
-        Future { promise in
-            promise(.success(GithubInMemoryCache.metaCache))
-        }.eraseToAnyPublisher()
+    func loadDataFromCache(param: UnitHash) async -> GithubMeta? {
+        GithubInMemoryCache.metaCache
     }
 
-    func saveDataToCache(newData: GithubMeta?, param: UnitHash) -> AnyPublisher<Void, Never> {
-        Future { promise in
-            GithubInMemoryCache.metaCache = newData
-            GithubInMemoryCache.metaCacheCreatedAt = Date()
-            promise(.success(()))
-        }.eraseToAnyPublisher()
+    func saveDataToCache(newData: GithubMeta?, param: UnitHash) async {
+        GithubInMemoryCache.metaCache = newData
+        GithubInMemoryCache.metaCacheCreatedAt = Date()
     }
 
-    func fetchDataFromOrigin(param: UnitHash) -> AnyPublisher<GithubMeta, Error> {
-        githubApi.getMeta()
+    func fetchDataFromOrigin(param: UnitHash) async throws -> GithubMeta {
+        try await githubApi.getMeta()
     }
 
-    func needRefresh(cachedData: GithubMeta, param: UnitHash) -> AnyPublisher<Bool, Never> {
-        Future { promise in
-            if let createdAt = GithubInMemoryCache.metaCacheCreatedAt {
-                let expiredAt = createdAt + GithubMetaFlowableFactory.EXPIRE_SECONDS
-                promise(.success(expiredAt < Date()))
-            } else {
-                promise(.success(true))
-            }
-        }.eraseToAnyPublisher()
+    func needRefresh(cachedData: GithubMeta, param: UnitHash) async -> Bool {
+        if let createdAt = GithubInMemoryCache.metaCacheCreatedAt {
+            let expiredAt = createdAt + GithubMetaFlowableFactory.EXPIRE_SECONDS
+            return expiredAt < Date()
+        } else {
+            return true
+        }
     }
 }

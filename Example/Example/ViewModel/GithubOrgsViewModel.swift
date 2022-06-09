@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import Combine
 
+@MainActor
 final class GithubOrgsViewModel : ObservableObject {
 
     @Published var githubOrgs: [GithubOrg] = []
@@ -17,45 +17,30 @@ final class GithubOrgsViewModel : ObservableObject {
     @Published var mainError: Error?
     @Published var nextError: Error?
     private let githubOrgsRepository = GithubOrgsRepository()
-    private var cancellableSet = Set<AnyCancellable>()
 
-    func initialize() {
-        cancellableSet.removeAll()
-        subscribe()
+    func initialize() async {
+        await subscribe()
     }
 
-    func refresh() {
-        githubOrgsRepository.refresh()
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func refresh() async {
+        await githubOrgsRepository.refresh()
     }
 
-    func retry() {
-        githubOrgsRepository.refresh()
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func retry() async {
+        await githubOrgsRepository.refresh()
     }
 
-    func requestNext() {
-        githubOrgsRepository.requestNext(continueWhenError: false)
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func requestNext() async {
+        await githubOrgsRepository.requestNext(continueWhenError: false)
     }
 
-    func retryNext() {
-        githubOrgsRepository.requestNext(continueWhenError: true)
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func retryNext() async {
+        await githubOrgsRepository.requestNext(continueWhenError: true)
     }
 
-    private func subscribe() {
-        githubOrgsRepository.follow()
-            .receive(on: DispatchQueue.main)
-            .sink { state in
+    private func subscribe() async {
+        do {
+            for try await state in githubOrgsRepository.follow() {
                 state.doAction(
                     onLoading: { githubOrgs in
                         if let githubOrgs = githubOrgs {
@@ -101,6 +86,6 @@ final class GithubOrgsViewModel : ObservableObject {
                     }
                 )
             }
-            .store(in: &cancellableSet)
+        } catch { /* do nothing. */ }
     }
 }

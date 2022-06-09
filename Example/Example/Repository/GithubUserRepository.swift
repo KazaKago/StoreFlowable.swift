@@ -16,8 +16,8 @@ struct GithubUserRepository {
         return githubUserFlowable.publish()
     }
 
-    func refresh(userName: String) -> AnyPublisher<Void, Never> {
+    func refresh(userName: String) async {
         let githubUserFlowable = GithubUserFlowableFactory().create(userName)
-        return githubUserFlowable.refresh()
+        await githubUserFlowable.refresh()
     }
 }

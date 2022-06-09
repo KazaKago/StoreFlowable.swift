@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 
 /**
  * Abstract factory class for `StoreFlowable` class.
@@ -20,5 +19,5 @@ public protocol StoreFlowableFactory: BaseStoreFlowableFactory {
      *
      * - returns acquired data.
      */
-    func fetchDataFromOrigin(param: PARAM) -> AnyPublisher<DATA, Error>
+    func fetchDataFromOrigin(param: PARAM) async throws -> DATA
 }

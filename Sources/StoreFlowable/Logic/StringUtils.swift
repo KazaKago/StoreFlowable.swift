@@ -12,9 +12,4 @@ extension Optional where Wrapped == String {
         guard let str = self else { return true }
         return str.isEmpty
     }
-
-    func isNotNilOrEmpty() -> Bool {
-        guard let str = self else { return false }
-        return !str.isEmpty
-    }
 }

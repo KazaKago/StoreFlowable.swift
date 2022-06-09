@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 
 public extension TwoWayPaginationStoreFlowableFactory {
 
@@ -17,40 +16,64 @@ public extension TwoWayPaginationStoreFlowableFactory {
      */
     func create(_ param: PARAM) -> AnyTwoWayPaginationStoreFlowable<DATA> {
         AnyTwoWayPaginationStoreFlowable(StoreFlowableImpl(
-            param: param,
-            flowableDataStateManager: flowableDataStateManager,
+            dataStateFlowAccessor: AnyDataStateFlowAccessor(
+                getFlow: {
+                    flowableDataStateManager.getFlow(param: param)
+                }
+            ),
+            requestKeyManager: AnyRequestKeyManager(
+                loadNext: {
+                    flowableDataStateManager.loadNext(param: param)
+                },
+                saveNext: { requestKey in
+                    flowableDataStateManager.saveNext(param: param, requestKey: requestKey)
+                },
+                loadPrev: {
+                    flowableDataStateManager.loadPrev(param: param)
+                },
+                savePrev: { requestKey in
+                    flowableDataStateManager.savePrev(param: param, requestKey: requestKey)
+                }
+            ),
             cacheDataManager: AnyCacheDataManager<DATA>(
                 load: {
-                    loadDataFromCache(param: param)
+                    await loadDataFromCache(param: param)
                 },
                 save: { newData in
-                    saveDataToCache(newData: newData, param: param)
+                    await saveDataToCache(newData: newData, param: param)
                 },
                 saveNext: { cachedData, newData in
-                    saveNextDataToCache(cachedData: cachedData, newData: newData, param: param)
+                    await saveNextDataToCache(cachedData: cachedData, newData: newData, param: param)
                 },
                 savePrev: { cachedData, newData in
-                    savePrevDataToCache(cachedData: cachedData, newData: newData, param: param)
+                    await savePrevDataToCache(cachedData: cachedData, newData: newData, param: param)
                 }
             ),
             originDataManager: AnyOriginDataManager<DATA>(
                 fetch: {
-                    fetchDataFromOrigin(param: param).map { result in
-                        InternalFetched(data: result.data, nextKey: result.nextKey, prevKey: result.prevKey)
-                    }.eraseToAnyPublisher()
+                    let result = try await fetchDataFromOrigin(param: param)
+                    return InternalFetched(data: result.data, nextKey: result.nextKey, prevKey: result.prevKey)
                 },
                 fetchNext: { nextKey in
-                    fetchNextDataFromOrigin(nextKey: nextKey, param: param).map { result in
-                        InternalFetched(data: result.data, nextKey: result.nextKey, prevKey: nil)
-                    }.eraseToAnyPublisher()
+                    let result = try await fetchNextDataFromOrigin(nextKey: nextKey, param: param)
+                    return InternalFetched(data: result.data, nextKey: result.nextKey, prevKey: nil)
                 },
                 fetchPrev: { prevKey in
-                    fetchPrevDataFromOrigin(prevKey: prevKey, param: param).map { result in
-                        InternalFetched(data: result.data, nextKey: nil, prevKey: result.prevKey)
-                    }.eraseToAnyPublisher()
+                    let result = try await fetchPrevDataFromOrigin(prevKey: prevKey, param: param)
+                    return InternalFetched(data: result.data, nextKey: nil, prevKey: result.prevKey)
                 }
             ),
-            needRefresh: { cachedData in needRefresh(cachedData: cachedData, param: param) }
+            dataStateManager: AnyDataStateManager(
+                load: {
+                    flowableDataStateManager.load(param: param)
+                },
+                save: { state in
+                    flowableDataStateManager.save(param: param, state: state)
+                }
+            ),
+            needRefresh: { cachedData in
+                await needRefresh(cachedData: cachedData, param: param)
+            }
         ))
     }
 }

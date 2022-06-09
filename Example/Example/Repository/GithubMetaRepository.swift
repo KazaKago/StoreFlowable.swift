@@ -16,8 +16,8 @@ struct GithubMetaRepository {
         return githubMetaFlowable.publish()
     }
 
-    func refresh() -> AnyPublisher<Void, Never> {
+    func refresh() async {
         let githubMetaFlowable = GithubMetaFlowableFactory().create(UnitHash())
-        return githubMetaFlowable.refresh()
+        await githubMetaFlowable.refresh()
     }
 }

@@ -13,42 +13,34 @@ struct GithubApi {
 
     private let baseApiUrl = URL(string: "https://api.github.com/")!
 
-    func getMeta() -> AnyPublisher<GithubMeta, Error> {
-        AF.request(baseApiUrl.appendingPathComponent("meta").toUrlRequest())
-            .publishResponse(GithubMeta.self)
-            .delay(for: .seconds(1.0), scheduler: RunLoop.main) // dummy delay
-            .eraseToAnyPublisher()
+    func getMeta() async throws -> GithubMeta {
+        try await AF.request(baseApiUrl.appendingPathComponent("meta").toUrlRequest())
+            .publish(GithubMeta.self)
     }
 
-    func getOrgs(since: Int?, perPage: Int) -> AnyPublisher<[GithubOrg], Error> {
+    func getOrgs(since: Int?, perPage: Int) async throws -> [GithubOrg] {
         var queryItems: [URLQueryItem] = []
         queryItems.append(URLQueryItem(name: "per_page", value: perPage.description))
         if let since = since { queryItems.append(URLQueryItem(name: "since", value: since.description)) }
         var urlComponents = URLComponents(url: baseApiUrl.appendingPathComponent("organizations"), resolvingAgainstBaseURL: true)!
         urlComponents.queryItems = queryItems
-        return AF.request((try! urlComponents.asURL()).toUrlRequest())
-            .publishResponse([GithubOrg].self)
-            .delay(for: .seconds(1.0), scheduler: RunLoop.main) // dummy delay
-            .eraseToAnyPublisher()
+        return try await AF.request((try! urlComponents.asURL()).toUrlRequest())
+            .publish([GithubOrg].self)
     }
 
-    func getUser(userName: String) -> AnyPublisher<GithubUser, Error> {
-        AF.request(baseApiUrl.appendingPathComponent("users/\(userName)").toUrlRequest())
-            .publishResponse(GithubUser.self)
-            .delay(for: .seconds(1.0), scheduler: RunLoop.main) // dummy delay
-            .eraseToAnyPublisher()
+    func getUser(userName: String) async throws -> GithubUser {
+        try await AF.request(baseApiUrl.appendingPathComponent("users/\(userName)").toUrlRequest())
+            .publish(GithubUser.self)
     }
 
-    func getRepos(userName: String, page: Int, perPage: Int) -> AnyPublisher<[GithubRepo], Error> {
+    func getRepos(userName: String, page: Int, perPage: Int) async throws -> [GithubRepo] {
         var queryItems: [URLQueryItem] = []
         queryItems.append(URLQueryItem(name: "per_page", value: perPage.description))
         queryItems.append(URLQueryItem(name: "page", value: page.description))
         var urlComponents = URLComponents(url: baseApiUrl.appendingPathComponent("users/\(userName)/repos"), resolvingAgainstBaseURL: true)!
         urlComponents.queryItems = queryItems
-        return AF.request((try! urlComponents.asURL()).toUrlRequest())
-            .publishResponse([GithubRepo].self)
-            .delay(for: .seconds(1.0), scheduler: RunLoop.main) // dummy delay
-            .eraseToAnyPublisher()
+        return try await AF.request((try! urlComponents.asURL()).toUrlRequest())
+            .publish([GithubRepo].self)
     }
 }
 

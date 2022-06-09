@@ -13,21 +13,7 @@ import Foundation
  * This state is only used inside this library.
  */
 public enum AdditionalDataState {
-    case fixed(additionalRequestKey: String)
-    case fixedWithNoMoreAdditionalData
-    case loading(additionalRequestKey: String)
-    case error(additionalRequestKey: String, rawError: Error)
-
-    func additionalRequestKeyOrNil() -> String? {
-        switch (self) {
-        case .fixed(let additionalRequestKey):
-            return additionalRequestKey
-        case .fixedWithNoMoreAdditionalData:
-            return nil
-        case .loading(let additionalRequestKey):
-            return additionalRequestKey
-        case .error(let additionalRequestKey, _):
-            return additionalRequestKey
-        }
-    }
+    case fixed
+    case loading
+    case error(rawError: Error)
 }

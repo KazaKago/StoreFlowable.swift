@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 import StoreFlowable
 
 struct GithubTwoWayReposFlowableFactory: TwoWayPaginationStoreFlowableFactory {
@@ -21,72 +20,56 @@ struct GithubTwoWayReposFlowableFactory: TwoWayPaginationStoreFlowableFactory {
 
     let flowableDataStateManager: FlowableDataStateManager<String> = GithubTwoWayReposStateManager.shared
 
-    func loadDataFromCache(param: String) -> AnyPublisher<[GithubRepo]?, Never> {
-        Future { promise in
-            promise(.success(GithubInMemoryCache.reposCache[param]))
-        }.eraseToAnyPublisher()
+    func loadDataFromCache(param: String) async -> [GithubRepo]? {
+        GithubInMemoryCache.reposCache[param]
     }
 
-    func saveDataToCache(newData: [GithubRepo]?, param: String) -> AnyPublisher<Void, Never> {
-        Future { promise in
-            GithubInMemoryCache.reposCache[param] = newData
-            GithubInMemoryCache.reposCacheCreatedAt[param] = Date()
-            promise(.success(()))
-        }.eraseToAnyPublisher()
+    func saveDataToCache(newData: [GithubRepo]?, param: String) async {
+        GithubInMemoryCache.reposCache[param] = newData
+        GithubInMemoryCache.reposCacheCreatedAt[param] = Date()
     }
 
-    func saveNextDataToCache(cachedData: [GithubRepo], newData: [GithubRepo], param: String) -> AnyPublisher<Void, Never> {
-        Future { promise in
-            GithubInMemoryCache.reposCache[param] = cachedData + newData
-            promise(.success(()))
-        }.eraseToAnyPublisher()
+    func saveNextDataToCache(cachedData: [GithubRepo], newData: [GithubRepo], param: String) async {
+        GithubInMemoryCache.reposCache[param] = cachedData + newData
     }
     
-    func savePrevDataToCache(cachedData: [GithubRepo], newData: [GithubRepo], param: String) -> AnyPublisher<Void, Never> {
-        Future { promise in
-            GithubInMemoryCache.reposCache[param] = newData + cachedData
-            promise(.success(()))
-        }.eraseToAnyPublisher()
+    func savePrevDataToCache(cachedData: [GithubRepo], newData: [GithubRepo], param: String) async {
+        GithubInMemoryCache.reposCache[param] = newData + cachedData
     }
 
-    func fetchDataFromOrigin(param: String) -> AnyPublisher<FetchedInitial<[GithubRepo]>, Error> {
-        githubApi.getRepos(userName: param, page: 4, perPage: GithubTwoWayReposFlowableFactory.PER_PAGE).map { newData in
-            FetchedInitial(
-                data: newData,
-                nextKey: newData.isEmpty ? nil : 5.description,
-                prevKey: newData.isEmpty ? nil : 3.description
-            )
-        }.eraseToAnyPublisher()
+    func fetchDataFromOrigin(param: String) async throws -> FetchedInitial<[GithubRepo]> {
+        let newData = try await githubApi.getRepos(userName: param, page: 4, perPage: GithubTwoWayReposFlowableFactory.PER_PAGE)
+        return FetchedInitial(
+            data: newData,
+            nextKey: newData.isEmpty ? nil : 5.description,
+            prevKey: newData.isEmpty ? nil : 3.description
+        )
     }
 
-    func fetchNextDataFromOrigin(nextKey: String, param: String) -> AnyPublisher<FetchedNext<[GithubRepo]>, Error> {
+    func fetchNextDataFromOrigin(nextKey: String, param: String) async throws -> FetchedNext<[GithubRepo]> {
         let nextPage = Int(nextKey)!
-        return githubApi.getRepos(userName: param, page: nextPage, perPage: GithubTwoWayReposFlowableFactory.PER_PAGE).map { newData in
-            FetchedNext(
-                data: newData,
-                nextKey: newData.isEmpty ? nil : (nextPage + 1).description
-            )
-        }.eraseToAnyPublisher()
+        let newData = try await githubApi.getRepos(userName: param, page: nextPage, perPage: GithubTwoWayReposFlowableFactory.PER_PAGE)
+        return FetchedNext(
+            data: newData,
+            nextKey: newData.isEmpty ? nil : (nextPage + 1).description
+        )
     }
 
-    func fetchPrevDataFromOrigin(prevKey: String, param: String) -> AnyPublisher<FetchedPrev<[GithubRepo]>, Error> {
+    func fetchPrevDataFromOrigin(prevKey: String, param: String) async throws -> FetchedPrev<[GithubRepo]> {
         let prevPage = Int(prevKey)!
-        return githubApi.getRepos(userName: param, page: prevPage, perPage: GithubTwoWayReposFlowableFactory.PER_PAGE).map { newData in
-            FetchedPrev(
-                data: newData,
-                prevKey: (prevPage > 1) ? (prevPage - 1).description : nil
-            )
-        }.eraseToAnyPublisher()
+        let newData = try await githubApi.getRepos(userName: param, page: prevPage, perPage: GithubTwoWayReposFlowableFactory.PER_PAGE)
+        return FetchedPrev(
+            data: newData,
+            prevKey: (prevPage > 1) ? (prevPage - 1).description : nil
+        )
     }
 
-    func needRefresh(cachedData: [GithubRepo], param: String) -> AnyPublisher<Bool, Never> {
-        Future { promise in
-            if let createdAt = GithubInMemoryCache.reposCacheCreatedAt[param] {
-                let expiredAt = createdAt + GithubTwoWayReposFlowableFactory.EXPIRE_SECONDS
-                promise(.success(expiredAt < Date()))
-            } else {
-                promise(.success(true))
-            }
-        }.eraseToAnyPublisher()
+    func needRefresh(cachedData: [GithubRepo], param: String) async -> Bool {
+        if let createdAt = GithubInMemoryCache.reposCacheCreatedAt[param] {
+            let expiredAt = createdAt + GithubTwoWayReposFlowableFactory.EXPIRE_SECONDS
+            return expiredAt < Date()
+        } else {
+            return true
+        }
     }
 }

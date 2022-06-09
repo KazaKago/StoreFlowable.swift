@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 
 /**
  * Abstract factory class for `TwoWayPaginationStoreFlowable` class.
@@ -22,7 +21,7 @@ public protocol TwoWayPaginationStoreFlowableFactory: BaseStoreFlowableFactory {
      * - parameter cachedData: Currently cached data.
      * - parameter newData: Data to be saved.
      */
-    func saveNextDataToCache(cachedData: DATA, newData: DATA, param: PARAM) -> AnyPublisher<Void, Never>
+    func saveNextDataToCache(cachedData: DATA, newData: DATA, param: PARAM) async
 
     /**
      * The previous data saving process to cache.
@@ -31,14 +30,14 @@ public protocol TwoWayPaginationStoreFlowableFactory: BaseStoreFlowableFactory {
      * - parameter cachedData: Currently cached data.
      * - parameter newData: Data to be saved.
      */
-    func savePrevDataToCache(cachedData: DATA, newData: DATA, param: PARAM) -> AnyPublisher<Void, Never>
+    func savePrevDataToCache(cachedData: DATA, newData: DATA, param: PARAM) async
 
     /**
      * The latest data acquisition process from origin.
      *
      * - returns `Fetched` class including the acquired data.
      */
-    func fetchDataFromOrigin(param: PARAM) -> AnyPublisher<FetchedInitial<DATA>, Error>
+    func fetchDataFromOrigin(param: PARAM) async throws -> FetchedInitial<DATA>
 
     /**
      * Next data acquisition process from origin.
@@ -46,7 +45,7 @@ public protocol TwoWayPaginationStoreFlowableFactory: BaseStoreFlowableFactory {
      * - parameter nextKey: Key for next data request.
      * - returns `Fetched` class including the acquired data.
      */
-    func fetchNextDataFromOrigin(nextKey: String, param: PARAM) -> AnyPublisher<FetchedNext<DATA>, Error>
+    func fetchNextDataFromOrigin(nextKey: String, param: PARAM) async throws -> FetchedNext<DATA>
 
     /**
      * Previous data acquisition process from origin.
@@ -54,5 +53,5 @@ public protocol TwoWayPaginationStoreFlowableFactory: BaseStoreFlowableFactory {
      * - parameter prevKey: Key for previous data request.
      * - returns `Fetched` class including the acquired data.
      */
-    func fetchPrevDataFromOrigin(prevKey: String, param: PARAM) -> AnyPublisher<FetchedPrev<DATA>, Error>
+    func fetchPrevDataFromOrigin(prevKey: String, param: PARAM) async throws -> FetchedPrev<DATA>
 }
