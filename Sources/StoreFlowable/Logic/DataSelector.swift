@@ -165,7 +165,7 @@ struct DataSelector<DATA> {
                 await cacheDataManager.saveNext(cachedData: cachedData, newData: result.data)
                 await requestKeyManager.saveNext(requestKey: result.nextKey)
                 let state = dataStateManager.load()
-                dataStateManager.save(state: .fixed(nextDataState: .fixed, prevDataState: state.nextDataState()))
+                dataStateManager.save(state: .fixed(nextDataState: .fixed, prevDataState: state.prevDataState()))
             case .prev(let requestKey):
                 let result = try await originDataManager.fetchPrev(prevKey: requestKey)
                 guard let cachedData = await cacheDataManager.load() else { throw AdditionalRequestOnNilException() }
