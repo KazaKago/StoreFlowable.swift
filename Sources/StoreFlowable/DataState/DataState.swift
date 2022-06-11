@@ -12,7 +12,7 @@ import Foundation
  *
  * This state is only used inside this library.
  */
-public enum DataState {
+enum DataState {
     case fixed(nextDataState: AdditionalDataState, prevDataState: AdditionalDataState)
     case loading(nextDataState: AdditionalDataState = .fixed, prevDataState: AdditionalDataState = .fixed)
     case error(nextDataState: AdditionalDataState = .fixed, prevDataState: AdditionalDataState = .fixed, rawError: Error)

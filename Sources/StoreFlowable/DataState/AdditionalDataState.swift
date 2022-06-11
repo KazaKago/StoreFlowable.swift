@@ -12,7 +12,7 @@ import Foundation
  *
  * This state is only used inside this library.
  */
-public enum AdditionalDataState {
+enum AdditionalDataState {
     case fixed
     case loading
     case error(rawError: Error)

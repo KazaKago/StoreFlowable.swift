@@ -75,33 +75,15 @@ open class Cacher<PARAM: Hashable, DATA> {
         }
     }
 
-    /**
-     * Get the data state as [Flow].
-     *
-     * @param param Key to get the specified data.
-     * @return Flow for getting data state changes.
-     */
-    open func getStateFlow(param: PARAM) -> AnyAsyncSequence<DataState> {
+    func getStateFlow(param: PARAM) -> AnyAsyncSequence<DataState> {
         dataStateMap.getOrCreate(param).eraseToAnyAsyncSequence()
     }
 
-    /**
-     * Get the current data state.
-     *
-     * @param param Key to get the specified data.
-     * @return State of saved data.
-     */
-    open func loadState(param: PARAM) -> DataState {
+    func loadState(param: PARAM) -> DataState {
         dataStateMap.getOrCreate(param).element
     }
 
-    /**
-     * Save the data state.
-     *
-     * @param param Key to get the specified data.
-     * @param state State of saved data.
-     */
-    open func saveState(param: PARAM, state: DataState) {
+    func saveState(param: PARAM, state: DataState) {
         dataStateMap.getOrCreate(param).element = state
     }
 
