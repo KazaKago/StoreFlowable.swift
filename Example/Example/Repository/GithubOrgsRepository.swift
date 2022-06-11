@@ -6,23 +6,22 @@
 //
 
 import Foundation
-import Combine
 import StoreFlowable
 
 struct GithubOrgsRepository {
 
     func follow() -> LoadingStatePublisher<[GithubOrg]> {
-        let githubOrgsFlowable = GithubOrgsFlowableFactory().create(UnitHash())
+        let githubOrgsFlowable = AnyStoreFlowable.from(cacher: GithubOrgsCacher.shared, fetcher: GithubOrgsFetcher())
         return githubOrgsFlowable.publish()
     }
 
     func refresh() async {
-        let githubOrgsFlowable = GithubOrgsFlowableFactory().create(UnitHash())
+        let githubOrgsFlowable = AnyStoreFlowable.from(cacher: GithubOrgsCacher.shared, fetcher: GithubOrgsFetcher())
         await githubOrgsFlowable.refresh()
     }
 
     func requestNext(continueWhenError: Bool) async {
-        let githubOrgsFlowable = GithubOrgsFlowableFactory().create(UnitHash())
+        let githubOrgsFlowable = AnyStoreFlowable.from(cacher: GithubOrgsCacher.shared, fetcher: GithubOrgsFetcher())
         await githubOrgsFlowable.requestNextData(continueWhenError: continueWhenError)
     }
 }

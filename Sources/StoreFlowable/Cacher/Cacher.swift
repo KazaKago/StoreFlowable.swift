@@ -18,12 +18,14 @@ open class Cacher<PARAM: Hashable, DATA> {
      * Sets the time to data expire in seconds.
      * default is TimeInterval.infinity (= not expire)
      */
-    public let expireSeconds: TimeInterval = TimeInterval.infinity
+    open var expireSeconds: TimeInterval {
+        get { TimeInterval.infinity }
+    }
 
     public init() {
     }
 
-    public func loadData(param: PARAM) async -> DATA? {
+    open func loadData(param: PARAM) async -> DATA? {
         dataMap[param]
     }
 
@@ -33,7 +35,7 @@ open class Cacher<PARAM: Hashable, DATA> {
      * @param data Data to be saved.
      * @param param Key to get the specified data.
      */
-    public func saveData(data: DATA?, param: PARAM) async {
+    open func saveData(data: DATA?, param: PARAM) async {
         dataMap[param] = data
     }
 
@@ -43,7 +45,7 @@ open class Cacher<PARAM: Hashable, DATA> {
      *
      * @param param Key to get the specified data.
      */
-    public func loadDataCachedAt(param: PARAM) async -> Double? {
+    open func loadDataCachedAt(param: PARAM) async -> Double? {
         dataCachedAtMap[param]
     }
 
@@ -53,7 +55,7 @@ open class Cacher<PARAM: Hashable, DATA> {
      * @param epochSeconds Time when the data was cached.
      * @param param Key to get the specified data.
      */
-    public func saveDataCachedAt(epochSeconds: Double, param: PARAM) async {
+    open func saveDataCachedAt(epochSeconds: Double, param: PARAM) async {
         dataCachedAtMap[param] = epochSeconds
     }
 
@@ -63,7 +65,7 @@ open class Cacher<PARAM: Hashable, DATA> {
      * @param cachedData Current cache data.
      * @return Returns `true` if the cache is invalid and refresh is needed.
      */
-    public func needRefresh(cachedData: DATA, param: PARAM) async -> Bool {
+    open func needRefresh(cachedData: DATA, param: PARAM) async -> Bool {
         let cachedAt = await loadDataCachedAt(param: param)
         if let cachedAt = cachedAt {
             let expiredAt = cachedAt + expireSeconds
@@ -79,7 +81,7 @@ open class Cacher<PARAM: Hashable, DATA> {
      * @param param Key to get the specified data.
      * @return Flow for getting data state changes.
      */
-    public func getStateFlow(param: PARAM) -> AnyAsyncSequence<DataState> {
+    open func getStateFlow(param: PARAM) -> AnyAsyncSequence<DataState> {
         dataStateMap.getOrCreate(param).eraseToAnyAsyncSequence()
     }
 
@@ -89,7 +91,7 @@ open class Cacher<PARAM: Hashable, DATA> {
      * @param param Key to get the specified data.
      * @return State of saved data.
      */
-    public func loadState(param: PARAM) -> DataState {
+    open func loadState(param: PARAM) -> DataState {
         dataStateMap.getOrCreate(param).element
     }
 
@@ -99,14 +101,14 @@ open class Cacher<PARAM: Hashable, DATA> {
      * @param param Key to get the specified data.
      * @param state State of saved data.
      */
-    public func saveState(param: PARAM, state: DataState) {
+    open func saveState(param: PARAM, state: DataState) {
         dataStateMap.getOrCreate(param).element = state
     }
 
     /**
      * Clear cache.
      */
-    public func clear() {
+    open func clear() {
         dataMap.removeAll()
         dataCachedAtMap.removeAll()
         dataStateMap.removeAll()

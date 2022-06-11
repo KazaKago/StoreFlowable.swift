@@ -17,14 +17,14 @@ public protocol TwoWayPaginationFetcher {
     associatedtype PARAM: Hashable
     associatedtype DATA
 
-    typealias Result = TwoWayPaginationFetcherResult
+    typealias Fetched = TwoWayPaginationFetcherResult
 
     /**
      * The latest data acquisition process from origin.
      *
      * @return [Result] class including the acquired data.
      */
-    func fetch(param: PARAM) async throws -> Result.Initial<DATA>
+    func fetch(param: PARAM) async throws -> Fetched.Initial<DATA>
 
     /**
      * Next data acquisition process from origin.
@@ -32,7 +32,7 @@ public protocol TwoWayPaginationFetcher {
      * @param nextKey Key for next data request.
      * @return [Result] class including the acquired data.
      */
-    func fetchNext(nextKey: String, param: PARAM) async throws -> Result.Next<DATA>
+    func fetchNext(nextKey: String, param: PARAM) async throws -> Fetched.Next<DATA>
 
     /**
      * Previous data acquisition process from origin.
@@ -40,7 +40,7 @@ public protocol TwoWayPaginationFetcher {
      * @param prevKey Key for previous data request.
      * @return [Fetched] class including the acquired data.
      */
-    func fetchPrev(prevKey: String, param: PARAM) async throws -> Result.Prev<DATA>
+    func fetchPrev(prevKey: String, param: PARAM) async throws -> Fetched.Prev<DATA>
 }
 
 /**
@@ -83,6 +83,12 @@ public struct TwoWayPaginationFetcherResultInitial<DATA>: TwoWayPaginationFetche
      * If `null` or `empty` is set, it is considered that there is no previous page.
      */
     let prevRequestKey: String?
+
+    public init(data: [DATA], nextRequestKey: String?, prevRequestKey: String?) {
+        self.data = data
+        self.nextRequestKey = nextRequestKey
+        self.prevRequestKey = prevRequestKey
+    }
 }
 
 /**
@@ -101,6 +107,11 @@ public struct TwoWayPaginationFetcherResultNext<DATA>: TwoWayPaginationFetcherRe
      * If `null` or `empty` is set, it is considered that there is no next page.
      */
     let nextRequestKey: String?
+
+    public init(data: [DATA], nextRequestKey: String?) {
+        self.data = data
+        self.nextRequestKey = nextRequestKey
+    }
 }
 
 /**
@@ -119,4 +130,9 @@ public struct TwoWayPaginationFetcherResultPrev<DATA>: TwoWayPaginationFetcherRe
      * If `null` or `empty` is set, it is considered that there is no previous page.
      */
     let prevRequestKey: String?
+
+    public init(data: [DATA], prevRequestKey: String?) {
+        self.data = data
+        self.prevRequestKey = prevRequestKey
+    }
 }

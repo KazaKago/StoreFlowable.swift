@@ -17,21 +17,21 @@ public protocol PaginationFetcher {
     associatedtype PARAM: Hashable
     associatedtype DATA
 
-    typealias Result = PaginationFetcherResult
+    typealias Fetched = PaginationFetcherResult
 
     /**
      * The latest data acquisition process from origin.
      *
      * @return [Result] class including the acquired data.
      */
-    func fetch(param: PARAM) async throws -> Result<DATA>
+    func fetch(param: PARAM) async throws -> Fetched<DATA>
 
     /**
      * The latest data acquisition process from origin.
      *
      * @return [Result] class including the acquired data.
      */
-    func fetchNext(nextKey: String, param: PARAM) async throws -> Result<DATA>
+    func fetchNext(nextKey: String, param: PARAM) async throws -> Fetched<DATA>
 }
 
 /**
@@ -49,4 +49,9 @@ public struct PaginationFetcherResult<DATA> {
      * If `null` or `empty` is set, it is considered that there is no next page.
      */
     let nextRequestKey: String?
+
+    public init(data: [DATA], nextRequestKey: String?) {
+        self.data = data
+        self.nextRequestKey = nextRequestKey
+    }
 }

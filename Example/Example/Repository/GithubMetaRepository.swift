@@ -6,18 +6,17 @@
 //
 
 import Foundation
-import Combine
 import StoreFlowable
 
 struct GithubMetaRepository {
 
     func follow() -> LoadingStatePublisher<GithubMeta> {
-        let githubMetaFlowable = GithubMetaFlowableFactory().create(UnitHash())
+        let githubMetaFlowable = AnyStoreFlowable.from(cacher: GithubMetaCacher.shared, fetcher: GithubMetaFetcher())
         return githubMetaFlowable.publish()
     }
 
     func refresh() async {
-        let githubMetaFlowable = GithubMetaFlowableFactory().create(UnitHash())
+        let githubMetaFlowable = AnyStoreFlowable.from(cacher: GithubMetaCacher.shared, fetcher: GithubMetaFetcher())
         await githubMetaFlowable.refresh()
     }
 }

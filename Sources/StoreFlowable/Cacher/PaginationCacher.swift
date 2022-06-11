@@ -13,7 +13,7 @@ import Foundation
  *
  * @see com.kazakago.storeflowable.from
  */
-public class PaginationCacher<PARAM: Hashable, DATA>: Cacher<PARAM, [DATA]> {
+open class PaginationCacher<PARAM: Hashable, DATA>: Cacher<PARAM, [DATA]> {
 
     private var nextRequestKeyMap: [PARAM: String] = [:]
 
@@ -25,7 +25,7 @@ public class PaginationCacher<PARAM: Hashable, DATA>: Cacher<PARAM, [DATA]> {
      * @param newData Data to be saved.
      * @param param Key to get the specified data.
      */
-    public func saveNextData(cachedData: [DATA], newData: [DATA], param: PARAM) async {
+    open func saveNextData(cachedData: [DATA], newData: [DATA], param: PARAM) async {
         await saveData(data: cachedData + newData, param: param)
     }
 
@@ -34,7 +34,7 @@ public class PaginationCacher<PARAM: Hashable, DATA>: Cacher<PARAM, [DATA]> {
      *
      * @param param Key to get the specified data.
      */
-    public func loadNextRequestKey(param: PARAM) async -> String? {
+    open func loadNextRequestKey(param: PARAM) async -> String? {
         nextRequestKeyMap[param]
     }
 
@@ -44,7 +44,7 @@ public class PaginationCacher<PARAM: Hashable, DATA>: Cacher<PARAM, [DATA]> {
      * @param requestKey pagination request key.
      * @param param Key to get the specified data.
      */
-    public func saveNextRequestKey(requestKey: String?, param: PARAM) async {
+    open func saveNextRequestKey(requestKey: String?, param: PARAM) async {
         nextRequestKeyMap[param] = requestKey
     }
 }
