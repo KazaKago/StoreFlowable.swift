@@ -29,7 +29,7 @@ struct StoreFlowableImpl<DATA>: StoreFlowable, PaginationStoreFlowable, TwoWayPa
         )
     }
 
-    func publish(forceRefresh: Bool) -> LoadingStatePublisher<DATA> {
+    func publish(forceRefresh: Bool) -> LoadingStateSequence<DATA> {
         AsyncStream<Void> { continuation in
             Task {
                 if forceRefresh {

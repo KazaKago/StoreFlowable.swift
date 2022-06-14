@@ -14,7 +14,7 @@ public struct AnyPaginationStoreFlowable<DATA>: PaginationStoreFlowable {
 
     public typealias DATA = DATA
 
-    private let _publish: (_ forceRefresh: Bool) -> LoadingStatePublisher<DATA>
+    private let _publish: (_ forceRefresh: Bool) -> LoadingStateSequence<DATA>
     private let _getData: (_ from: GettingFrom) async -> DATA?
     private let _requireData: (_ from: GettingFrom) async throws -> DATA
     private let _validate: () async -> ()
@@ -54,7 +54,7 @@ public struct AnyPaginationStoreFlowable<DATA>: PaginationStoreFlowable {
         }
     }
 
-    public func publish(forceRefresh: Bool) -> LoadingStatePublisher<DATA> {
+    public func publish(forceRefresh: Bool) -> LoadingStateSequence<DATA> {
         _publish(forceRefresh)
     }
 

@@ -11,10 +11,10 @@ import AsyncExtensions
 public extension AsyncSequence {
 
     /**
-     * Use when mapping raw data in `LoadingStatePublisher`.
+     * Use when mapping raw data in `LoadingStateSequence`.
      *
      * - parameter transform: This callback that returns the result of transforming the data.
-     * - returns: Return `LoadingStatePublisher` containing the transformed data.
+     * - returns: Return `LoadingStateSequence` containing the transformed data.
      */
     func mapContent<A, Z>(_ transform: @escaping (A) -> Z) -> AnyAsyncSequence<LoadingState<Z>> where Self.Element == LoadingState<A> {
         map { element in

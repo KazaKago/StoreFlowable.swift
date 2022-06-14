@@ -1,182 +1,183 @@
-//import XCTest
-//import Combine
-//import CombineExpectations
-//@testable import StoreFlowable
-//
-//final class DataSelectorValidateFailedTests: XCTestCase {
-//
-//    private enum TestData: Equatable {
-//        case validData
-//        case invalidData
-//        case fetchedData
-//
-//        var needRefresh: Bool {
-//            switch self {
-//            case .validData: return false
-//            case .invalidData: return true
-//            case .fetchedData: return false
-//            }
-//        }
-//    }
-//
-//    private var dataSelector: DataSelector<UnitHash, TestData>!
-//    private var dataState: DataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData)
-//    private var dataCache: TestData? = nil
-//
-//    override func setUp() {
-//        dataSelector = DataSelector(
-//            param: UnitHash(),
-//            dataStateManager: AnyDataStateManager(
-//                load: { key in
-//                    self.dataState
-//                },
-//                save: { key, dataState in
-//                    self.dataState = dataState
-//                }
-//            ),
-//            cacheDataManager: AnyCacheDataManager(
-//                load: {
-//                    Just(self.dataCache).eraseToAnyPublisher()
-//                },
-//                save: { newData in
-//                    Future { promise in
-//                        self.dataCache = newData
-//                        promise(.success(()))
-//                    }.eraseToAnyPublisher()
-//                },
-//                saveNext: { cachedData, newData in
-//                    XCTFail()
-//                    fatalError()
-//                },
-//                savePrev: { cachedData, newData in
-//                    XCTFail()
-//                    fatalError()
-//                }
-//            ),
-//            originDataManager: AnyOriginDataManager(
-//                fetch: {
-//                    Fail(error: NoSuchElementError()).eraseToAnyPublisher()
-//                },
-//                fetchNext: { nextKey in
-//                    XCTFail()
-//                    fatalError()
-//                },
-//                fetchPrev: { prevKey in
-//                    XCTFail()
-//                    fatalError()
-//                }
-//            ),
-//            needRefresh: { value in Just(value.needRefresh).eraseToAnyPublisher() }
-//        )
-//    }
-//
-//    func test_Validate_Fixed_NoCache() throws {
-//        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData)
-//        dataCache = nil
-//
-//        let recorder = dataSelector.validate().record()
-//        _ = try wait(for: recorder.elements, timeout: 1)
-//        if case .error(let rawError) = self.dataState {
-//            XCTAssert(rawError is NoSuchElementError)
-//        } else {
-//            XCTFail()
-//        }
-//        XCTAssertEqual(self.dataCache, nil)
-//    }
-//
-//    func test_Validate_Fixed_ValidCache() throws {
-//        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData)
-//        dataCache = .validData
-//
-//        let recorder = dataSelector.validate().record()
-//        _ = try wait(for: recorder.elements, timeout: 1)
-//        guard case .fixed = self.dataState else { return XCTFail() }
-//        XCTAssertEqual(self.dataCache, .validData)
-//    }
-//
-//    func test_Validate_Fixed_InvalidCache() throws {
-//        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData)
-//        dataCache = .invalidData
-//
-//        let recorder = dataSelector.validate().record()
-//        _ = try wait(for: recorder.elements, timeout: 1)
-//        if case .error(let rawError) = self.dataState {
-//            XCTAssert(rawError is NoSuchElementError)
-//        } else {
-//            XCTFail()
-//        }
-//        XCTAssertEqual(self.dataCache, nil)
-//    }
-//
-//    func test_Validate_Loading_NoCache() throws {
-//        dataState = .loading
-//        dataCache = nil
-//
-//        let recorder = dataSelector.validate().record()
-//        _ = try wait(for: recorder.elements, timeout: 1)
-//        guard case .loading = self.dataState else { return XCTFail() }
-//        XCTAssertEqual(self.dataCache, nil)
-//    }
-//
-//    func test_Validate_Loading_ValidCache() throws {
-//        dataState = .loading
-//        dataCache = .validData
-//
-//        let recorder = dataSelector.validate().record()
-//        _ = try wait(for: recorder.elements, timeout: 1)
-//        guard case .loading = self.dataState else { return XCTFail() }
-//        XCTAssertEqual(self.dataCache, .validData)
-//    }
-//
-//    func test_Validate_Loading_InvalidCache() throws {
-//        dataState = .loading
-//        dataCache = .invalidData
-//
-//        let recorder = dataSelector.validate().record()
-//        _ = try wait(for: recorder.elements, timeout: 1)
-//        guard case .loading = self.dataState else { return XCTFail() }
-//        XCTAssertEqual(self.dataCache, .invalidData)
-//    }
-//
-//    func test_Validate_Error_NoCache() throws {
-//        dataState = .error(rawError: NoSuchElementError())
-//        dataCache = nil
-//
-//        let recorder = dataSelector.validate().record()
-//        _ = try wait(for: recorder.elements, timeout: 1)
-//        if case .error(let rawError) = self.dataState {
-//            XCTAssert(rawError is NoSuchElementError)
-//        } else {
-//            XCTFail()
-//        }
-//        XCTAssertEqual(self.dataCache, nil)
-//    }
-//
-//    func test_Validate_Error_ValidCache() throws {
-//        dataState = .error(rawError: NoSuchElementError())
-//        dataCache = .validData
-//
-//        let recorder = dataSelector.validate().record()
-//        _ = try wait(for: recorder.elements, timeout: 1)
-//        if case .error(let rawError) = self.dataState {
-//            XCTAssert(rawError is NoSuchElementError)
-//        } else {
-//            XCTFail()
-//        }
-//        XCTAssertEqual(self.dataCache, nil)
-//    }
-//
-//    func test_Validate_Error_InvalidCache() throws {
-//        dataState = .error(rawError: NoSuchElementError())
-//        dataCache = .invalidData
-//
-//        let recorder = dataSelector.validate().record()
-//        _ = try wait(for: recorder.elements, timeout: 1)
-//        if case .error(let rawError) = self.dataState {
-//            XCTAssert(rawError is NoSuchElementError)
-//        } else {
-//            XCTFail()
-//        }
-//        XCTAssertEqual(self.dataCache, nil)
-//    }
-//}
+import XCTest
+@testable import StoreFlowable
+
+final class DataSelectorValidateFailedTests: XCTestCase {
+
+    private enum TestData: Equatable {
+        case validData
+        case invalidData
+        case fetchedData
+
+        var needRefresh: Bool {
+            switch self {
+            case .validData: return false
+            case .invalidData: return true
+            case .fetchedData: return false
+            }
+        }
+    }
+
+    private var dataSelector: DataSelector<TestData>!
+    private var dataState: DataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
+    private var dataCache: TestData? = nil
+
+    override func setUp() {
+        dataSelector = DataSelector(
+            requestKeyManager: AnyRequestKeyManager(
+                loadNext: {
+                    XCTFail()
+                    fatalError()
+                },
+                saveNext: { requestKey in
+                    // do nothing.
+                },
+                loadPrev: {
+                    XCTFail()
+                    fatalError()
+                },
+                savePrev: { requestKey in
+                    // do nothing.
+                }
+            ),
+            cacheDataManager: AnyCacheDataManager(
+                load: {
+                    self.dataCache
+                },
+                save: { newData in
+                    self.dataCache = newData
+                },
+                saveNext: { cachedData, newData in
+                    XCTFail()
+                    fatalError()
+                },
+                savePrev: { cachedData, newData in
+                    XCTFail()
+                    fatalError()
+                }
+            ),
+            originDataManager: AnyOriginDataManager(
+                fetch: {
+                    throw NoSuchElementError()
+                },
+                fetchNext: { nextKey in
+                    XCTFail()
+                    fatalError()
+                },
+                fetchPrev: { prevKey in
+                    XCTFail()
+                    fatalError()
+                }
+            ),
+            dataStateManager: AnyDataStateManager(
+                load: {
+                    self.dataState
+                },
+                save: { dataState in
+                    self.dataState = dataState
+                }
+            ),
+            needRefresh: { value in value.needRefresh }
+        )
+    }
+
+    func test_Validate_Fixed_NoCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
+        dataCache = nil
+
+        await dataSelector.validate()
+        if case .error(_, _, let rawError) = self.dataState {
+            XCTAssert(rawError is NoSuchElementError)
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, nil)
+    }
+
+    func test_Validate_Fixed_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
+        dataCache = .validData
+
+        await dataSelector.validate()
+        guard case .fixed = self.dataState else { return XCTFail() }
+        XCTAssertEqual(self.dataCache, .validData)
+    }
+
+    func test_Validate_Fixed_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
+        dataCache = .invalidData
+
+        await dataSelector.validate()
+        if case .error(_, _, let rawError) = self.dataState {
+            XCTAssert(rawError is NoSuchElementError)
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, nil)
+    }
+
+    func test_Validate_Loading_NoCache() async throws {
+        dataState = .loading()
+        dataCache = nil
+
+        await dataSelector.validate()
+        guard case .loading = self.dataState else { return XCTFail() }
+        XCTAssertEqual(self.dataCache, nil)
+    }
+
+    func test_Validate_Loading_ValidCache() async throws {
+        dataState = .loading()
+        dataCache = .validData
+
+        await dataSelector.validate()
+        guard case .loading = self.dataState else { return XCTFail() }
+        XCTAssertEqual(self.dataCache, .validData)
+    }
+
+    func test_Validate_Loading_InvalidCache() async throws {
+        dataState = .loading()
+        dataCache = .invalidData
+
+        await dataSelector.validate()
+        guard case .loading = self.dataState else { return XCTFail() }
+        XCTAssertEqual(self.dataCache, .invalidData)
+    }
+
+    func test_Validate_Error_NoCache() async throws {
+        dataState = .error(rawError: NoSuchElementError())
+        dataCache = nil
+
+        await dataSelector.validate()
+        if case .error(_, _, let rawError) = self.dataState {
+            XCTAssert(rawError is NoSuchElementError)
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, nil)
+    }
+
+    func test_Validate_Error_ValidCache() async throws {
+        dataState = .error(rawError: NoSuchElementError())
+        dataCache = .validData
+
+        await dataSelector.validate()
+        if case .error(_, _, let rawError) = self.dataState {
+            XCTAssert(rawError is NoSuchElementError)
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, nil)
+    }
+
+    func test_Validate_Error_InvalidCache() async throws {
+        dataState = .error(rawError: NoSuchElementError())
+        dataCache = .invalidData
+
+        await dataSelector.validate()
+        if case .error(_, _, let rawError) = self.dataState {
+            XCTAssert(rawError is NoSuchElementError)
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, nil)
+    }
+}

@@ -10,7 +10,7 @@ import StoreFlowable
 
 struct GithubTwoWayReposRepository {
 
-    func follow() -> LoadingStatePublisher<[GithubRepo]> {
+    func follow() -> LoadingStateSequence<[GithubRepo]> {
         let githubReposFlowable = AnyStoreFlowable.from(cacher: GithubTwoWayReposCacher.shared, fetcher: GithubTwoWayReposFetcher(), param: "github")
         return githubReposFlowable.publish()
     }

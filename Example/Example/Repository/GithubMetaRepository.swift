@@ -10,7 +10,7 @@ import StoreFlowable
 
 struct GithubMetaRepository {
 
-    func follow() -> LoadingStatePublisher<GithubMeta> {
+    func follow() -> LoadingStateSequence<GithubMeta> {
         let githubMetaFlowable = AnyStoreFlowable.from(cacher: GithubMetaCacher.shared, fetcher: GithubMetaFetcher())
         return githubMetaFlowable.publish()
     }

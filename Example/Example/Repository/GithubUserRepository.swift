@@ -10,7 +10,7 @@ import StoreFlowable
 
 struct GithubUserRepository {
 
-    func follow(userName: String) -> LoadingStatePublisher<GithubUser> {
+    func follow(userName: String) -> LoadingStateSequence<GithubUser> {
         let githubUserFlowable = AnyStoreFlowable.from(cacher: GithubUserCacher.shared, fetcher: GithubUserFetcher(), param: userName)
         return githubUserFlowable.publish()
     }

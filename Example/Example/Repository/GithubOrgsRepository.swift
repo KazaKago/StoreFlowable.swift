@@ -10,7 +10,7 @@ import StoreFlowable
 
 struct GithubOrgsRepository {
 
-    func follow() -> LoadingStatePublisher<[GithubOrg]> {
+    func follow() -> LoadingStateSequence<[GithubOrg]> {
         let githubOrgsFlowable = AnyStoreFlowable.from(cacher: GithubOrgsCacher.shared, fetcher: GithubOrgsFetcher())
         return githubOrgsFlowable.publish()
     }
