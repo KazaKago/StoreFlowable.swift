@@ -5,8 +5,6 @@
 //  Created by Kensuke Tamura on 2020/12/11.
 //
 
-import Foundation
-
 struct StoreFlowableImpl<DATA>: StoreFlowable, PaginationStoreFlowable, TwoWayPaginationStoreFlowable {
 
     typealias DATA = DATA

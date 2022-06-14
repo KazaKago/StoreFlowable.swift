@@ -5,8 +5,6 @@
 //  Created by Kensuke Tamura on 2020/11/29.
 //
 
-import Foundation
-
 protocol OriginDataManager {
 
     associatedtype DATA

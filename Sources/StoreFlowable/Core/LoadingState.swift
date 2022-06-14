@@ -5,8 +5,6 @@
 //  Created by Kensuke Tamura on 2020/11/28.
 //
 
-import Foundation
-
 /**
  * This enum that represents the state of the data.
  *

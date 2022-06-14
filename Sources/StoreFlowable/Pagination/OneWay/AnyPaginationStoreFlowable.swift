@@ -5,8 +5,6 @@
 //  Created by Kensuke Tamura on 2020/12/24.
 //
 
-import Foundation
-
 /**
  * Type erasure of `PaginationStoreFlowable`.
  */

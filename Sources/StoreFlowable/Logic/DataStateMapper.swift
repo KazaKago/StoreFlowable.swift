@@ -5,8 +5,6 @@
 //  Created by Kensuke Tamura on 2020/12/07.
 //
 
-import Foundation
-
 extension DataState {
     func toLoadingState<DATA>(content: DATA?, canNextRequest: Bool, canPrevRequest: Bool) -> LoadingState<DATA> {
         switch self {

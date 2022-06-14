@@ -5,8 +5,6 @@
 //  Created by Kensuke Tamura on 2022/06/10.
 //
 
-import Foundation
-
 /**
  * A Fetcher class that supports pagination in one direction.
  *

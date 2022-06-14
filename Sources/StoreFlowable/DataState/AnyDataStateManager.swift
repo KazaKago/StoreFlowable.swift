@@ -5,8 +5,6 @@
 //  Created by Kensuke Tamura on 2022/06/08.
 //
 
-import Foundation
-
 struct AnyDataStateManager: DataStateManager {
 
     private let _load: () -> DataState

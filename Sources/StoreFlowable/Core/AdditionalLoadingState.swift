@@ -5,8 +5,6 @@
 //  Created by tamura_k on 2021/07/19.
 //
 
-import Foundation
-
 /**
  * This enum that represents the state of the additional pagination data.
  *

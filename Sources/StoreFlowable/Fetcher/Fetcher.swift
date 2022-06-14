@@ -5,8 +5,6 @@
 //  Created by Kensuke Tamura on 2022/06/10.
 //
 
-import Foundation
-
 /**
  * Class for fetching origin data from server.
  *

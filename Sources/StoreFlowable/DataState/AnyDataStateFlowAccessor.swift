@@ -5,7 +5,6 @@
 //  Created by Kensuke Tamura on 2022/06/08.
 //
 
-import Foundation
 import AsyncExtensions
 
 struct AnyDataStateFlowAccessor: DataStateFlowAccessor {

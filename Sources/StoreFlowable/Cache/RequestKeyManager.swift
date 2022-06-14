@@ -5,8 +5,6 @@
 //  Created by Kensuke Tamura on 2022/06/07.
 //
 
-import Foundation
-
 protocol RequestKeyManager {
 
     func loadNext() async -> String?

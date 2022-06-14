@@ -5,8 +5,6 @@
 //  Created by tamura_k on 2021/07/20.
 //
 
-import Foundation
-
 /**
  * Type erasure of `TwoWayPaginationStoreFlowable`.
  */

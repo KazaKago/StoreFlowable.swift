@@ -5,8 +5,6 @@
 //  Created by Kensuke Tamura on 2020/12/07.
 //
 
-import Foundation
-
 /**
  * Provides input / output methods that abstract the data acquisition destination.
  *
