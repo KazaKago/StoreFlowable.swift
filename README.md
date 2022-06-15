@@ -7,6 +7,11 @@
 [Repository pattern](https://msdn.microsoft.com/en-us/library/ff649690.aspx) support library for Swift with Concurrency.  
 Available for iOS or any Swift projects.  
 
+## Related projects
+
+- [StoreFlowable.kt](https://github.com/KazaKago/StoreFlowable.kt)
+- [StoreFlowable.dart](https://github.com/KazaKago/StoreFlowable.dart)
+
 ## Overview
 
 This library provides remote and local cache abstraction and observation with [Swift Concurrency](https://docs.swift.org/swift-book/LanguageGuide/Concurrency.html).  
