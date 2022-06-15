@@ -13,7 +13,7 @@ class GithubOrgsCacher: PaginationCacher<UnitHash, GithubOrg> {
     static let shared = GithubOrgsCacher()
 
     override var expireSeconds: TimeInterval {
-        get { TimeInterval(60 * 30) }
+        get { TimeInterval(60) }
     }
 
     override private init() {

@@ -49,7 +49,7 @@ struct StoreFlowableImpl<DATA>: StoreFlowable, PaginationStoreFlowable, TwoWayPa
                 canPrevRequest: requestKeyManager.loadPrev() != nil
             )
         }
-        .eraseToAnyAsyncSequence()
+        .eraseToLoadingStateSequence()
     }
 
     func getData(from: GettingFrom) async -> DATA? {

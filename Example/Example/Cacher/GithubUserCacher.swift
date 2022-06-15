@@ -13,7 +13,7 @@ class GithubUserCacher: Cacher<String, GithubUser> {
     static let shared = GithubUserCacher()
 
     override var expireSeconds: TimeInterval {
-        get { TimeInterval(60 * 30) }
+        get { TimeInterval(60) }
     }
 
     override private init() {

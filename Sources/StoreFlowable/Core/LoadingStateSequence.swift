@@ -5,9 +5,39 @@
 //  Created by Kensuke Tamura on 2021/04/18.
 //
 
-import AsyncExtensions
+extension AsyncSequence {
+    func eraseToLoadingStateSequence<DATA>() -> LoadingStateSequence<DATA> where Element == LoadingState<DATA> {
+        LoadingStateSequence(self)
+    }
+}
 
 /**
- * Type alias of `AnyPublisher<LoadingState<DATA>, Never>`.
+ * AsyncSequence with LoadingState<DATA>
  */
-public typealias LoadingStateSequence<DATA> = AnyAsyncSequence<LoadingState<DATA>>
+public struct LoadingStateSequence<DATA>: AsyncSequence {
+    public typealias Element = LoadingState<DATA>
+    public typealias AsyncIterator = Iterator
+
+    private let makeAsyncIteratorClosure: () -> AsyncIterator
+
+    public init<BaseAsyncSequence: AsyncSequence>(_ baseAsyncSequence: BaseAsyncSequence) where BaseAsyncSequence.Element == Element {
+        self.makeAsyncIteratorClosure = { Iterator(baseIterator: baseAsyncSequence.makeAsyncIterator()) }
+    }
+
+    public func makeAsyncIterator() -> AsyncIterator {
+        Iterator(baseIterator: self.makeAsyncIteratorClosure())
+    }
+
+    public struct Iterator: AsyncIteratorProtocol {
+        private let nextClosure: () async throws -> Element?
+
+        public init<BaseAsyncIterator: AsyncIteratorProtocol>(baseIterator: BaseAsyncIterator) where BaseAsyncIterator.Element == Element {
+            var baseIterator = baseIterator
+            self.nextClosure = { try await baseIterator.next() }
+        }
+
+        public func next() async throws -> Element? {
+            try await self.nextClosure()
+        }
+    }
+}

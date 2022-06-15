@@ -13,7 +13,7 @@ class GithubMetaCacher: Cacher<UnitHash, GithubMeta> {
     static let shared = GithubMetaCacher()
 
     override var expireSeconds: TimeInterval {
-        get { TimeInterval(60 * 30) }
+        get { TimeInterval(60) }
     }
 
     override private init() {

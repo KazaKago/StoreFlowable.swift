@@ -15,7 +15,7 @@ public extension AsyncSequence {
      * - parameter transform: This callback that returns the result of transforming the data.
      * - returns: Return `LoadingStateSequence` containing the transformed data.
      */
-    func mapContent<A, Z>(_ transform: @escaping (A) -> Z) -> AnyAsyncSequence<LoadingState<Z>> where Self.Element == LoadingState<A> {
+    func mapContent<A, Z>(_ transform: @escaping (A) -> Z) -> LoadingStateSequence<Z> where Self.Element == LoadingState<A> {
         map { element in
             switch element {
             case .loading(let content):
@@ -30,6 +30,6 @@ public extension AsyncSequence {
                 return .error(rawError: rawError)
             }
         }
-        .eraseToAnyAsyncSequence()
+        .eraseToLoadingStateSequence()
     }
 }
