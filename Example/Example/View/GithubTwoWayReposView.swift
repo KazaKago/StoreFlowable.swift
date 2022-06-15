@@ -24,7 +24,7 @@ struct GithubTwoWayReposView: View {
                     }
                     if let error = githubTwoWayReposViewModel.prevError {
                         ErrorItem(error: error) {
-                            githubTwoWayReposViewModel.retryPrev()
+                            Task { await githubTwoWayReposViewModel.retryPrev() }
                         }
                     }
                     ForEach(githubTwoWayReposViewModel.githubRepos) { githubRepo in
@@ -35,10 +35,10 @@ struct GithubTwoWayReposView: View {
                                     scrollProxy.scrollTo(githubTwoWayReposViewModel.githubRepos[8].id)
                                 }
                                 if githubRepo == githubTwoWayReposViewModel.githubRepos.first {
-                                    githubTwoWayReposViewModel.requestPrev()
+                                    Task { await githubTwoWayReposViewModel.requestPrev() }
                                 }
                                 if githubRepo == githubTwoWayReposViewModel.githubRepos.last {
-                                    githubTwoWayReposViewModel.requestNext()
+                                    Task { await githubTwoWayReposViewModel.requestNext() }
                                 }
                             }
                     }
@@ -47,7 +47,7 @@ struct GithubTwoWayReposView: View {
                     }
                     if let error = githubTwoWayReposViewModel.nextError {
                         ErrorItem(error: error) {
-                            githubTwoWayReposViewModel.retryNext()
+                            Task { await githubTwoWayReposViewModel.retryNext() }
                         }
                     }
                 }
@@ -62,14 +62,14 @@ struct GithubTwoWayReposView: View {
                         Spacer()
                             .frame(height: 4)
                         Button("Retry") {
-                            githubTwoWayReposViewModel.retry()
+                            Task { await githubTwoWayReposViewModel.retry() }
                         }
                     }
                     .padding()
                 }
             }
-            .onAppear {
-                githubTwoWayReposViewModel.initialize()
+            .task {
+                await githubTwoWayReposViewModel.initialize()
             }
         }
     }

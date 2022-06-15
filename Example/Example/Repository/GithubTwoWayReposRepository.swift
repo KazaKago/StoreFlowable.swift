@@ -6,28 +6,27 @@
 //
 
 import Foundation
-import Combine
 import StoreFlowable
 
 struct GithubTwoWayReposRepository {
 
-    func follow() -> LoadingStatePublisher<[GithubRepo]> {
-        let githubReposFlowable = GithubTwoWayReposFlowableFactory().create("github")
+    func follow() -> LoadingStateSequence<[GithubRepo]> {
+        let githubReposFlowable = AnyStoreFlowable.from(cacher: GithubTwoWayReposCacher.shared, fetcher: GithubTwoWayReposFetcher(), param: "github")
         return githubReposFlowable.publish()
     }
 
-    func refresh() -> AnyPublisher<Void, Never> {
-        let githubReposFlowable = GithubTwoWayReposFlowableFactory().create("github")
-        return githubReposFlowable.refresh()
+    func refresh() async {
+        let githubReposFlowable = AnyStoreFlowable.from(cacher: GithubTwoWayReposCacher.shared, fetcher: GithubTwoWayReposFetcher(), param: "github")
+        await githubReposFlowable.refresh()
     }
 
-    func requestNext(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
-        let githubReposFlowable = GithubTwoWayReposFlowableFactory().create("github")
-        return githubReposFlowable.requestNextData(continueWhenError: continueWhenError)
+    func requestNext(continueWhenError: Bool) async {
+        let githubReposFlowable = AnyStoreFlowable.from(cacher: GithubTwoWayReposCacher.shared, fetcher: GithubTwoWayReposFetcher(), param: "github")
+        await githubReposFlowable.requestNextData(continueWhenError: continueWhenError)
     }
 
-    func requestPrev(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
-        let githubReposFlowable = GithubTwoWayReposFlowableFactory().create("github")
-        return githubReposFlowable.requestPrevData(continueWhenError: continueWhenError)
+    func requestPrev(continueWhenError: Bool) async {
+        let githubReposFlowable = AnyStoreFlowable.from(cacher: GithubTwoWayReposCacher.shared, fetcher: GithubTwoWayReposFetcher(), param: "github")
+        await githubReposFlowable.requestPrevData(continueWhenError: continueWhenError)
     }
 }

@@ -4,12 +4,12 @@
 [![Test](https://github.com/KazaKago/StoreFlowable.swift/workflows/Test/badge.svg)](https://github.com/KazaKago/StoreFlowable.swift/actions?query=workflow%3ATest)
 [![License](https://img.shields.io/github/license/kazakago/storeflowable.swift.svg)](LICENSE)
 
-[Repository pattern](https://msdn.microsoft.com/en-us/library/ff649690.aspx) support library for Swift with Combine Framework.  
-Available for iOS or any Mac/tvOS/watchOS projects.  
+[Repository pattern](https://msdn.microsoft.com/en-us/library/ff649690.aspx) support library for Swift with Concurrency.  
+Available for iOS or any Swift projects.  
 
 ## Overview
 
-This library provides remote and local data abstraction and observation with [Combine Framework](https://developer.apple.com/documentation/combine).  
+This library provides remote and local cache abstraction and observation with [Swift Concurrency](https://docs.swift.org/swift-book/LanguageGuide/Concurrency.html).  
 Created according to the following 5 policies.  
 
 - **Repository pattern**
@@ -29,13 +29,6 @@ The following is an example of screen display using [`LoadingState`](Sources/Sto
 
 ![https://user-images.githubusercontent.com/7742104/125714730-381eee65-4126-4ee8-991a-7fc64dfb325c.jpg](https://user-images.githubusercontent.com/7742104/125714730-381eee65-4126-4ee8-991a-7fc64dfb325c.jpg)
 
-## Requirement
-
-- iOS 13.0 or later
-- MacOS 10.15 or later
-- tvOS 13.0 or later
-- watchOS 6.0 or later
-
 ## Install
 
 Install as [Swift Package Manager](https://swift.org/package-manager/) exchanging x.x.x for the latest tag.  
@@ -46,122 +39,83 @@ dependencies: [
 ],
 ```
 
-## Basic Usage
+## Get started
 
-There are only 5 things you have to implement:  
+There are only 2 things you have to implement:  
 
-- Create data state management class
-- Get data from local cache
-- Save data to local cache
-- Get data from remote server
-- Whether the cache is valid
+- Create a class to manage the in-app cache.
+- Create a class to get data from origin server.
 
-### 1. Create FlowableDataStateManager class
+### 1. Create a class to manage the in-app cache
 
-First, create a class that inherits [`FlowableDataStateManager<PARAM: Hashable>`](Sources/StoreFlowable/FlowableDataStateManager.swift).  
+First, create a class that inherits [`Cacher<PARAM: Hashable, DATA>`](Sources/StoreFlowable/cacher/Cacher.swift).  
 Put the type you want to use as a param in `<PARAM: Hashable>`. If you don't need the param, put in the [`UnitHash`](Sources/StoreFlowable/UnitHash.swift).  
 
 ```swift
-class UserStateManager: FlowableDataStateManager<UserId> {
-    static let shared = UserStateManager()
+class UserCacher: Cacher<UserId, UserData> {
+    static let shared = UserCacher()
     private override init() {}
 }
 ```
 
-[`FlowableDataStateManager<PARAM: Hashable>`](Sources/StoreFlowable/FlowableDataStateManager.swift) needs to be used in Singleton pattern.  
+[`Cacher<PARAM: Hashable, DATA>`](Sources/StoreFlowable/Cacher/Cacher.swift) needs to be used in Singleton pattern.  
 
-### 2. Create StoreFlowableFactory class
+### 2. Create a class to get data from origin server
 
-Next, create a class that implements [`StoreFlowableFactory`](Sources/StoreFlowable/StoreFlowableFactory.swift).  
+Next, create a class that implements [`Fetcher`](Sources/StoreFlowable/Fetcher/Fetcher.swift).  
 Put the type you want to use as a Data in `DATA` associatedtype.  
 
 An example is shown below.  
 
 ```swift
-struct UserFlowableFactory : StoreFlowableFactory {
+struct UserFetcher : Fetcher {
 
     typealias PARAM = UserId
     typealias DATA = UserData
 
     private let userApi = UserApi()
-    private let userCache = UserCache()
 
-    // Create data state management class.
-    let flowableDataStateManager: FlowableDataStateManager<UserId> = UserStateManager.shared
-
-    // Get data from local cache.
-    func loadDataFromCache(param: UserId) -> AnyPublisher<UserData?, Never> {
-        userCache.load(userId: param)
-    }
-
-    // Save data to local cache.
-    func saveDataToCache(newData: UserData?, param: UserId) -> AnyPublisher<Void, Never> {
-        userCache.save(userId: param, data: newData)
-    }
-
-    // Get data from remote server.
-    func fetchDataFromOrigin(param: UserId) -> AnyPublisher<UserData, Error> {
+    func fetch(param: UserId) async throws -> UserData {
         userApi.fetch(userId: param)
     }
-
-    // Whether the cache is valid.
-    func needRefresh(cachedData: UserData, param: UserId) -> AnyPublisher<Bool, Never> {
-        cachedData.isExpired()
-    }
 }
 ```
 
-You need to prepare the API access class and the cache access class.  
-In this case, `UserApi` and `UserCache` classes.  
+You need to prepare the API access class.  
+In this case, `UserApi` classe.  
 
-### 3. Create Repository class
+### 3. Build StoreFlowable from Cacher & Fetcher class
 
-After that, you can get the [`AnyStoreFlowable<DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class from the [`StoreFlowableFactory.create()`](Sources/StoreFlowable/StoreFlowableExtension.swift) method, and use it to build the Repository class.  
-Be sure to go through the created [`AnyStoreFlowable<DATA>`](Sources/StoreFlowable/AnyStoreFlowable.swift) class when getting / updating data.  
+After that, you can get the [`StoreFlowable<DATA>`](Sources/StoreFlowable/StoreFlowable.swift) class from the [`AnyStoreFlowable.from()`](Sources/StoreFlowable/StoreFlowableExtension.swift) method.  
+Be sure to go through the created [`StoreFlowable<DATA>`](Sources/StoreFlowable/StoreFlowable.swift) class when getting / updating data.  
 
 ```swift
-struct UserRepository {
-
-    func followUserData(userId: UserId) -> LoadingStatePublisher<UserData> {
-        let userFlowable: AnyStoreFlowable<UserData> = UserFlowableFactory().create(userId)
-        return userFlowable.publish()
-    }
-
-    func updateUserData(userData: UserData) -> AnyPublisher<Void, Never> {
-        let userFlowable: AnyStoreFlowable<UserData> = UserFlowableFactory().create(userId)
-        return userFlowable.update(newData: userData)
-    }
-}
+let userFlowable: AnyStoreFlowable<UserData> = AnyStoreFlowable.from(cacher: userCacher, fetcher: userFetcher, param: userId)
+let userStateSequence: LoadingStateSequence<UserData> = userFlowable.publish()
 ```
 
-You can get the data in the form of [`LoadingStatePublisher<DATA>`](Sources/StoreFlowable/Core/LoadingStatePublisher.swift) (Same as `AnyPublisher<LoadingState<DATA>, Never>`) by using the [`publish()`](Sources/StoreFlowable/StoreFlowable.swift) method.  
+You can get the data in the form of [`LoadingStateSequence<DATA>`](Sources/StoreFlowable/Core/LoadingStateSequence.swift) (Same as `AsyncSequence<LoadingState<DATA>>`) by using the [`publish()`](Sources/StoreFlowable/StoreFlowable.swift) method.  
 [`LoadingState`](Sources/StoreFlowable/Core/LoadingState.swift) is a [enum](https://docs.swift.org/swift-book/LanguageGuide/Enumerations.html) that holds raw data.  
 
-### 4. Use Repository class
+### 4. Subscribe `FlowLoadingState<DATA>`
 
-You can observe the data by sink [`AnyPublisher`](https://developer.apple.com/documentation/combine).  
+You can observe the data by for-in [`AsyncSequence`](https://developer.apple.com/documentation/swift/asyncsequence).  
 and branch the data state with [`doAction()`](Sources/StoreFlowable/Core/LoadingState.swift) method or `switch` statement.  
 
 ```swift
-private func subscribe(userId: UserId) {
-    userRepository.followUserData(userId: userId)
-        .receive(on: DispatchQueue.main)
-        .sink { state in
-            state.doAction(
-                onLoading: { (content: UserData?) in
-                    ...
-                },
-                onCompleted: { (content: UserData, _, _) in
-                    ...
-                },
-                onError: { (error: Error) in
-                    ...
-                }
-            )
+for try await userState in userStateSequence {
+    userState.doAction(
+        onLoading: { (content: UserData?) in
+            ...
+        },
+        onCompleted: { (content: UserData, _, _) in
+            ...
+        },
+        onError: { (error: Error) in
+            ...
         }
-        .store(in: &cancellableSet)
+    )
 }
-
 ```
 
 ## Example
@@ -169,9 +123,12 @@ private func subscribe(userId: UserId) {
 Refer to the [**example project**](Example) for details. This module works as an iOS app.  
 See [GithubMetaFlowableFactory](Example/Example/Flowable/GithubMetaFlowableFactory.swift) and [GithubUserFlowableFactory](Example/Example/Flowable/GithubUserFlowableFactory.swift).  
 
+Refer to the [**example module**](example) for details. This module works as an Android app.  
+See [GithubMetaCacher](Example/Example/Cacher/GithubMetaCacher.swift) + [GithubMetaFetcher](Example/Example/Fetcher/GithubMetaFetcher.swift) or [GithubUserCacher](Example/Example/Cacher/GithubUserCacher.swift) + [GithubUserFetcher](Example/Example/Fetcher/GithubUserFetcher.swift).
+
 This example accesses the [Github API](https://docs.github.com/en/free-pro-team@latest/rest).  
 
-## Advanced Usage
+## Other usage of `StoreFlowable` class
 
 ### Get data without [LoadingState](Sources/StoreFlowable/Core/LoadingState.swift) enum
 
@@ -181,8 +138,8 @@ If you don't need value flow and [`LoadingState`](Sources/StoreFlowable/Core/Loa
 
 ```swift
 public extension StoreFlowable {
-    func getData(from: GettingFrom = .both) -> AnyPublisher<DATA?, Never>
-    func requireData(from: GettingFrom = .both) -> AnyPublisher<DATA, Error>
+    func getData(from: GettingFrom = .both) async -> DATA?
+    func requireData(from: GettingFrom = .both) async throws -> DATA
 }
 ```
 
@@ -207,7 +164,7 @@ If you want to ignore the cache and get new data, add `forceRefresh` parameter t
 
 ```swift
 public extension StoreFlowable {
-    func publish(forceRefresh: Bool = false) -> LoadingStatePublisher<DATA>
+    func publish(forceRefresh: Bool = false) -> LoadingStateSequence<DATA>
 }
 ```
 
@@ -215,7 +172,7 @@ Or you can use [`refresh()`](Sources/StoreFlowable/StoreFlowable.swift) if you a
 
 ```swift
 public protocol StoreFlowable {
-    func refresh() -> AnyPublisher<Void, Never>
+    func refresh() async
 }
 ```
 
@@ -226,7 +183,7 @@ If invalid, get new data remotely.
 
 ```swift
 public protocol StoreFlowable {
-    func validate() -> AnyPublisher<Void, Never>
+    func validate() async
 }
 ```
 
@@ -237,7 +194,87 @@ If you want to update the local cache, use the [`update()`](Sources/StoreFlowabl
 
 ```swift
 public protocol StoreFlowable {
-    func update(newData: DATA?) -> AnyPublisher<Void, Never>
+    func update(newData: DATA?) async
+}
+```
+
+## `LoadingStateSequence<DATA>` operators
+
+### Map `LoadingStateSequence<DATA>`
+
+Use [`mapContent(transform)`](Sources/StoreFlowable/Core/LoadingStateSequenceMapper.swift) to transform content in `LoadingStateSequence<DATA>`.
+
+```swift
+let state: LoadingStateSequence<Int> = ...
+let mappedState: LoadingStateSequence<String> = state.mapContent { value: Int in
+    value.toString()
+}
+```
+
+### Combine multiple `LoadingStateSequence<DATA>`
+
+Use [`combineState(state, transform)`](Sources/StoreFlowable/Core/LoadingStateSequenceCombiner.swift) to combine multiple `LoadingStateSequence<DATA>`.
+
+```swift
+let state1: LoadingStateSequence<Int> = ...
+let state2: LoadingStateSequence<Int> = ...
+let combinedState: LoadingStateSequence<Int> = state1.combineState(state2) { value1: Int, value2: Int in
+    value1 + value2
+}
+```
+
+## Manage Cache
+
+### Manage cache expire time
+
+You can easily set the cache expiration time. Override expireSeconds variable in your [`Cacher<PARAM: Hashable, DATA>`](Sources/StoreFlowable/Cacher/Cacher.swift) class.
+The default value is `TimeInterval.infinity` (= will NOT expire).
+
+```swift
+class UserCacher: Cacher<UserId, UserData> {
+    static let shared = UserCacher()
+    private override init() {}
+
+    override var expireSeconds: TimeInterval {
+        get { TimeInterval(60 * 30) } // expiration time is 30 minutes.
+    }
+}
+```
+
+### Persist data
+
+If you want to make the cached data persistent, override the method of your [`Cacher<PARAM: Hashable, DATA>`](Sources/StoreFlowable/Cacher/Cacher.swift) class.
+
+```swift
+class UserCacher: Cacher<UserId, UserData> {
+    static let shared = UserCacher()
+    private override init() {}
+
+    override var expireSeconds: TimeInterval {
+        get { TimeInterval(60 * 30) } // expiration time is 30 minutes.
+    }
+
+    // Save the data for each parameter in any store.
+    override func saveData(data: GithubMeta?, param: UnitHash) async {
+        ...
+    }
+
+    // Get the data from the store for each parameter.
+    override func loadData(param: UnitHash) async -> GithubMeta? {
+        ...
+    }
+
+    // Save the epoch time for each parameter to manage the expiration time.
+    // If there is no expiration time, no override is needed.
+    override func saveDataCachedAt(epochSeconds: Double, param: UnitHash) async {
+        ...
+    }
+
+    // Get the date for managing the expiration time for each parameter.
+    // If there is no expiration time, no override is needed.
+    override func loadDataCachedAt(param: UnitHash) async -> Double? {
+        ...
+    }
 }
 ```
 
@@ -247,91 +284,65 @@ This library includes Pagination support.
 
 <img src="https://user-images.githubusercontent.com/7742104/103469914-7a833700-4dae-11eb-8ff8-98de478f20f8.gif" width="280"> <img src="https://user-images.githubusercontent.com/7742104/103469911-75be8300-4dae-11eb-924e-af509abd273a.gif" width="280">
 
-Inherit [`PagnationStoreFlowableFactory<PARAM: Hashable, DATA>`](Sources/StoreFlowable/Pagination/OneWay/PaginationStoreFlowableFactory.swift) instead of [`StoreFlowableFactory<PARAM: Hashable, DATA>`](Sources/StoreFlowable/StoreFlowableFactory.swift).  
+Inherit [`PaginationCacher<PARAM: Hashable, DATA>`](Sources/StoreFlowable/Cacher/PaginationCacher.swift) & [`PaginationFetcher`](Sources/StoreFlowable/Fetcher/PaginationFetcher.swift) instead of [`Cacher<PARAM: Hashable, DATA>`](Sources/StoreFlowable/StoreFlowableFactory.swift) & [`Fetcher`](Sources/StoreFlowable/Fetcher/Fetcher.swift).  
 
 An example is shown below.  
 
 ```swift
-class UserListStateManager: FlowableDataStateManager<UnitHash> {
-    static let shared = UserListStateManager()
+class UserListCacher: PaginationCacher<UnitHash, UserData> {
+    static let shared = UserListCacher()
     private override init() {}
 }
-```
-```swift
-struct UserListFlowableFactory : PaginationStoreFlowableFactory {
+
+struct UserListFetcher : PaginationFetcher {
 
     typealias PARAM = UnitHash
-    typealias DATA = [UserData]
+    typealias DATA = UserData
 
     private let userListApi = UserListApi()
-    private let userListCache = UserListCache()
 
-    let flowableDataStateManager: FlowableDataStateManager<UnitHash> = UserListStateManager.shared
-
-    func loadDataFromCache(param: UnitHash) -> AnyPublisher<[UserData]?, Never> {
-        userListCache.load()
+    func fetch(param: UnitHash) async throws -> PaginationFetcher.Result<UserData> {
+        let fetched = userListApi.fetch(pageToken: nil)
+        return PaginationFetcher.Result(data: fetched.data, nextKey: fetched.nextPageToken)
     }
 
-    func saveDataToCache(newData: [UserData]?, param: UnitHash) -> AnyPublisher<Void, Never> {
-        userListCache.save(data: newData)
-    }
-
-    func saveNextDataToCache(cachedData: [UserData], newData: [UserData], param: UnitHash) -> AnyPublisher<Void, Never> {
-        userListCache.save(data: cachedData + newData)
-    }
-
-    func fetchDataFromOrigin(param: UnitHash) -> AnyPublisher<Fetched<[UserData]>, Error> {
-        userListApi.fetch(pageToken: nil).map { fetchedData in
-            Fetched(data: fetchedData, nextKey: fetchedData.nextPageToken)
-        }.eraseToAnyPublisher()
-    }
-
-    func fetchNextDataFromOrigin(nextKey: String, param: UnitHash) -> AnyPublisher<Fetched<[UserData]>, Error> {
-        userListApi.fetch(pageToken: nextKey).map { fetchedData in
-            Fetched(data: fetchedData, nextKey: fetchedData.nextPageToken)
-        }.eraseToAnyPublisher()
-    }
-
-    func needRefresh(cachedData: [UserData], param: UnitHash) -> AnyPublisher<Bool, Never> {
-        cachedData.last.isExpired()
+    func fetchNext(nextKey: String, param: UnitHash) async throws -> PaginationFetcher.Result<UserData> {
+        let fetched = userListApi.fetch(pageToken: nextKey)
+        return PaginationFetcher.Result(data: fetched.data, nextKey: fetched.nextPageToken)
     }
 }
 ```
 
-You need to additionally implements [`saveNextDataToCache()`](Sources/StoreFlowable/Pagination/OneWay/PaginationStoreFlowableFactory.swift) and [`fetchNextDataFromOrigin()`](Sources/StoreFlowable/Pagination/OneWay/PaginationStoreFlowable.swift).  
-When saving the data, combine the cached data and the new data before saving.  
+You need to additionally implements [`fetchNext(nextKey: String, param: PARAM)`](Sources/StoreFlowable/Fetcher/PaginationFetcher.swift).  
 
 And then, You can get the state of additional loading from the `next` parameter of `onCompleted {}`.
 
 ```swift
-let userFlowable = UserListFlowableFactory().create(UnitHash())
-userFlowable.publish()
-    .receive(on: DispatchQueue.main)
-    .sink { state in
-        state.doAction(
-            onLoading: { (content: UserData?) in
-                // Whole (Initial) data loading.
-            },
-            onCompleted: { (content: UserData, next: AdditionalLoadingState, _) in
-                // Whole (Initial) data loading completed.
-                next.doAction(
-                    onFixed: { (canRequestAdditionalData: Bool) in
-                        // No additional processing.
-                    },
-                    onLoading: {
-                        // Additional data loading.
-                    },
-                    onError: { (error: Error) in
-                        // Additional loading error.
-                    }
-                )
-            },
-            onError: { (error: Error) in
-                // Whole (Initial) data loading error.
-            }
-        )
-    }
-    .store(in: &cancellableSet)
+let userFlowable = AnyStoreFlowable.from(cacher: userListCacher, fetcher: userListFetcher)
+for try await loadingState in userFlowable.publish() {
+    loadingState.doAction(
+        onLoading: { (content: UserData?) in
+            // Whole (Initial) data loading.
+        },
+        onCompleted: { (content: UserData, next: AdditionalLoadingState, _) in
+            // Whole (Initial) data loading completed.
+            next.doAction(
+                onFixed: { (canRequestAdditionalData: Bool) in
+                    // No additional processing.
+                },
+                onLoading: {
+                    // Additional data loading.
+                },
+                onError: { (error: Error) in
+                    // Additional loading error.
+                }
+            )
+        },
+        onError: { (error: Error) in
+            // Whole (Initial) data loading error.
+        }
+    )
+}
 ```
 
 To display in the [`UITableView`](https://developer.apple.com/documentation/uikit/uitableview), Please use the difference update function. See also [`UITableViewDiffableDataSource`](https://developer.apple.com/documentation/uikit/uitableviewdiffabledatasource).
@@ -342,13 +353,13 @@ You can request additional data for paginating using the [`requestNextData()`](S
 
 ```swift
 public extension PaginationStoreFlowable {
-    func requestNextData(continueWhenError: Bool = true) -> AnyPublisher<Void, Never>
+    func requestNextData(continueWhenError: Bool = true) async
 }
 ```
 
 ## Pagination Example
 
-The [GithubOrgsFlowableFactory](Example/Example/Flowable/GithubOrgsFlowableFactory.swift) and [GithubReposFlowableFactory](Example/Example/Flowable/GithubReposFlowableFactory.swift) classes in [**example project**](Example) implement pagination.  
+The [GithubOrgsCacher](Example/Example/Cacher/GithubOrgsCacher.swift) + [GithubOrgsFetcher](Example/Example/Fetcher/GithubOrgsFetcher.swift) or [GithubReposCacher](Example/Example/Cacher/GithubReposCacher.swift) + [GithubReposFetcher](Example/Example/Fetcher/GithubReposFetcher.swift) classes in [**example module**](Example) implement pagination.
 
 ## License
 

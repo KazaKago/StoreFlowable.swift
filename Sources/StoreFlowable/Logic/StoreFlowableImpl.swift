@@ -5,125 +5,125 @@
 //  Created by Kensuke Tamura on 2020/12/11.
 //
 
-import Foundation
-import Combine
-import CombineAsync
+struct StoreFlowableImpl<DATA>: StoreFlowable, PaginationStoreFlowable, TwoWayPaginationStoreFlowable {
 
-struct StoreFlowableImpl<PARAM: Hashable, DATA>: StoreFlowable, PaginationStoreFlowable, TwoWayPaginationStoreFlowable {
-
-    typealias PARAM = PARAM
     typealias DATA = DATA
 
-    private let param: PARAM
-    private let flowableDataStateManager: FlowableDataStateManager<PARAM>
+    private let dataStateFlowAccessor: DataStateFlowAccessor
+    private let requestKeyManager: RequestKeyManager
     private let cacheDataManager: AnyCacheDataManager<DATA>
-    private let dataSelector: DataSelector<PARAM, DATA>
+    private let dataSelector: DataSelector<DATA>
 
-    init(param: PARAM, flowableDataStateManager: FlowableDataStateManager<PARAM>, cacheDataManager: AnyCacheDataManager<DATA>, originDataManager: AnyOriginDataManager<DATA>, needRefresh: @escaping (_ cachedData: DATA) -> AnyPublisher<Bool, Never>) {
-        self.param = param
-        self.flowableDataStateManager = flowableDataStateManager
+    init(dataStateFlowAccessor: DataStateFlowAccessor, requestKeyManager: RequestKeyManager, cacheDataManager: AnyCacheDataManager<DATA>, originDataManager: AnyOriginDataManager<DATA>, dataStateManager: DataStateManager, needRefresh: @escaping (_ cachedData: DATA) async -> Bool) {
+        self.dataStateFlowAccessor = dataStateFlowAccessor
+        self.requestKeyManager = requestKeyManager
         self.cacheDataManager = cacheDataManager
         self.dataSelector = DataSelector(
-            param: param,
-            dataStateManager: AnyDataStateManager(flowableDataStateManager),
+            requestKeyManager: requestKeyManager,
             cacheDataManager: cacheDataManager,
             originDataManager: originDataManager,
+            dataStateManager: dataStateManager,
             needRefresh: needRefresh
         )
     }
 
-    func publish(forceRefresh: Bool) -> LoadingStatePublisher<DATA> {
-        async { _ in
-            if forceRefresh {
-                try `await`(dataSelector.refreshAsync(clearCacheBeforeFetching: true))
-            } else {
-                try `await`(dataSelector.validateAsync())
+    func publish(forceRefresh: Bool) -> LoadingStateSequence<DATA> {
+        AsyncStream<Void> { continuation in
+            Task {
+                if forceRefresh {
+                    await dataSelector.refreshAsync(clearCacheBeforeFetching: true)
+                } else {
+                    await dataSelector.validateAsync()
+                }
+                continuation.yield(())
+                continuation.finish()
             }
         }
-        .replaceError(with: ())
         .flatMap { _ in
-            flowableDataStateManager.getFlow(param: param)
+            dataStateFlowAccessor.getFlow()
         }
-        .flatMap { dataState in
-            cacheDataManager.load().map { data in
-                (dataState, data)
+        .map { dataState in
+            await dataState.toLoadingState(
+                content: await cacheDataManager.load(),
+                canNextRequest: requestKeyManager.loadNext() != nil,
+                canPrevRequest: requestKeyManager.loadPrev() != nil
+            )
+        }
+        .eraseToAnyAsyncSequence()
+    }
+
+    func getData(from: GettingFrom) async -> DATA? {
+        try? await requireData(from: from)
+    }
+
+    func requireData(from: GettingFrom) async throws -> DATA {
+        try await withCheckedThrowingContinuation { continuation in
+            Task {
+                switch from {
+                case .both:
+                    await dataSelector.validate()
+                case .origin:
+                    await dataSelector.refresh(clearCacheBeforeFetching: true)
+                case .cache:
+                    break
+                }
+                for try await dataState in dataStateFlowAccessor.getFlow() {
+                    switch dataState {
+                    case .fixed:
+                        let data = await dataSelector.loadValidCacheOrNil()
+                        if let data = data {
+                            continuation.resume(returning: data)
+                            return
+                        } else {
+                            continuation.resume(throwing: NoSuchElementError())
+                            return
+                        }
+                    case .loading:
+                        break
+                    case .error(_, _, let rawError):
+                        let data = await dataSelector.loadValidCacheOrNil()
+                        if let data = data {
+                            continuation.resume(returning: data)
+                            return
+                        } else {
+                            continuation.resume(throwing: rawError)
+                            return
+                        }
+                    }
+                }
             }
         }
-        .map { (dataState, data) in
-            dataState.toLoadingState(content: data)
-        }
-        .eraseToAnyPublisher()
     }
 
-    func getData(from: GettingFrom) -> AnyPublisher<DATA?, Never> {
-        requireData(from: from)
-            .map { data -> DATA? in
-                data
-            }
-            .replaceError(with: nil)
-            .eraseToAnyPublisher()
+    func validate() async {
+        await dataSelector.validate()
     }
 
-    func requireData(from: GettingFrom) -> AnyPublisher<DATA, Error> {
-        async { _ in
-            switch from {
-            case .both:
-                try `await`(dataSelector.validate())
-            case .origin:
-                try `await`(dataSelector.refresh(clearCacheBeforeFetching: true))
-            case .cache:
-                break
-            }
-        }
-        .flatMap {
-            flowableDataStateManager.getFlow(param: param)
-                .setFailureType(to: Error.self) // Workaround for macOS10.15/iOS13.0/tvOS13.0/watchOS6.0 https://www.donnywals.com/configuring-error-types-when-using-flatmap-in-combine/
-        }
-        .flatMap { dataState in
-            dataSelector.loadValidCacheOrNil().map { data in
-                (dataState, data)
-            }
-            .setFailureType(to: Error.self) // Workaround for macOS10.15/iOS13.0/tvOS13.0/watchOS6.0 https://www.donnywals.com/configuring-error-types-when-using-flatmap-in-combine/
-        }
-        .tryCompactMap { (dataState, data) in
-            switch dataState {
-            case .fixed:
-                if let data = data { return data } else { throw NoSuchElementError() }
-            case .loading:
-                return nil
-            case .error(let rawError):
-                if let data = data { return data } else { throw rawError }
-            }
-        }
-        .first()
-        .eraseToAnyPublisher()
+    func refresh() async {
+        await dataSelector.refresh(clearCacheBeforeFetching: false)
     }
 
-    func validate() -> AnyPublisher<Void, Never> {
-        dataSelector.validate()
+    func requestNextData(continueWhenError: Bool) async {
+        await dataSelector.requestNextData(continueWhenError: continueWhenError)
     }
 
-    func refresh() -> AnyPublisher<Void, Never> {
-        dataSelector.refresh(clearCacheBeforeFetching: false)
+    func requestPrevData(continueWhenError: Bool) async {
+        await dataSelector.requestPrevData(continueWhenError: continueWhenError)
     }
 
-    func requestNextData(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
-        dataSelector.requestNextData(continueWhenError: continueWhenError)
+    func update(newData: DATA?) async {
+        await dataSelector.update(newData: newData, nextKey: nil, prevKey: nil)
     }
 
-    func requestPrevData(continueWhenError: Bool) -> AnyPublisher<Void, Never> {
-        dataSelector.requestPrevData(continueWhenError: continueWhenError)
+    func update(newData: DATA?, nextKey: String?) async {
+        await dataSelector.update(newData: newData, nextKey: nextKey, prevKey: nil)
     }
 
-    func update(newData: DATA?) -> AnyPublisher<Void, Never> {
-        dataSelector.update(newData: newData, nextKey: nil, prevKey: nil)
+    func update(newData: DATA?, nextKey: String?, prevKey: String?) async {
+        await dataSelector.update(newData: newData, nextKey: nextKey, prevKey: prevKey)
     }
-
-    func update(newData: DATA?, nextKey: String?) -> AnyPublisher<Void, Never> {
-        dataSelector.update(newData: newData, nextKey: nextKey, prevKey: nil)
-    }
-
-    func update(newData: DATA?, nextKey: String?, prevKey: String?) -> AnyPublisher<Void, Never> {
-        dataSelector.update(newData: newData, nextKey: nextKey, prevKey: prevKey)
+    
+    func clear() async {
+        await dataSelector.clear()
     }
 }

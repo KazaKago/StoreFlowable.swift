@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import Combine
 
+@MainActor
 final class GithubReposViewModel : ObservableObject {
 
     @Published var githubRepos: [GithubRepo] = []
@@ -18,49 +18,34 @@ final class GithubReposViewModel : ObservableObject {
     @Published var nextError: Error?
     private let userName: String
     private let githubReposRepository = GithubReposRepository()
-    private var cancellableSet = Set<AnyCancellable>()
 
     init(userName: String) {
         self.userName = userName
     }
 
-    func initialize() {
-        cancellableSet.removeAll()
-        subscribe()
+    func initialize() async {
+        await subscribe()
     }
 
-    func refresh() {
-        githubReposRepository.refresh(userName: userName)
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func refresh() async {
+        await githubReposRepository.refresh(userName: userName)
     }
 
-    func retry() {
-        githubReposRepository.refresh(userName: userName)
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func retry() async {
+        await githubReposRepository.refresh(userName: userName)
     }
 
-    func requestNext() {
-        githubReposRepository.requestNext(userName: userName, continueWhenError: false)
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func requestNext() async {
+        await githubReposRepository.requestNext(userName: userName, continueWhenError: false)
     }
 
-    func retryNext() {
-        githubReposRepository.requestNext(userName: userName, continueWhenError: true)
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func retryNext() async {
+        await githubReposRepository.requestNext(userName: userName, continueWhenError: true)
     }
 
-    private func subscribe() {
-        githubReposRepository.follow(userName: userName)
-            .receive(on: DispatchQueue.main)
-            .sink { state in
+    private func subscribe() async {
+        do {
+            for try await state in githubReposRepository.follow(userName: userName) {
                 state.doAction(
                     onLoading: { githubRepos in
                         if let githubRepos = githubRepos {
@@ -106,6 +91,6 @@ final class GithubReposViewModel : ObservableObject {
                     }
                 )
             }
-            .store(in: &cancellableSet)
+        } catch { /* do nothing. */ }
     }
 }

@@ -1,6 +1,4 @@
 import XCTest
-import Combine
-import CombineExpectations
 @testable import StoreFlowable
 
 final class DataSelectorRequestNextAndPrevTests: XCTestCase {
@@ -23,40 +21,41 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
         }
     }
 
-    private var dataSelector: DataSelector<UnitHash, [TestData]>!
-    private var dataState: DataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData)
+    private var dataSelector: DataSelector<[TestData]>!
+    private var dataState: DataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
     private var dataCache: [TestData]? = nil
+    private var nextRequestKey: String? = nil
+    private var prevRequestKey: String? = nil
 
     override func setUp() {
         dataSelector = DataSelector(
-            param: UnitHash(),
-            dataStateManager: AnyDataStateManager(
-                load: { key in
-                    self.dataState
+            requestKeyManager: AnyRequestKeyManager(
+                loadNext: {
+                    self.nextRequestKey
                 },
-                save: { key, dataState in
-                    self.dataState = dataState
+                saveNext: { requestKey in
+                    self.nextRequestKey = requestKey
+                },
+                loadPrev: {
+                    self.prevRequestKey
+                },
+                savePrev: { requestKey in
+                    self.prevRequestKey = requestKey
                 }
             ),
             cacheDataManager: AnyCacheDataManager(
                 load: {
-                    Just(self.dataCache).eraseToAnyPublisher()
+                    self.dataCache
                 },
                 save: { newData in
                     XCTFail()
                     fatalError()
                 },
                 saveNext: { cachedData, newData in
-                    Future { promise in
-                        self.dataCache = cachedData + newData
-                        promise(.success(()))
-                    }.eraseToAnyPublisher()
+                    self.dataCache = cachedData + newData
                 },
                 savePrev: { cachedData, newData in
-                    Future { promise in
-                        self.dataCache = newData + cachedData
-                        promise(.success(()))
-                    }.eraseToAnyPublisher()
+                    self.dataCache = newData + cachedData
                 }
             ),
             originDataManager: AnyOriginDataManager(
@@ -65,49 +64,58 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
                     fatalError()
                 },
                 fetchNext: { nextKey in
-                    Just(InternalFetched(data: [.fetchedNextData], nextKey: "KEY", prevKey: nil))
-                        .setFailureType(to: Error.self)
-                        .eraseToAnyPublisher()
+                    InternalFetched(data: [.fetchedNextData], nextKey: "NEXT_KEY", prevKey: nil)
                 },
                 fetchPrev: { prevKey in
-                    Just(InternalFetched(data: [.fetchedPrevData], nextKey: nil, prevKey: "KEY"))
-                        .setFailureType(to: Error.self)
-                        .eraseToAnyPublisher()
+                    InternalFetched(data: [.fetchedPrevData], nextKey: nil, prevKey: "PREV_KEY")
                 }
             ),
-            needRefresh: { value in Just(value.first?.needRefresh == true).eraseToAnyPublisher() }
+            dataStateManager: AnyDataStateManager(
+                load: {
+                    self.dataState
+                },
+                save: { dataState in
+                    self.dataState = dataState
+                }
+            ),
+            needRefresh: { value in value.first?.needRefresh == true }
         )
     }
 
-    func test_RequestNextAndPrev_Fixed_Fixed_Fixed_NoCache() throws {
-        dataState = .fixed(nextDataState: .fixed(additionalRequestKey: "KEY"), prevDataState: .fixed(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_Fixed_Fixed_NoCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
         dataCache = nil
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnNilException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnErrorStateException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Fixed_Fixed_ValidCache() throws {
-        dataState = .fixed(nextDataState: .fixed(additionalRequestKey: "KEY"), prevDataState: .fixed(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_Fixed_Fixed_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
         dataCache = [.validData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -115,9 +123,10 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -125,14 +134,17 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.fetchedPrevData, .validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Fixed_Fixed_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .fixed(additionalRequestKey: "KEY"), prevDataState: .fixed(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_Fixed_Fixed_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
         dataCache = [.invalidData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -140,9 +152,10 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -150,110 +163,129 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.fetchedPrevData, .invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Fixed_FixedWithNoMoreData_NoCache() throws {
-        dataState = .fixed(nextDataState: .fixed(additionalRequestKey: "KEY"), prevDataState: .fixedWithNoMoreAdditionalData)
+    func test_RequestNextAndPrev_Fixed_Fixed_FixedWithNoMoreData_NoCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
         dataCache = nil
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = nil
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnNilException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnErrorStateException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
     }
 
-    func test_RequestNextAndPrev_Fixed_Fixed_FixedWithNoMoreData_ValidCache() throws {
-        dataState = .fixed(nextDataState: .fixed(additionalRequestKey: "KEY"), prevDataState: .fixedWithNoMoreAdditionalData)
+    func test_RequestNextAndPrev_Fixed_Fixed_FixedWithNoMoreData_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
         dataCache = [.validData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = nil
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
     }
 
-    func test_RequestNextAndPrev_Fixed_Fixed_FixedWithNoMoreData_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .fixed(additionalRequestKey: "KEY"), prevDataState: .fixedWithNoMoreAdditionalData)
+    func test_RequestNextAndPrev_Fixed_Fixed_FixedWithNoMoreData_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
         dataCache = [.invalidData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = nil
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
     }
 
-    func test_RequestNextAndPrev_Fixed_Fixed_Loading_NoCache() throws {
-        dataState = .fixed(nextDataState: .fixed(additionalRequestKey: "KEY"), prevDataState: .loading(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_Fixed_Loading_NoCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .loading)
         dataCache = nil
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnNilException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnErrorStateException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Fixed_Loading_ValidCache() throws {
-        dataState = .fixed(nextDataState: .fixed(additionalRequestKey: "KEY"), prevDataState: .loading(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_Fixed_Loading_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .loading)
         dataCache = [.validData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .loading = prevDataState else { return XCTFail() }
@@ -261,9 +293,10 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .loading = prevDataState else { return XCTFail() }
@@ -271,14 +304,17 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Fixed_Loading_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .fixed(additionalRequestKey: "KEY"), prevDataState: .loading(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_Fixed_Loading_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .loading)
         dataCache = [.invalidData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .loading = prevDataState else { return XCTFail() }
@@ -286,9 +322,10 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .loading = prevDataState else { return XCTFail() }
@@ -296,37 +333,44 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Fixed_Error_NoCache() throws {
-        dataState = .fixed(nextDataState: .fixed(additionalRequestKey: "KEY"), prevDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()))
+    func test_RequestNextAndPrev_Fixed_Fixed_Error_NoCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .error(rawError: NoSuchElementError()))
         dataCache = nil
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnNilException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnErrorStateException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Fixed_Error_ValidCache() throws {
-        dataState = .fixed(nextDataState: .fixed(additionalRequestKey: "KEY"), prevDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()))
+    func test_RequestNextAndPrev_Fixed_Fixed_Error_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .error(rawError: NoSuchElementError()))
         dataCache = [.validData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .error = prevDataState else { return XCTFail() }
@@ -334,9 +378,10 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -344,14 +389,17 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.fetchedPrevData, .validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Fixed_Error_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .fixed(additionalRequestKey: "KEY"), prevDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()))
+    func test_RequestNextAndPrev_Fixed_Fixed_Error_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .error(rawError: NoSuchElementError()))
         dataCache = [.invalidData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .error = prevDataState else { return XCTFail() }
@@ -359,9 +407,10 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -369,312 +418,363 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.fetchedPrevData, .invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Fixed_NoCache() throws {
-        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixed(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Fixed_NoCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
         dataCache = nil
+        nextRequestKey = nil
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnNilException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Fixed_ValidCache() throws {
-        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixed(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Fixed_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
         dataCache = [.validData]
+        nextRequestKey = nil
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.fetchedPrevData, .validData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Fixed_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixed(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Fixed_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
         dataCache = [.invalidData]
+        nextRequestKey = nil
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.fetchedPrevData, .invalidData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_FixedWithNoMoreData_NoCache() throws {
-        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData)
+    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_FixedWithNoMoreData_NoCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
         dataCache = nil
+        nextRequestKey = nil
+        prevRequestKey = nil
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, nil)
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, nil)
     }
 
-    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_FixedWithNoMoreData_ValidCache() throws {
-        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData)
+    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_FixedWithNoMoreData_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
         dataCache = [.validData]
+        nextRequestKey = nil
+        prevRequestKey = nil
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, nil)
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, nil)
     }
 
-    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_FixedWithNoMoreData_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData)
+    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_FixedWithNoMoreData_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
         dataCache = [.invalidData]
+        nextRequestKey = nil
+        prevRequestKey = nil
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, nil)
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, nil)
     }
 
-    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Loading_NoCache() throws {
-        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .loading(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Loading_NoCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .loading)
         dataCache = nil
+        nextRequestKey = nil
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .loading = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .loading = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Loading_ValidCache() throws {
-        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .loading(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Loading_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .loading)
         dataCache = [.validData]
+        nextRequestKey = nil
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .loading = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .loading = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Loading_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .loading(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Loading_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .loading)
         dataCache = [.invalidData]
+        nextRequestKey = nil
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .loading = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .loading = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Error_NoCache() throws {
-        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()))
+    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Error_NoCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .error(rawError: NoSuchElementError()))
         dataCache = nil
+        nextRequestKey = nil
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .error = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnNilException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Error_ValidCache() throws {
-        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()))
+    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Error_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .error(rawError: NoSuchElementError()))
         dataCache = [.validData]
+        nextRequestKey = nil
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .error = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.fetchedPrevData, .validData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Error_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()))
+    func test_RequestNextAndPrev_Fixed_FixedWithNoMoreData_Error_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .fixed, prevDataState: .error(rawError: NoSuchElementError()))
         dataCache = [.invalidData]
+        nextRequestKey = nil
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .error = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .fixedWithNoMoreAdditionalData = nextDataState else { return XCTFail() }
+            guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.fetchedPrevData, .invalidData])
+        XCTAssertEqual(self.nextRequestKey, nil)
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Loading_Fixed_NoCache() throws {
-        dataState = .fixed(nextDataState: .loading(additionalRequestKey: "KEY"), prevDataState: .fixed(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_Loading_Fixed_NoCache() async throws {
+        dataState = .fixed(nextDataState: .loading, prevDataState: .fixed)
         dataCache = nil
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .loading = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -682,23 +782,27 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnNilException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Loading_Fixed_ValidCache() throws {
-        dataState = .fixed(nextDataState: .loading(additionalRequestKey: "KEY"), prevDataState: .fixed(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_Loading_Fixed_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .loading, prevDataState: .fixed)
         dataCache = [.validData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .loading = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -706,233 +810,10 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .fixed = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, [.fetchedPrevData, .validData])
-    }
-
-    func test_RequestNextAndPrev_Fixed_Loading_Fixed_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .loading(additionalRequestKey: "KEY"), prevDataState: .fixed(additionalRequestKey: "KEY"))
-        dataCache = [.invalidData]
-
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .fixed = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, [.invalidData])
-
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .fixed = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, [.fetchedPrevData, .invalidData])
-    }
-
-    func test_RequestNextAndPrev_Fixed_Loading_FixedWithNoMoreData_NoCache() throws {
-        dataState = .fixed(nextDataState: .loading(additionalRequestKey: "KEY"), prevDataState: .fixedWithNoMoreAdditionalData)
-        dataCache = nil
-
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, nil)
-
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, nil)
-    }
-
-    func test_RequestNextAndPrev_Fixed_Loading_FixedWithNoMoreData_ValidCache() throws {
-        dataState = .fixed(nextDataState: .loading(additionalRequestKey: "KEY"), prevDataState: .fixedWithNoMoreAdditionalData)
-        dataCache = [.validData]
-
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, [.validData])
-
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, [.validData])
-    }
-
-    func test_RequestNextAndPrev_Fixed_Loading_FixedWithNoMoreData_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .loading(additionalRequestKey: "KEY"), prevDataState: .fixedWithNoMoreAdditionalData)
-        dataCache = [.invalidData]
-
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, [.invalidData])
-
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, [.invalidData])
-    }
-
-    func test_RequestNextAndPrev_Fixed_Loading_Loading_NoCache() throws {
-        dataState = .fixed(nextDataState: .loading(additionalRequestKey: "KEY"), prevDataState: .loading(additionalRequestKey: "KEY"))
-        dataCache = nil
-
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .loading = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, nil)
-
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .loading = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, nil)
-    }
-
-    func test_RequestNextAndPrev_Fixed_Loading_Loading_ValidCache() throws {
-        dataState = .fixed(nextDataState: .loading(additionalRequestKey: "KEY"), prevDataState: .loading(additionalRequestKey: "KEY"))
-        dataCache = [.validData]
-
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .loading = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, [.validData])
-
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .loading = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, [.validData])
-    }
-
-    func test_RequestNextAndPrev_Fixed_Loading_Loading_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .loading(additionalRequestKey: "KEY"), prevDataState: .loading(additionalRequestKey: "KEY"))
-        dataCache = [.invalidData]
-
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .loading = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, [.invalidData])
-
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .loading = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, [.invalidData])
-    }
-
-    func test_RequestNextAndPrev_Fixed_Loading_Error_NoCache() throws {
-        dataState = .fixed(nextDataState: .loading(additionalRequestKey: "KEY"), prevDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()))
-        dataCache = nil
-
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .error = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, nil)
-
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
-            XCTAssert(rawError is AdditionalRequestOnNilException)
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, nil)
-    }
-
-    func test_RequestNextAndPrev_Fixed_Loading_Error_ValidCache() throws {
-        dataState = .fixed(nextDataState: .loading(additionalRequestKey: "KEY"), prevDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()))
-        dataCache = [.validData]
-
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
-            guard case .loading = nextDataState else { return XCTFail() }
-            guard case .error = prevDataState else { return XCTFail() }
-        } else {
-            XCTFail()
-        }
-        XCTAssertEqual(self.dataCache, [.validData])
-
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .loading = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -940,24 +821,28 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.fetchedPrevData, .validData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Loading_Error_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .loading(additionalRequestKey: "KEY"), prevDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()))
+    func test_RequestNextAndPrev_Fixed_Loading_Fixed_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .loading, prevDataState: .fixed)
         dataCache = [.invalidData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .loading = nextDataState else { return XCTFail() }
-            guard case .error = prevDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .loading = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -965,37 +850,304 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.fetchedPrevData, .invalidData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Error_Fixed_NoCache() throws {
-        dataState = .fixed(nextDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()), prevDataState: .fixed(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_Loading_FixedWithNoMoreData_NoCache() async throws {
+        dataState = .fixed(nextDataState: .loading, prevDataState: .fixed)
         dataCache = nil
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = nil
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
+
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
+    }
+
+    func test_RequestNextAndPrev_Fixed_Loading_FixedWithNoMoreData_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .loading, prevDataState: .fixed)
+        dataCache = [.validData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = nil
+
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, [.validData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
+
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, [.validData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
+    }
+
+    func test_RequestNextAndPrev_Fixed_Loading_FixedWithNoMoreData_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .loading, prevDataState: .fixed)
+        dataCache = [.invalidData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = nil
+
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, [.invalidData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
+
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, [.invalidData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
+    }
+
+    func test_RequestNextAndPrev_Fixed_Loading_Loading_NoCache() async throws {
+        dataState = .fixed(nextDataState: .loading, prevDataState: .loading)
+        dataCache = nil
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
+
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .loading = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
+
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .loading = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
+    }
+
+    func test_RequestNextAndPrev_Fixed_Loading_Loading_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .loading, prevDataState: .loading)
+        dataCache = [.validData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
+
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .loading = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, [.validData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
+
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .loading = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, [.validData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
+    }
+
+    func test_RequestNextAndPrev_Fixed_Loading_Loading_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .loading, prevDataState: .loading)
+        dataCache = [.invalidData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
+
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .loading = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, [.invalidData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
+
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .loading = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, [.invalidData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
+    }
+
+    func test_RequestNextAndPrev_Fixed_Loading_Error_NoCache() async throws {
+        dataState = .fixed(nextDataState: .loading, prevDataState: .error(rawError: NoSuchElementError()))
+        dataCache = nil
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
+
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .error = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
+
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnNilException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
+    }
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+    func test_RequestNextAndPrev_Fixed_Loading_Error_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .loading, prevDataState: .error(rawError: NoSuchElementError()))
+        dataCache = [.validData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
+
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .error = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, [.validData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
+
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, [.fetchedPrevData, .validData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
+    }
+
+    func test_RequestNextAndPrev_Fixed_Loading_Error_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .loading, prevDataState: .error(rawError: NoSuchElementError()))
+        dataCache = [.invalidData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
+
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .error = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, [.invalidData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
+
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .fixed(let nextDataState, let prevDataState) = self.dataState {
+            guard case .loading = nextDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, [.fetchedPrevData, .invalidData])
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
+    }
+
+    func test_RequestNextAndPrev_Fixed_Error_Fixed_NoCache() async throws {
+        dataState = .fixed(nextDataState: .error(rawError: NoSuchElementError()), prevDataState: .fixed)
+        dataCache = nil
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
+
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
+            XCTAssert(rawError is AdditionalRequestOnNilException)
+        } else {
+            XCTFail()
+        }
+        XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
+
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnErrorStateException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Error_Fixed_ValidCache() throws {
-        dataState = .fixed(nextDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()), prevDataState: .fixed(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_Error_Fixed_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .error(rawError: NoSuchElementError()), prevDataState: .fixed)
         dataCache = [.validData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -1003,9 +1155,10 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -1013,14 +1166,17 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.fetchedPrevData, .validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Error_Fixed_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()), prevDataState: .fixed(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_Error_Fixed_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .error(rawError: NoSuchElementError()), prevDataState: .fixed)
         dataCache = [.invalidData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -1028,9 +1184,10 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -1038,110 +1195,129 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.fetchedPrevData, .invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Error_FixedWithNoMoreData_NoCache() throws {
-        dataState = .fixed(nextDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()), prevDataState: .fixedWithNoMoreAdditionalData)
+    func test_RequestNextAndPrev_Fixed_Error_FixedWithNoMoreData_NoCache() async throws {
+        dataState = .fixed(nextDataState: .error(rawError: NoSuchElementError()), prevDataState: .fixed)
         dataCache = nil
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = nil
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnNilException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnErrorStateException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
     }
 
-    func test_RequestNextAndPrev_Fixed_Error_FixedWithNoMoreData_ValidCache() throws {
-        dataState = .fixed(nextDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()), prevDataState: .fixedWithNoMoreAdditionalData)
+    func test_RequestNextAndPrev_Fixed_Error_FixedWithNoMoreData_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .error(rawError: NoSuchElementError()), prevDataState: .fixed)
         dataCache = [.validData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = nil
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
     }
 
-    func test_RequestNextAndPrev_Fixed_Error_FixedWithNoMoreData_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()), prevDataState: .fixedWithNoMoreAdditionalData)
+    func test_RequestNextAndPrev_Fixed_Error_FixedWithNoMoreData_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .error(rawError: NoSuchElementError()), prevDataState: .fixed)
         dataCache = [.invalidData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = nil
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
-            guard case .fixedWithNoMoreAdditionalData = prevDataState else { return XCTFail() }
+            guard case .fixed = prevDataState else { return XCTFail() }
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, nil)
     }
 
-    func test_RequestNextAndPrev_Fixed_Error_Loading_NoCache() throws {
-        dataState = .fixed(nextDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()), prevDataState: .loading(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_Error_Loading_NoCache() async throws {
+        dataState = .fixed(nextDataState: .error(rawError: NoSuchElementError()), prevDataState: .loading)
         dataCache = nil
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnNilException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnErrorStateException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Error_Loading_ValidCache() throws {
-        dataState = .fixed(nextDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()), prevDataState: .loading(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_Error_Loading_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .error(rawError: NoSuchElementError()), prevDataState: .loading)
         dataCache = [.validData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .loading = prevDataState else { return XCTFail() }
@@ -1149,9 +1325,10 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .loading = prevDataState else { return XCTFail() }
@@ -1159,14 +1336,17 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Error_Loading_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()), prevDataState: .loading(additionalRequestKey: "KEY"))
+    func test_RequestNextAndPrev_Fixed_Error_Loading_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .error(rawError: NoSuchElementError()), prevDataState: .loading)
         dataCache = [.invalidData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .loading = prevDataState else { return XCTFail() }
@@ -1174,9 +1354,10 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .loading = prevDataState else { return XCTFail() }
@@ -1184,37 +1365,44 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Error_Error_NoCache() throws {
-        dataState = .fixed(nextDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()), prevDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()))
+    func test_RequestNextAndPrev_Fixed_Error_Error_NoCache() async throws {
+        dataState = .fixed(nextDataState: .error(rawError: NoSuchElementError()), prevDataState: .error(rawError: NoSuchElementError()))
         dataCache = nil
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestNextData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnNilException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
-        if case .error(let rawError) = self.dataState {
+        await dataSelector.requestPrevData(continueWhenError: true)
+        if case .error(_, _, let rawError) = self.dataState {
             XCTAssert(rawError is AdditionalRequestOnErrorStateException)
         } else {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, nil)
+        XCTAssertEqual(self.nextRequestKey, "INITIAL_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Error_Error_ValidCache() throws {
-        dataState = .fixed(nextDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()), prevDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()))
+    func test_RequestNextAndPrev_Fixed_Error_Error_ValidCache() async throws {
+        dataState = .fixed(nextDataState: .error(rawError: NoSuchElementError()), prevDataState: .error(rawError: NoSuchElementError()))
         dataCache = [.validData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .error = prevDataState else { return XCTFail() }
@@ -1222,9 +1410,10 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -1232,14 +1421,17 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.fetchedPrevData, .validData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
     }
 
-    func test_RequestNextAndPrev_Fixed_Error_Error_InvalidCache() throws {
-        dataState = .fixed(nextDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()), prevDataState: .error(additionalRequestKey: "KEY", rawError: NoSuchElementError()))
+    func test_RequestNextAndPrev_Fixed_Error_Error_InvalidCache() async throws {
+        dataState = .fixed(nextDataState: .error(rawError: NoSuchElementError()), prevDataState: .error(rawError: NoSuchElementError()))
         dataCache = [.invalidData]
+        nextRequestKey = "INITIAL_KEY"
+        prevRequestKey = "INITIAL_KEY"
 
-        let nextRecorder = dataSelector.requestNextData(continueWhenError: true).record()
-        _ = try wait(for: nextRecorder.elements, timeout: 1)
+        await dataSelector.requestNextData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .error = prevDataState else { return XCTFail() }
@@ -1247,9 +1439,10 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "INITIAL_KEY")
 
-        let prevRecorder = dataSelector.requestPrevData(continueWhenError: true).record()
-        _ = try wait(for: prevRecorder.elements, timeout: 1)
+        await dataSelector.requestPrevData(continueWhenError: true)
         if case .fixed(let nextDataState, let prevDataState) = self.dataState {
             guard case .fixed = nextDataState else { return XCTFail() }
             guard case .fixed = prevDataState else { return XCTFail() }
@@ -1257,5 +1450,7 @@ final class DataSelectorRequestNextAndPrevTests: XCTestCase {
             XCTFail()
         }
         XCTAssertEqual(self.dataCache, [.fetchedPrevData, .invalidData, .fetchedNextData])
+        XCTAssertEqual(self.nextRequestKey, "NEXT_KEY")
+        XCTAssertEqual(self.prevRequestKey, "PREV_KEY")
     }
 }

@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import Combine
 
+@MainActor
 final class GithubTwoWayReposViewModel : ObservableObject {
 
     @Published var githubRepos: [GithubRepo] = []
@@ -19,60 +19,39 @@ final class GithubTwoWayReposViewModel : ObservableObject {
     @Published var nextError: Error?
     @Published var prevError: Error?
     private let githubTwoWayReposRepository = GithubTwoWayReposRepository()
-    private var cancellableSet = Set<AnyCancellable>()
     var firstLoad = true
 
-    func initialize() {
-        cancellableSet.removeAll()
-        subscribe()
+    func initialize() async {
+        await subscribe()
     }
 
-    func refresh() {
-        githubTwoWayReposRepository.refresh()
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func refresh() async {
+        await githubTwoWayReposRepository.refresh()
     }
 
-    func retry() {
-        githubTwoWayReposRepository.refresh()
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func retry() async {
+        await githubTwoWayReposRepository.refresh()
     }
 
-    func requestNext() {
-        githubTwoWayReposRepository.requestNext(continueWhenError: false)
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func requestNext() async {
+        await githubTwoWayReposRepository.requestNext(continueWhenError: false)
     }
 
-    func requestPrev() {
-        githubTwoWayReposRepository.requestPrev(continueWhenError: false)
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func requestPrev() async {
+        await githubTwoWayReposRepository.requestPrev(continueWhenError: false)
     }
 
-    func retryNext() {
-        githubTwoWayReposRepository.requestNext(continueWhenError: true)
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func retryNext() async {
+        await githubTwoWayReposRepository.requestNext(continueWhenError: true)
     }
 
-    func retryPrev() {
-        githubTwoWayReposRepository.requestPrev(continueWhenError: true)
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func retryPrev() async {
+        await githubTwoWayReposRepository.requestPrev(continueWhenError: true)
     }
 
-    private func subscribe() {
-        githubTwoWayReposRepository.follow()
-            .receive(on: DispatchQueue.main)
-            .sink { state in
+    private func subscribe() async {
+        do {
+            for try await state in githubTwoWayReposRepository.follow() {
                 state.doAction(
                     onLoading: { githubRepos in
                         if let githubRepos = githubRepos {
@@ -136,6 +115,6 @@ final class GithubTwoWayReposViewModel : ObservableObject {
                     }
                 )
             }
-            .store(in: &cancellableSet)
+        } catch { /* do nothing. */ }
     }
 }

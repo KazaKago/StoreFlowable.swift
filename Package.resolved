@@ -1,25 +1,14 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "CombineAsync",
-        "repositoryURL": "https://github.com/rizumita/CombineAsync.git",
-        "state": {
-          "branch": null,
-          "revision": "c2572b184829030cd377e5876dde4b17345f0c62",
-          "version": "0.1.5"
-        }
-      },
-      {
-        "package": "CombineExpectations",
-        "repositoryURL": "https://github.com/groue/CombineExpectations.git",
-        "state": {
-          "branch": null,
-          "revision": "989a92221899929ab8347a5878aa2b16db8b81ca",
-          "version": "0.6.0"
-        }
+  "pins" : [
+    {
+      "identity" : "asyncextensions",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AsyncCommunity/AsyncExtensions",
+      "state" : {
+        "revision" : "e31495e79ebb25fdff5843ea1af26072e717c4c8",
+        "version" : "0.4.0"
       }
-    ]
-  },
-  "version": 1
+    }
+  ],
+  "version" : 2
 }
