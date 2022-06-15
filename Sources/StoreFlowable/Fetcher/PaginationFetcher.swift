@@ -15,21 +15,21 @@ public protocol PaginationFetcher {
     associatedtype PARAM: Hashable
     associatedtype DATA
 
-    typealias Fetched = PaginationFetcherResult
+    typealias Result = PaginationFetcherResult
 
     /**
      * The latest data acquisition process from origin.
      *
      * @return [Result] class including the acquired data.
      */
-    func fetch(param: PARAM) async throws -> Fetched<DATA>
+    func fetch(param: PARAM) async throws -> Result<DATA>
 
     /**
      * The latest data acquisition process from origin.
      *
      * @return [Result] class including the acquired data.
      */
-    func fetchNext(nextKey: String, param: PARAM) async throws -> Fetched<DATA>
+    func fetchNext(nextKey: String, param: PARAM) async throws -> Result<DATA>
 }
 
 /**

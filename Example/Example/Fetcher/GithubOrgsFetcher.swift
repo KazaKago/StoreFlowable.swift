@@ -16,17 +16,17 @@ struct GithubOrgsFetcher: PaginationFetcher {
     private static let PER_PAGE = 20
     private let githubApi = GithubApi()
 
-    func fetch(param: UnitHash) async throws -> Fetched<GithubOrg> {
+    func fetch(param: UnitHash) async throws -> PaginationFetcher.Result<GithubOrg> {
         let data = try await githubApi.getOrgs(since: nil, perPage: Self.PER_PAGE)
-        return Fetched(
+        return PaginationFetcher.Result(
             data: data,
             nextRequestKey: data.last?.id.description
         )
     }
 
-    func fetchNext(nextKey: String, param: UnitHash) async throws -> Fetched<GithubOrg> {
+    func fetchNext(nextKey: String, param: UnitHash) async throws -> PaginationFetcher.Result<GithubOrg> {
         let data = try await githubApi.getOrgs(since: Int(nextKey), perPage: Self.PER_PAGE)
-        return Fetched(
+        return PaginationFetcher.Result(
             data: data,
             nextRequestKey: data.last?.id.description
         )

@@ -17,28 +17,28 @@ struct GithubTwoWayReposFetcher: TwoWayPaginationFetcher {
     private static let PER_PAGE = 20
     private let githubApi = GithubApi()
 
-    func fetch(param: String) async throws -> Fetched.Initial<GithubRepo> {
+    func fetch(param: String) async throws -> TwoWayPaginationFetcher.Result.Initial<GithubRepo> {
         let newData = try await githubApi.getRepos(userName: param, page: 4, perPage: Self.PER_PAGE)
-        return Fetched.Initial(
+        return TwoWayPaginationFetcher.Result.Initial(
             data: newData,
             nextRequestKey: newData.isEmpty ? nil : 5.description,
             prevRequestKey: newData.isEmpty ? nil : 3.description
         )
     }
 
-    func fetchNext(nextKey: String, param: String) async throws -> Fetched.Next<GithubRepo> {
+    func fetchNext(nextKey: String, param: String) async throws -> TwoWayPaginationFetcher.Result.Next<GithubRepo> {
         let nextPage = Int(nextKey)!
         let newData = try await githubApi.getRepos(userName: param, page: nextPage, perPage: Self.PER_PAGE)
-        return Fetched.Next(
+        return TwoWayPaginationFetcher.Result.Next(
             data: newData,
             nextRequestKey: newData.isEmpty ? nil : (nextPage + 1).description
         )
     }
 
-    func fetchPrev(prevKey: String, param: String) async throws -> Fetched.Prev<GithubRepo> {
+    func fetchPrev(prevKey: String, param: String) async throws -> TwoWayPaginationFetcher.Result.Prev<GithubRepo> {
         let prevPage = Int(prevKey)!
         let newData = try await githubApi.getRepos(userName: param, page: prevPage, perPage: Self.PER_PAGE)
-        return Fetched.Prev(
+        return TwoWayPaginationFetcher.Result.Prev(
             data: newData,
             prevRequestKey: (prevPage > 1) ? (prevPage - 1).description : nil
         )

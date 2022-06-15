@@ -15,14 +15,14 @@ public protocol TwoWayPaginationFetcher {
     associatedtype PARAM: Hashable
     associatedtype DATA
 
-    typealias Fetched = TwoWayPaginationFetcherResult
+    typealias Result = TwoWayPaginationFetcherResult
 
     /**
      * The latest data acquisition process from origin.
      *
      * @return [Result] class including the acquired data.
      */
-    func fetch(param: PARAM) async throws -> Fetched.Initial<DATA>
+    func fetch(param: PARAM) async throws -> Result.Initial<DATA>
 
     /**
      * Next data acquisition process from origin.
@@ -30,7 +30,7 @@ public protocol TwoWayPaginationFetcher {
      * @param nextKey Key for next data request.
      * @return [Result] class including the acquired data.
      */
-    func fetchNext(nextKey: String, param: PARAM) async throws -> Fetched.Next<DATA>
+    func fetchNext(nextKey: String, param: PARAM) async throws -> Result.Next<DATA>
 
     /**
      * Previous data acquisition process from origin.
@@ -38,7 +38,7 @@ public protocol TwoWayPaginationFetcher {
      * @param prevKey Key for previous data request.
      * @return [Fetched] class including the acquired data.
      */
-    func fetchPrev(prevKey: String, param: PARAM) async throws -> Fetched.Prev<DATA>
+    func fetchPrev(prevKey: String, param: PARAM) async throws -> Result.Prev<DATA>
 }
 
 /**
