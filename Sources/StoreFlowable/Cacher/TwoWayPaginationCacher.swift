@@ -19,8 +19,8 @@ open class TwoWayPaginationCacher<PARAM: Hashable, DATA>: PaginationCacher<PARAM
      * The previous data saving process to cache.
      * You need to merge cached data & new fetched previous data.
      *
-     * @param cachedData Currently cached data.
-     * @param newData Data to be saved.
+     * - parameter cachedData: Currently cached data.
+     * - parameter newData: Data to be saved.
      */
     open func savePrevData(cachedData: [DATA], newData: [DATA], param: PARAM) async {
         await saveData(data: newData + cachedData, param: param)
@@ -29,7 +29,7 @@ open class TwoWayPaginationCacher<PARAM: Hashable, DATA>: PaginationCacher<PARAM
     /**
      * Get RequestKey to Fetch the prev pagination data.
      *
-     * @param param Key to get the specified data.
+     * - parameter param: Key to get the specified data.
      */
     open func loadPrevRequestKey(param: PARAM) async -> String? {
         prevRequestKeyMap[param]
@@ -38,8 +38,8 @@ open class TwoWayPaginationCacher<PARAM: Hashable, DATA>: PaginationCacher<PARAM
     /**
      * Save RequestKey to Fetch the prev pagination data.
      *
-     * @param requestKey pagination request key.
-     * @param param Key to get the specified data.
+     * - parameter requestKey: pagination request key.
+     * - parameter param: Key to get the specified data.
      */
     open func savePrevRequestKey(requestKey: String?, param: PARAM) async {
         prevRequestKeyMap[param] = requestKey

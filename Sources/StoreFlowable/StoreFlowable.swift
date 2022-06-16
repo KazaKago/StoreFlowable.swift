@@ -8,7 +8,7 @@
 /**
  * Provides input / output methods that abstract the data acquisition destination.
  *
- * This class is generated from `StoreFlowableFactory.create`.
+ * This class is generated from `StoreFlowable.from`.
  */
 public protocol StoreFlowable {
 

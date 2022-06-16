@@ -20,23 +20,23 @@ public protocol TwoWayPaginationFetcher {
     /**
      * The latest data acquisition process from origin.
      *
-     * @return [Result] class including the acquired data.
+     * - returns: [Result] class including the acquired data.
      */
     func fetch(param: PARAM) async throws -> Result.Initial<DATA>
 
     /**
      * Next data acquisition process from origin.
      *
-     * @param nextKey Key for next data request.
-     * @return [Result] class including the acquired data.
+     * - parameter nextKey: Key for next data request.
+     * - returns: [Result] class including the acquired data.
      */
     func fetchNext(nextKey: String, param: PARAM) async throws -> Result.Next<DATA>
 
     /**
      * Previous data acquisition process from origin.
      *
-     * @param prevKey Key for previous data request.
-     * @return [Fetched] class including the acquired data.
+     * - parameter prevKey: Key for previous data request.
+     * - returns: [Fetched] class including the acquired data.
      */
     func fetchPrev(prevKey: String, param: PARAM) async throws -> Result.Prev<DATA>
 }
@@ -44,7 +44,7 @@ public protocol TwoWayPaginationFetcher {
 /**
  * Result of Fetching from origin.
  *
- * @param DATA Specify the type of data to be handled.
+ * - parameter DATA: Specify the type of data to be handled.
  */
 public protocol TwoWayPaginationFetcherResult {
 
@@ -63,7 +63,7 @@ public protocol TwoWayPaginationFetcherResult {
 /**
  * Result of initial fetching from origin.
  *
- * @param DATA Specify the type of data to be handled.
+ * - parameter DATA: Specify the type of data to be handled.
  */
 public struct TwoWayPaginationFetcherResultInitial<DATA>: TwoWayPaginationFetcherResult {
 
@@ -92,7 +92,7 @@ public struct TwoWayPaginationFetcherResultInitial<DATA>: TwoWayPaginationFetche
 /**
  * Result of next fetching from origin.
  *
- * @param DATA Specify the type of data to be handled.
+ * - parameter DATA: Specify the type of data to be handled.
  */
 public struct TwoWayPaginationFetcherResultNext<DATA>: TwoWayPaginationFetcherResult {
 
@@ -115,7 +115,7 @@ public struct TwoWayPaginationFetcherResultNext<DATA>: TwoWayPaginationFetcherRe
 /**
  * Result of previous fetching from origin.
  *
- * @param DATA Specify the type of data to be handled.
+ * - parameter DATA: Specify the type of data to be handled.
  */
 public struct TwoWayPaginationFetcherResultPrev<DATA>: TwoWayPaginationFetcherResult {
 

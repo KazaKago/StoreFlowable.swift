@@ -25,6 +25,12 @@ open class Cacher<PARAM: Hashable, DATA> {
     public init() {
     }
 
+    /**
+     * The data loading process from cache.
+     *
+     * - parameter param: Key to get the specified data.
+     * - returns: The loaded data.
+     */
     open func loadData(param: PARAM) async -> DATA? {
         dataMap[param]
     }
@@ -32,8 +38,8 @@ open class Cacher<PARAM: Hashable, DATA> {
     /**
      * The data saving process to cache.
      *
-     * @param data Data to be saved.
-     * @param param Key to get the specified data.
+     * - parameter data: Data to be saved.
+     * - parameter param: Key to get the specified data.
      */
     open func saveData(data: DATA?, param: PARAM) async {
         dataMap[param] = data
@@ -43,7 +49,8 @@ open class Cacher<PARAM: Hashable, DATA> {
      * Gets the time when the data was cached.
      * The format is Epoch Time.
      *
-     * @param param Key to get the specified data.
+     * - parameter param: Key to get the specified data.
+     * - returns: Epoch seconds.
      */
     open func loadDataCachedAt(param: PARAM) async -> Double? {
         dataCachedAtMap[param]
@@ -52,8 +59,8 @@ open class Cacher<PARAM: Hashable, DATA> {
     /**
      * Saves the time when the data was cached.
      *
-     * @param epochSeconds Time when the data was cached.
-     * @param param Key to get the specified data.
+     * - parameter epochSeconds: Time when the data was cached.
+     * - parameter param: Key to get the specified data.
      */
     open func saveDataCachedAt(epochSeconds: Double, param: PARAM) async {
         dataCachedAtMap[param] = epochSeconds
@@ -62,8 +69,8 @@ open class Cacher<PARAM: Hashable, DATA> {
     /**
      * Determine if the cache is valid.
      *
-     * @param cachedData Current cache data.
-     * @return Returns `true` if the cache is invalid and refresh is needed.
+     * - parameter cachedData: Current cache data.
+     * - returns: Returns `true` if the cache is invalid and refresh is needed.
      */
     open func needRefresh(cachedData: DATA, param: PARAM) async -> Bool {
         let cachedAt = await loadDataCachedAt(param: param)

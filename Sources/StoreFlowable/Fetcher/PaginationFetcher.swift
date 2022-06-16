@@ -20,14 +20,14 @@ public protocol PaginationFetcher {
     /**
      * The latest data acquisition process from origin.
      *
-     * @return [Result] class including the acquired data.
+     * - returns: [Result] class including the acquired data.
      */
     func fetch(param: PARAM) async throws -> Result<DATA>
 
     /**
      * The latest data acquisition process from origin.
      *
-     * @return [Result] class including the acquired data.
+     * - returns: [Result] class including the acquired data.
      */
     func fetchNext(nextKey: String, param: PARAM) async throws -> Result<DATA>
 }
@@ -35,7 +35,7 @@ public protocol PaginationFetcher {
 /**
  * Result of Fetching from origin.
  *
- * @param DATA Specify the type of data to be handled.
+ * - parameter DATA: Specify the type of data to be handled.
  */
 public struct PaginationFetcherResult<DATA> {
     /**

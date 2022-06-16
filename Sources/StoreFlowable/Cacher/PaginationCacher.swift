@@ -19,9 +19,9 @@ open class PaginationCacher<PARAM: Hashable, DATA>: Cacher<PARAM, [DATA]> {
      * The next data saving process to cache.
      * You need to merge cached data & new fetched next data.
      *
-     * @param cachedData Currently cached data.
-     * @param newData Data to be saved.
-     * @param param Key to get the specified data.
+     * - parameter cachedData: Currently cached data.
+     * - parameter newData: Data to be saved.
+     * - parameter param: Key to get the specified data.
      */
     open func saveNextData(cachedData: [DATA], newData: [DATA], param: PARAM) async {
         await saveData(data: cachedData + newData, param: param)
@@ -30,7 +30,8 @@ open class PaginationCacher<PARAM: Hashable, DATA>: Cacher<PARAM, [DATA]> {
     /**
      * Get RequestKey to Fetch the next pagination data.
      *
-     * @param param Key to get the specified data.
+     * - parameter param: Key to get the specified data.
+     * - returns: Next request key.
      */
     open func loadNextRequestKey(param: PARAM) async -> String? {
         nextRequestKeyMap[param]
@@ -39,8 +40,8 @@ open class PaginationCacher<PARAM: Hashable, DATA>: Cacher<PARAM, [DATA]> {
     /**
      * Save RequestKey to Fetch the next pagination data.
      *
-     * @param requestKey pagination request key.
-     * @param param Key to get the specified data.
+     * - parameter requestKey: pagination request key.
+     * - parameter param: Key to get the specified data.
      */
     open func saveNextRequestKey(requestKey: String?, param: PARAM) async {
         nextRequestKeyMap[param] = requestKey

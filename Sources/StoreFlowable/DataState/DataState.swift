@@ -5,11 +5,6 @@
 //  Created by Kensuke Tamura on 2020/11/29.
 //
 
-/**
- * Indicates the state of the data.
- *
- * This state is only used inside this library.
- */
 enum DataState {
     case fixed(nextDataState: AdditionalDataState, prevDataState: AdditionalDataState)
     case loading(nextDataState: AdditionalDataState = .fixed, prevDataState: AdditionalDataState = .fixed)

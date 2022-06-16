@@ -19,19 +19,19 @@ public enum LoadingState<T> {
     /**
      * When data fetch is processing.
      *
-     * - content: Indicates the existing or not existing of data.
+     * - parameter content: Indicates the existing or not existing of data.
      */
     case loading(content: T?)
     /**
      * When data fetch is successful.
      *
-     * - content: Raw data.
+     * - parameter content: Raw data.
      */
     case completed(content: T, next: AdditionalLoadingState, prev: AdditionalLoadingState)
     /**
      * When data fetch is failure.
      *
-     * - exception: Occurred exception.
+     * - parameter exception: Occurred exception.
      */
     case error(rawError: Error)
 

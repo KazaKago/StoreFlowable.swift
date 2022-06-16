@@ -18,7 +18,7 @@ public protocol Fetcher {
     /**
      * The latest data acquisition process from origin.
      *
-     * @return acquired data.
+     * - returns: acquired data.
      */
     func fetch(param: PARAM) async throws -> DATA
 }
