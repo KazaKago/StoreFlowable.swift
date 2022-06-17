@@ -6,39 +6,30 @@
 //
 
 import Foundation
-import Combine
 
+@MainActor
 final class GithubMetaViewModel : ObservableObject {
 
     @Published var githubMeta: GithubMeta?
     @Published var isLoading: Bool = false
     @Published var error: Error?
     private let githubMetaRepository = GithubMetaRepository()
-    private var cancellableSet = Set<AnyCancellable>()
 
-    func initialize() {
-        cancellableSet.removeAll()
-        subscribe()
+    func initialize() async {
+        await subscribe()
     }
 
-    func refresh() {
-        githubMetaRepository.refresh()
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func refresh() async {
+        await githubMetaRepository.refresh()
     }
 
-    func retry() {
-        githubMetaRepository.refresh()
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func retry() async {
+        await githubMetaRepository.refresh()
     }
 
-    private func subscribe() {
-        githubMetaRepository.follow()
-            .receive(on: DispatchQueue.main)
-            .sink { state in
+    private func subscribe() async {
+        do {
+            for try await state in githubMetaRepository.follow() {
                 state.doAction(
                     onLoading: { _ in
                         self.githubMeta = nil
@@ -57,6 +48,6 @@ final class GithubMetaViewModel : ObservableObject {
                     }
                 )
             }
-            .store(in: &cancellableSet)
+        } catch { /* do nothing. */ }
     }
 }

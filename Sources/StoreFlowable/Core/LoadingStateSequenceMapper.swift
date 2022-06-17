@@ -5,20 +5,19 @@
 //  Created by Kensuke Tamura on 2020/12/28.
 //
 
-import Foundation
-import Combine
+import AsyncExtensions
 
-public extension Publisher {
+public extension AsyncSequence {
 
     /**
-     * Use when mapping raw data in `LoadingStatePublisher`.
+     * Use when mapping raw data in `LoadingStateSequence`.
      *
      * - parameter transform: This callback that returns the result of transforming the data.
-     * - returns: Return `LoadingStatePublisher` containing the transformed data.
+     * - returns: Return `LoadingStateSequence` containing the transformed data.
      */
-    func mapContent<A, Z>(_ transform: @escaping (A) -> Z) -> Publishers.Map<Self, LoadingState<Z>> where Self.Output == LoadingState<A> {
-        map { input in
-            switch input {
+    func mapContent<A, Z>(_ transform: @escaping (A) -> Z) -> LoadingStateSequence<Z> where Self.Element == LoadingState<A> {
+        map { element in
+            switch element {
             case .loading(let content):
                 if let content = content {
                     return .loading(content: transform(content))
@@ -31,5 +30,6 @@ public extension Publisher {
                 return .error(rawError: rawError)
             }
         }
+        .eraseToLoadingStateSequence()
     }
 }

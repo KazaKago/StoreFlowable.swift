@@ -52,7 +52,7 @@ struct GithubUserView: View {
                     Spacer()
                         .frame(height: 4)
                     Button("Retry") {
-                        githubUserViewModel.retry()
+                        Task { await githubUserViewModel.retry() }
                     }
                 }
                 .padding()
@@ -62,12 +62,12 @@ struct GithubUserView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Refresh") {
-                    githubUserViewModel.refresh()
+                    Task { await githubUserViewModel.refresh() }
                 }
             }
         }
-        .onAppear {
-            githubUserViewModel.initialize()
+        .task {
+            await githubUserViewModel.initialize()
         }
     }
 }

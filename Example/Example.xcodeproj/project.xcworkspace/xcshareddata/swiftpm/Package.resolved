@@ -1,43 +1,32 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "Alamofire",
-        "repositoryURL": "https://github.com/Alamofire/Alamofire",
-        "state": {
-          "branch": null,
-          "revision": "eaf6e622dd41b07b251d8f01752eab31bc811493",
-          "version": "5.4.1"
-        }
-      },
-      {
-        "package": "CombineAsync",
-        "repositoryURL": "https://github.com/rizumita/CombineAsync.git",
-        "state": {
-          "branch": null,
-          "revision": "c2572b184829030cd377e5876dde4b17345f0c62",
-          "version": "0.1.5"
-        }
-      },
-      {
-        "package": "CombineExpectations",
-        "repositoryURL": "https://github.com/groue/CombineExpectations.git",
-        "state": {
-          "branch": null,
-          "revision": "5c36f3199960776fc055196a93ca04bfc00e1857",
-          "version": "0.7.0"
-        }
-      },
-      {
-        "package": "Kingfisher",
-        "repositoryURL": "https://github.com/onevcat/Kingfisher",
-        "state": {
-          "branch": null,
-          "revision": "1a0c2df04b31ed7aa318354f3583faea24f006fc",
-          "version": "5.15.8"
-        }
+  "pins" : [
+    {
+      "identity" : "alamofire",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Alamofire/Alamofire",
+      "state" : {
+        "revision" : "354dda32d89fc8cd4f5c46487f64957d355f53d8",
+        "version" : "5.6.1"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "asyncextensions",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AsyncCommunity/AsyncExtensions",
+      "state" : {
+        "revision" : "e31495e79ebb25fdff5843ea1af26072e717c4c8",
+        "version" : "0.4.0"
+      }
+    },
+    {
+      "identity" : "kingfisher",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/onevcat/Kingfisher",
+      "state" : {
+        "revision" : "1a0c2df04b31ed7aa318354f3583faea24f006fc",
+        "version" : "5.15.8"
+      }
+    }
+  ],
+  "version" : 2
 }

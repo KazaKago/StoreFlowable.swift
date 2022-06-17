@@ -6,18 +6,17 @@
 //
 
 import Foundation
-import Combine
 import StoreFlowable
 
 struct GithubUserRepository {
 
-    func follow(userName: String) -> LoadingStatePublisher<GithubUser> {
-        let githubUserFlowable = GithubUserFlowableFactory().create(userName)
+    func follow(userName: String) -> LoadingStateSequence<GithubUser> {
+        let githubUserFlowable = AnyStoreFlowable.from(cacher: GithubUserCacher.shared, fetcher: GithubUserFetcher(), param: userName)
         return githubUserFlowable.publish()
     }
 
-    func refresh(userName: String) -> AnyPublisher<Void, Never> {
-        let githubUserFlowable = GithubUserFlowableFactory().create(userName)
-        return githubUserFlowable.refresh()
+    func refresh(userName: String) async {
+        let githubUserFlowable = AnyStoreFlowable.from(cacher: GithubUserCacher.shared, fetcher: GithubUserFetcher(), param: userName)
+        await githubUserFlowable.refresh()
     }
 }

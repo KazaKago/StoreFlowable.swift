@@ -36,7 +36,7 @@ struct GithubMetaView: View {
                     Spacer()
                         .frame(height: 4)
                     Button("Retry") {
-                        githubMetaViewModel.retry()
+                        Task { await githubMetaViewModel.retry() }
                     }
                 }
                 .padding()
@@ -46,12 +46,12 @@ struct GithubMetaView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Refresh") {
-                    githubMetaViewModel.refresh()
+                    Task { await githubMetaViewModel.refresh() }
                 }
             }
         }
-        .onAppear {
-            githubMetaViewModel.initialize()
+        .task {
+            await githubMetaViewModel.initialize()
         }
     }
 }

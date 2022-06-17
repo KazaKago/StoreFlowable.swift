@@ -5,8 +5,6 @@
 //  Created by tamura_k on 2021/07/19.
 //
 
-import Foundation
-
 /**
  * This enum that represents the state of the additional pagination data.
  *
@@ -19,7 +17,7 @@ public enum AdditionalLoadingState {
     /**
      * No processing.
      *
-     * - canRequestAdditionalData: Whether additional fetching is possible from the origin.
+     * - parameter canRequestAdditionalData: Whether additional fetching is possible from the origin.
      */
     case fixed(canRequestAdditionalData: Bool)
     /**
@@ -29,7 +27,7 @@ public enum AdditionalLoadingState {
     /**
      * when data fetch is failure.
      *
-     * - rawError: Occurred exception.
+     * - parameter rawError: Occurred exception.
      */
     case error(rawError: Error)
 

@@ -1,38 +1,34 @@
 //
 //  AnyDataStateManager.swift
-//  StoreFlowable
+//  
 //
-//  Created by Kensuke Tamura on 2020/11/29.
+//  Created by Kensuke Tamura on 2022/06/08.
 //
 
-import Foundation
+struct AnyDataStateManager: DataStateManager {
 
-struct AnyDataStateManager<PARAM>: DataStateManager {
+    private let _load: () -> DataState
+    private let _save: (_ state: DataState) -> ()
 
-    typealias PARAM = PARAM
-
-    private let _load: (_ param: PARAM) -> DataState
-    private let _save: (_ param: PARAM, DataState) -> Void
-
-    init<INNER: DataStateManager>(_ inner: INNER) where INNER.PARAM == PARAM {
-        _load = { param in
-            inner.load(param: param)
+    init<INNER: DataStateManager>(_ inner: INNER) {
+        _load = {
+            inner.load()
         }
-        _save = { param, state in
-            inner.save(param: param, state: state)
+        _save = { state in
+            inner.save(state: state)
         }
     }
 
-    init(load: @escaping (_ param: PARAM) -> DataState, save: @escaping (_ param: PARAM, DataState) -> Void) {
+    init(load: @escaping () -> DataState, save: @escaping (_ state: DataState) -> ()) {
         _load = load
         _save = save
     }
 
-    func load(param: PARAM) -> DataState {
-        _load(param)
+    func load() -> DataState {
+        _load()
     }
-
-    func save(param: PARAM, state: DataState) {
-        return _save(param, state)
+    
+    func save(state: DataState) {
+        _save(state)
     }
 }

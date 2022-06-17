@@ -23,7 +23,7 @@ struct GithubReposView: View {
                         GithubRepoItem(githubRepo: githubRepo)
                             .onAppear {
                                 if githubRepo == githubReposViewModel.githubRepos.last {
-                                    githubReposViewModel.requestNext()
+                                    Task { await githubReposViewModel.requestNext() }
                                 }
                             }
                     }
@@ -32,7 +32,7 @@ struct GithubReposView: View {
                     }
                     if let error = githubReposViewModel.nextError {
                         ErrorItem(error: error) {
-                            githubReposViewModel.retryNext()
+                            Task { await githubReposViewModel.retryNext() }
                         }
                     }
                 }
@@ -47,7 +47,7 @@ struct GithubReposView: View {
                         Spacer()
                             .frame(height: 4)
                         Button("Retry") {
-                            githubReposViewModel.retry()
+                            Task { await githubReposViewModel.retry() }
                         }
                     }
                     .padding()
@@ -59,7 +59,7 @@ struct GithubReposView: View {
                         ProgressView()
                     } else {
                         Button("Refresh") {
-                            githubReposViewModel.refresh()
+                            Task { await githubReposViewModel.refresh() }
                             if let first = githubReposViewModel.githubRepos.first {
                                 withAnimation { scrollProxy.scrollTo(first.id) }
                             }
@@ -67,8 +67,8 @@ struct GithubReposView: View {
                     }
                 }
             }
-            .onAppear {
-                githubReposViewModel.initialize()
+            .task {
+                await githubReposViewModel.initialize()
             }
         }
     }

@@ -6,26 +6,24 @@
 //
 
 import Foundation
-import Combine
 import Alamofire
 
 extension DataRequest {
 
-    func publishResponse<T>(_ type: T.Type) -> AnyPublisher<T, Error> where T : Decodable {
-        Future { promise in
+    func publish<T>(_ type: T.Type) async throws -> T where T : Decodable {
+        try await withCheckedThrowingContinuation { continuation in
             self.response { response in
                 switch response.result {
                 case .success(let element): do {
                     let decodedResponse = try JSONDecoder().decode(type, from: element!)
-                    promise(.success(decodedResponse))
+                    continuation.resume(returning: decodedResponse)
                 } catch {
-                    promise(.failure(error))
+                    continuation.resume(throwing: error)
                 }
                 case .failure(let error):
-                    promise(.failure(error))
+                    continuation.resume(throwing: error)
                 }
             }
         }
-        .eraseToAnyPublisher()
     }
 }

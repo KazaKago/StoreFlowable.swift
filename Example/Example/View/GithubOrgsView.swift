@@ -19,7 +19,7 @@ struct GithubOrgsView: View {
                         GithubOrgItem(githubOrg: githubOrg)
                             .onAppear {
                                 if githubOrg == githubOrgsViewModel.githubOrgs.last {
-                                    githubOrgsViewModel.requestNext()
+                                    Task { await githubOrgsViewModel.requestNext() }
                                 }
                             }
                     }
@@ -28,7 +28,7 @@ struct GithubOrgsView: View {
                     }
                     if let error = githubOrgsViewModel.nextError {
                         ErrorItem(error: error) {
-                            githubOrgsViewModel.retryNext()
+                            Task { await githubOrgsViewModel.retryNext() }
                         }
                     }
                 }
@@ -43,7 +43,7 @@ struct GithubOrgsView: View {
                         Spacer()
                             .frame(height: 4)
                         Button("Retry") {
-                            githubOrgsViewModel.retry()
+                            Task { await githubOrgsViewModel.retry() }
                         }
                     }
                     .padding()
@@ -55,7 +55,7 @@ struct GithubOrgsView: View {
                         ProgressView()
                     } else {
                         Button("Refresh") {
-                            githubOrgsViewModel.refresh()
+                            Task { await githubOrgsViewModel.refresh() }
                             if let first = githubOrgsViewModel.githubOrgs.first {
                                 withAnimation { scrollProxy.scrollTo(first.id) }
                             }
@@ -63,8 +63,8 @@ struct GithubOrgsView: View {
                     }
                 }
             }
-            .onAppear {
-                githubOrgsViewModel.initialize()
+            .task {
+                await githubOrgsViewModel.initialize()
             }
         }
     }

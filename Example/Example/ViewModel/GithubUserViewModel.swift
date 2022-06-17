@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import Combine
 
+@MainActor
 final class GithubUserViewModel : ObservableObject {
 
     @Published var githubUser: GithubUser?
@@ -15,35 +15,26 @@ final class GithubUserViewModel : ObservableObject {
     @Published var error: Error?
     private let userName: String
     private let githubUserRepository = GithubUserRepository()
-    private var cancellableSet = Set<AnyCancellable>()
 
     init(userName: String) {
         self.userName = userName
     }
 
-    func initialize() {
-        cancellableSet.removeAll()
-        subscribe()
+    func initialize() async {
+        await subscribe()
     }
 
-    func refresh() {
-        githubUserRepository.refresh(userName: userName)
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func refresh() async {
+        await githubUserRepository.refresh(userName: userName)
     }
 
-    func retry() {
-        githubUserRepository.refresh(userName: userName)
-            .receive(on: DispatchQueue.main)
-            .sink {}
-            .store(in: &cancellableSet)
+    func retry() async {
+        await githubUserRepository.refresh(userName: userName)
     }
 
-    private func subscribe() {
-        githubUserRepository.follow(userName: userName)
-            .receive(on: DispatchQueue.main)
-            .sink { state in
+    private func subscribe() async {
+        do {
+            for try await state in githubUserRepository.follow(userName: userName) {
                 state.doAction(
                     onLoading: { _ in
                         self.githubUser = nil
@@ -62,6 +53,6 @@ final class GithubUserViewModel : ObservableObject {
                     }
                 )
             }
-            .store(in: &cancellableSet)
+        } catch { /* do nothing. */ }
     }
 }

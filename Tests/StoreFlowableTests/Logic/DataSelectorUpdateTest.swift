@@ -1,6 +1,4 @@
 import XCTest
-import Combine
-import CombineExpectations
 @testable import StoreFlowable
 
 final class DataSelectorUpdateTests: XCTestCase {
@@ -19,30 +17,34 @@ final class DataSelectorUpdateTests: XCTestCase {
         }
     }
 
-    private var dataSelector: DataSelector<UnitHash, TestData>!
-    private var dataState: DataState = .fixed(nextDataState: .fixedWithNoMoreAdditionalData, prevDataState: .fixedWithNoMoreAdditionalData)
+    private var dataSelector: DataSelector<TestData>!
+    private var dataState: DataState = .fixed(nextDataState: .fixed, prevDataState: .fixed)
     private var dataCache: TestData? = nil
 
     override func setUp() {
         dataSelector = DataSelector(
-            param: UnitHash(),
-            dataStateManager: AnyDataStateManager(
-                load: { key in
-                    self.dataState
+            requestKeyManager: AnyRequestKeyManager(
+                loadNext: {
+                    XCTFail()
+                    fatalError()
                 },
-                save: { key, dataState in
-                    self.dataState = dataState
+                saveNext: { requestKey in
+                    // do nothing.
+                },
+                loadPrev: {
+                    XCTFail()
+                    fatalError()
+                },
+                savePrev: { requestKey in
+                    // do nothing.
                 }
             ),
             cacheDataManager: AnyCacheDataManager(
                 load: {
-                    Just(self.dataCache).eraseToAnyPublisher()
+                    self.dataCache
                 },
                 save: { newData in
-                    Future { promise in
-                        self.dataCache = newData
-                        promise(.success(()))
-                    }.eraseToAnyPublisher()
+                    self.dataCache = newData
                 },
                 saveNext: { cachedData, newData in
                     XCTFail()
@@ -55,9 +57,7 @@ final class DataSelectorUpdateTests: XCTestCase {
             ),
             originDataManager: AnyOriginDataManager(
                 fetch: {
-                    Just(InternalFetched(data: .fetchedData, nextKey: nil, prevKey: nil))
-                        .setFailureType(to: Error.self)
-                        .eraseToAnyPublisher()
+                    InternalFetched(data: .fetchedData, nextKey: nil, prevKey: nil)
                 },
                 fetchNext: { nextKey in
                     XCTFail()
@@ -68,26 +68,32 @@ final class DataSelectorUpdateTests: XCTestCase {
                     fatalError()
                 }
             ),
-            needRefresh: { value in Just(value.needRefresh).eraseToAnyPublisher() }
+            dataStateManager: AnyDataStateManager(
+                load: {
+                    self.dataState
+                },
+                save: { dataState in
+                    self.dataState = dataState
+                }
+            ),
+            needRefresh: { value in value.needRefresh }
         )
     }
 
-    func test_Update_Data() throws {
-        dataState = .loading
+    func test_Update_Data() async throws {
+        dataState = .loading()
         dataCache = nil
 
-        let recorder = dataSelector.update(newData: .fetchedData, nextKey: nil, prevKey: nil).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        await dataSelector.update(newData: .fetchedData, nextKey: nil, prevKey: nil)
         guard case .fixed = self.dataState else { return XCTFail() }
         XCTAssertEqual(self.dataCache, .fetchedData)
     }
 
-    func test_Update_Nil() throws {
+    func test_Update_Nil() async throws {
         dataState = .error(rawError: NoSuchElementError())
         dataCache = .invalidData
 
-        let recorder = dataSelector.update(newData: nil, nextKey: nil, prevKey: nil).record()
-        _ = try wait(for: recorder.elements, timeout: 1)
+        await dataSelector.update(newData: nil, nextKey: nil, prevKey: nil)
         guard case .fixed = self.dataState else { return XCTFail() }
         XCTAssertEqual(self.dataCache, nil)
     }

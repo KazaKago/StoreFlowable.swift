@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.6
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -7,7 +7,7 @@ let package = Package(
     name: "StoreFlowable",
     platforms: [
         .iOS(.v13),
-        .macOS(.v10_15),
+        .macOS(.v11),
         .tvOS(.v13),
         .watchOS(.v6),
     ],
@@ -20,17 +20,16 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://github.com/rizumita/CombineAsync.git", from: "0.1.5"),
-        .package(url: "https://github.com/groue/CombineExpectations.git", from: "0.6.0"),
+        .package(url: "https://github.com/AsyncCommunity/AsyncExtensions", from: "0.4.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "StoreFlowable",
-            dependencies: ["CombineAsync"]),
+            dependencies: ["AsyncExtensions"]),
         .testTarget(
             name: "StoreFlowableTests",
-            dependencies: ["StoreFlowable", "CombineExpectations"]),
+            dependencies: ["StoreFlowable", "AsyncExtensions"]),
     ]
 )
