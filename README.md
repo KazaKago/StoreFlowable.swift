@@ -38,11 +38,11 @@ The following is an example of screen display using [`LoadingState`](Sources/Sto
 
 ## Install
 
-Install as [Swift Package Manager](https://swift.org/package-manager/) exchanging x.x.x for the latest tag.  
+Install as [Swift Package Manager](https://swift.org/package-manager/) exchanging `*.*.*` for the latest tag. [![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/kazakago/storeflowable.swift.svg)](https://github.com/KazaKago/StoreFlowable.swift/releases/latest)  
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/KazaKago/StoreFlowable.swift.git", from: "x.x.x"),
+    .package(url: "https://github.com/KazaKago/StoreFlowable.swift.git", from: "*.*.*"),
 ],
 ```
 
@@ -126,9 +126,6 @@ for try await userState in userStateSequence {
 ```
 
 ## Example
-
-Refer to the [**example project**](Example) for details. This module works as an iOS app.  
-See [GithubMetaFlowableFactory](Example/Example/Flowable/GithubMetaFlowableFactory.swift) and [GithubUserFlowableFactory](Example/Example/Flowable/GithubUserFlowableFactory.swift).  
 
 Refer to the [**example module**](example) for details. This module works as an Android app.  
 See [GithubMetaCacher](Example/Example/Cacher/GithubMetaCacher.swift) + [GithubMetaFetcher](Example/Example/Fetcher/GithubMetaFetcher.swift) or [GithubUserCacher](Example/Example/Cacher/GithubUserCacher.swift) + [GithubUserFetcher](Example/Example/Fetcher/GithubUserFetcher.swift).
