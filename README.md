@@ -3,14 +3,16 @@
 [![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/kazakago/storeflowable.swift.svg)](https://github.com/KazaKago/StoreFlowable.swift/releases/latest)
 [![Test](https://github.com/KazaKago/StoreFlowable.swift/workflows/Test/badge.svg)](https://github.com/KazaKago/StoreFlowable.swift/actions?query=workflow%3ATest)
 [![License](https://img.shields.io/github/license/kazakago/storeflowable.swift.svg)](LICENSE)
+[![Swift Version Compatibility](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FKazaKago%2FStoreFlowable.swift%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/KazaKago/StoreFlowable.swift)
+[![Platform Compatibility](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FKazaKago%2FStoreFlowable.swift%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/KazaKago/StoreFlowable.swift)
 
 [Repository pattern](https://msdn.microsoft.com/en-us/library/ff649690.aspx) support library for Swift with Concurrency.  
 Available for iOS or any Swift projects.  
 
-## Related projects
+### Related projects
 
-- [StoreFlowable.kt](https://github.com/KazaKago/StoreFlowable.kt)
-- [StoreFlowable.dart](https://github.com/KazaKago/StoreFlowable.dart)
+- [StoreFlowable.kt (for Kotlin)](https://github.com/KazaKago/StoreFlowable.kt)
+- [StoreFlowable.dart (for Dart)](https://github.com/KazaKago/StoreFlowable.dart)
 
 ## Overview
 
@@ -28,7 +30,7 @@ Created according to the following 5 policies.
 
 The following is the class structure of Repository pattern using this library.  
 
-![https://user-images.githubusercontent.com/7742104/126891014-ce95b223-5b13-4290-8b58-faf1dcebf49e.jpg](https://user-images.githubusercontent.com/7742104/126891014-ce95b223-5b13-4290-8b58-faf1dcebf49e.jpg)
+![README-SWIFT-1 (1)](https://user-images.githubusercontent.com/7742104/174244655-ab06ff3a-b5bd-444a-b0e9-380b74a9dd3b.jpg)
 
 The following is an example of screen display using [`LoadingState`](Sources/StoreFlowable/Core/LoadingState.swift).  
 
@@ -36,11 +38,11 @@ The following is an example of screen display using [`LoadingState`](Sources/Sto
 
 ## Install
 
-Install as [Swift Package Manager](https://swift.org/package-manager/) exchanging x.x.x for the latest tag.  
+Install as [Swift Package Manager](https://swift.org/package-manager/) exchanging `*.*.*` for the latest tag. [![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/kazakago/storeflowable.swift.svg)](https://github.com/KazaKago/StoreFlowable.swift/releases/latest)  
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/KazaKago/StoreFlowable.swift.git", from: "x.x.x"),
+    .package(url: "https://github.com/KazaKago/StoreFlowable.swift.git", from: "*.*.*"),
 ],
 ```
 
@@ -124,9 +126,6 @@ for try await userState in userStateSequence {
 ```
 
 ## Example
-
-Refer to the [**example project**](Example) for details. This module works as an iOS app.  
-See [GithubMetaFlowableFactory](Example/Example/Flowable/GithubMetaFlowableFactory.swift) and [GithubUserFlowableFactory](Example/Example/Flowable/GithubUserFlowableFactory.swift).  
 
 Refer to the [**example module**](example) for details. This module works as an Android app.  
 See [GithubMetaCacher](Example/Example/Cacher/GithubMetaCacher.swift) + [GithubMetaFetcher](Example/Example/Fetcher/GithubMetaFetcher.swift) or [GithubUserCacher](Example/Example/Cacher/GithubUserCacher.swift) + [GithubUserFetcher](Example/Example/Fetcher/GithubUserFetcher.swift).
