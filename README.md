@@ -110,7 +110,7 @@ You can observe the data by for-in [`AsyncSequence`](https://developer.apple.com
 and branch the data state with [`doAction()`](Sources/StoreFlowable/Core/LoadingState.swift) method or `switch` statement.  
 
 ```swift
-for try await userState in userStateSequence {
+for await userState in userStateSequence {
     userState.doAction(
         onLoading: { (content: UserData?) in
             ...
@@ -323,7 +323,7 @@ And then, You can get the state of additional loading from the `next` parameter 
 
 ```swift
 let userFlowable = AnyStoreFlowable.from(cacher: userListCacher, fetcher: userListFetcher)
-for try await loadingState in userFlowable.publish() {
+for await loadingState in userFlowable.publish() {
     loadingState.doAction(
         onLoading: { (content: UserData?) in
             // Whole (Initial) data loading.
