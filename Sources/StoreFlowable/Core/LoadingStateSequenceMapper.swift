@@ -5,8 +5,6 @@
 //  Created by Kensuke Tamura on 2020/12/28.
 //
 
-import AsyncExtensions
-
 public extension AsyncSequence {
 
     /**
