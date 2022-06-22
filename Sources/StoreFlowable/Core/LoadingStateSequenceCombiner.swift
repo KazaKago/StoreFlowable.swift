@@ -5,8 +5,6 @@
 //  Created by Kensuke Tamura on 2020/12/28.
 //
 
-import AsyncExtensions
-
 public extension AsyncSequence {
 
     /**
@@ -17,10 +15,9 @@ public extension AsyncSequence {
      * - returns: Return `LoadingStateSequence` containing the combined data.
      */
     func combineState<PUBLISHER_2: AsyncSequence, RAW_CONTENT_1, RAW_CONTENT_2, OUTPUT>(_ statePublisher2: PUBLISHER_2, _ transform: @escaping (_ content1: RAW_CONTENT_1, _ content2: RAW_CONTENT_2) -> OUTPUT) -> LoadingStateSequence<OUTPUT> where Self.Element == LoadingState<RAW_CONTENT_1>, PUBLISHER_2.Element == LoadingState<RAW_CONTENT_2> {
-        flatMapLatest { state1 in
-            statePublisher2.map { state2 in
-                state1.zip(state2, transform)
-            }
+        let combined = combineLatest(self, statePublisher2)
+        return combined.map { (state1, state2) in
+            state1.zip(state2, transform)
         }.eraseToLoadingStateSequence()
      }
 
