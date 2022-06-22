@@ -29,15 +29,15 @@ public struct LoadingStateSequence<DATA>: AsyncSequence {
     }
 
     public struct Iterator: AsyncIteratorProtocol {
-        private let nextClosure: () async throws -> Element?
+        private let nextClosure: () async -> Element?
 
         public init<BaseAsyncIterator: AsyncIteratorProtocol>(baseIterator: BaseAsyncIterator) where BaseAsyncIterator.Element == Element {
             var baseIterator = baseIterator
-            self.nextClosure = { try await baseIterator.next() }
+            self.nextClosure = { try! await baseIterator.next() }
         }
 
-        public func next() async throws -> Element? {
-            try await self.nextClosure()
+        public func next() async -> Element? {
+            await self.nextClosure()
         }
     }
 }

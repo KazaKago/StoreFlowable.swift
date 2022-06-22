@@ -33,26 +33,24 @@ final class GithubUserViewModel : ObservableObject {
     }
 
     private func subscribe() async {
-        do {
-            for try await state in githubUserRepository.follow(userName: userName) {
-                state.doAction(
-                    onLoading: { _ in
-                        self.githubUser = nil
-                        self.isLoading = true
-                        self.error = nil
-                    },
-                    onCompleted: { githubUser, _, _ in
-                        self.githubUser = githubUser
-                        self.isLoading = false
-                        self.error = nil
-                    },
-                    onError: { error in
-                        self.githubUser = nil
-                        self.isLoading = false
-                        self.error = error
-                    }
-                )
-            }
-        } catch { /* do nothing. */ }
+        for await state in githubUserRepository.follow(userName: userName) {
+            state.doAction(
+                onLoading: { _ in
+                    self.githubUser = nil
+                    self.isLoading = true
+                    self.error = nil
+                },
+                onCompleted: { githubUser, _, _ in
+                    self.githubUser = githubUser
+                    self.isLoading = false
+                    self.error = nil
+                },
+                onError: { error in
+                    self.githubUser = nil
+                    self.isLoading = false
+                    self.error = error
+                }
+            )
+        }
     }
 }

@@ -39,53 +39,51 @@ final class GithubOrgsViewModel : ObservableObject {
     }
 
     private func subscribe() async {
-        do {
-            for try await state in githubOrgsRepository.follow() {
-                state.doAction(
-                    onLoading: { githubOrgs in
-                        if let githubOrgs = githubOrgs {
-                            self.githubOrgs = githubOrgs
-                            self.isMainLoading = false
-                            self.isRefreshing = true
-                        } else {
-                            self.githubOrgs = []
-                            self.isMainLoading = true
-                            self.isRefreshing = true
-                        }
-                        self.isNextLoading = false
-                        self.mainError = nil
-                        self.nextError = nil
-                    },
-                    onCompleted: { githubOrgs, next, _ in
-                        next.doAction(
-                            onFixed: { _ in
-                                self.isNextLoading = false
-                                self.nextError = nil
-                            },
-                            onLoading: {
-                                self.isNextLoading = true
-                                self.nextError = nil
-                            },
-                            onError: { error in
-                                self.isNextLoading = false
-                                self.nextError = error
-                            }
-                        )
+        for await state in githubOrgsRepository.follow() {
+            state.doAction(
+                onLoading: { githubOrgs in
+                    if let githubOrgs = githubOrgs {
                         self.githubOrgs = githubOrgs
                         self.isMainLoading = false
-                        self.isRefreshing = false
-                        self.mainError = nil
-                    },
-                    onError: { error in
+                        self.isRefreshing = true
+                    } else {
                         self.githubOrgs = []
-                        self.isMainLoading = false
-                        self.isNextLoading = false
-                        self.isRefreshing = false
-                        self.mainError = error
-                        self.nextError = nil
+                        self.isMainLoading = true
+                        self.isRefreshing = true
                     }
-                )
-            }
-        } catch { /* do nothing. */ }
+                    self.isNextLoading = false
+                    self.mainError = nil
+                    self.nextError = nil
+                },
+                onCompleted: { githubOrgs, next, _ in
+                    next.doAction(
+                        onFixed: { _ in
+                            self.isNextLoading = false
+                            self.nextError = nil
+                        },
+                        onLoading: {
+                            self.isNextLoading = true
+                            self.nextError = nil
+                        },
+                        onError: { error in
+                            self.isNextLoading = false
+                            self.nextError = error
+                        }
+                    )
+                    self.githubOrgs = githubOrgs
+                    self.isMainLoading = false
+                    self.isRefreshing = false
+                    self.mainError = nil
+                },
+                onError: { error in
+                    self.githubOrgs = []
+                    self.isMainLoading = false
+                    self.isNextLoading = false
+                    self.isRefreshing = false
+                    self.mainError = error
+                    self.nextError = nil
+                }
+            )
+        }
     }
 }
