@@ -28,26 +28,24 @@ final class GithubMetaViewModel : ObservableObject {
     }
 
     private func subscribe() async {
-        do {
-            for try await state in githubMetaRepository.follow() {
-                state.doAction(
-                    onLoading: { _ in
-                        self.githubMeta = nil
-                        self.isLoading = true
-                        self.error = nil
-                    },
-                    onCompleted: { githubMeta, _, _ in
-                        self.githubMeta = githubMeta
-                        self.isLoading = false
-                        self.error = nil
-                    },
-                    onError: { error in
-                        self.githubMeta = nil
-                        self.isLoading = false
-                        self.error = error
-                    }
-                )
-            }
-        } catch { /* do nothing. */ }
+        for await state in githubMetaRepository.follow() {
+            state.doAction(
+                onLoading: { _ in
+                    self.githubMeta = nil
+                    self.isLoading = true
+                    self.error = nil
+                },
+                onCompleted: { githubMeta, _, _ in
+                    self.githubMeta = githubMeta
+                    self.isLoading = false
+                    self.error = nil
+                },
+                onError: { error in
+                    self.githubMeta = nil
+                    self.isLoading = false
+                    self.error = error
+                }
+            )
+        }
     }
 }
