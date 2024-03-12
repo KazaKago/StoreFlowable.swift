@@ -13,6 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: swift-actions/setup-swift@v1
+      - uses: swift-actions/setup-swift@v2
 
       - run: swift test
